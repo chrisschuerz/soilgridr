@@ -4,7 +4,8 @@
 \alias{obtain_soilgrids}
 \title{Obtain soilgrids layer from the ISRIC geoserver}
 \usage{
-obtain_soilgrids(project_path, shp_file = NULL, sg_ext = c(-180, 180,
+obtain_soilgrids(project_path, shp_file = NULL,
+  wcs = "http://data.isric.org/geoserver/sg250m/wcs?", sg_ext = c(-180, 180,
   -56.0008104, 83.9991672), sg_pxl = 1/480)
 }
 \arguments{
@@ -13,6 +14,8 @@ are saved}
 
 \item{shp_file}{Shape file to define the extent of the soilgrids layers. If
 \code{NULL} the shape file from the SWAT project will be used.}
+
+\item{wcs}{URL of the ISRIC soilgrids geoserver}
 
 \item{sg_ext}{Extent of the soilgrids layers at the geoserver}
 

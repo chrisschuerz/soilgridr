@@ -4,12 +4,14 @@
 #'   are saved
 #' @param shp_file Shape file to define the extent of the soilgrids layers. If
 #'   \code{NULL} the shape file from the SWAT project will be used.
+#' @param wcs URL of the ISRIC soilgrids geoserver
 #' @param sg_ext Extent of the soilgrids layers at the geoserver
 #' @param sg_pxl Pixel size of the soilgrids layers at the geoserver. Check
 #'   default values of with \code{check_soilgrids()}
 #' @importFrom rgdal readOGR
 #' @importFrom sp CRS spTransform
 #' @importFrom raster extent
+#' @importFrom XML newXMLNode saveXML
 #' @importFrom pasta %//% %.% %_%
 #'
 #' @return Writes the requiered soilgrids layer to project_path/soilgrids.
@@ -21,6 +23,7 @@
 # library(magrittr)
 
 obtain_soilgrids <- function(project_path, shp_file = NULL,
+                             wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
                              sg_ext = c(-180, 180, -56.0008104, 83.9991672),
                              sg_pxl = 1/480) {
 
