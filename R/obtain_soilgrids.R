@@ -1,12 +1,27 @@
+#' Obtain soilgrids layer from the ISRIC geoserver
+#'
+#' @param project_path Path to the SWAT project / Path where soilgrids layers
+#'   are saved
+#' @param shp_file Shape file to define the extent of the soilgrids layers. If
+#'   \code{NULL} the shape file from the SWAT project will be used.
+#' @param sg_ext Extent of the soilgrids layers at the geoserver
+#' @param sg_pxl Pixel size of the soilgrids layers at the geoserver. Check
+#'   default values of with \code{check_soilgrids()}
+#' @importFrom rgdal readOGR
+#' @importFrom sp CRS spTransform
+#' @importFrom raster extent
+#' @importFrom pasta %//% %.% %_%
+#'
+#' @return Writes the requiered soilgrids layer to project_path/soilgrids.
+#' @export
 
 ###For testing
-project_path <- "E:/R_project/SWAT_Raab"
-library(pasta)
-library(magrittr)
+# project_path <- "E:/R_project/SWAT_Raab"
+# library(pasta)
+# library(magrittr)
 
 obtain_soilgrids <- function(project_path, shp_file = NULL,
                              sg_ext = c(-180, 180, -56.0008104, 83.9991672),
-                             sg_dim = c(172800, 67200),
                              sg_pxl = 1/480) {
 
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
@@ -22,7 +37,7 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
   shp_ext <- raster::extent(shp_file)
 
   # Calculate the indices of the soilgrids raster for wcs access.
-  sg_ind <- find_rasterindex(shp_ext, sg_ext, sg_dim)
+  sg_ind <- find_rasterindex(shp_ext, sg_ext, sg_pxl)
 
   #URL of the ISRIC Soilgrids WCS server
   wcs <- "http://data.isric.org/geoserver/sg250m/wcs?"
@@ -70,10 +85,15 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
     system(gdal_cmd)
 
   }
+  xml_files <- list.files(path = project_path%//%"soilgrids", pattern = ".xml$",
+                          full.names = TRUE)
+  file.remove(xml_files)
 }
 
-find_rasterindex <- function(shp_ext, sg_ext, sg_dim) {
+find_rasterindex <- function(shp_ext, sg_ext, sg_pxl) {
   #Translation from shape extent to pixel indices.
+  sg_dim <- c(round((sg_ext[2] - sg_ext[1])/sg_pxl),
+              round((sg_ext[4] - sg_ext[3])/sg_pxl))
   ind <- floor(sg_dim[1]*(shp_ext[1] - sg_ext[1])/(sg_ext[2] - sg_ext[1]))
   ind <- c(ind,
            floor(sg_dim[2]*(sg_ext[4] - shp_ext[4])/(sg_ext[4] - sg_ext[3])))
