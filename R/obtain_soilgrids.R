@@ -60,8 +60,7 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
                    "SNDPPT_M_sl"%&%1:7%_%"250m",
                    "CECSOL_M_sl"%&%1:7%_%"250m",
                    "ORCDRC_M_sl"%&%1:7%_%"250m",
-                   "PHIHOX_M_sl"%&%1:7%_%"250m",
-                   "PHIKCL_M_sl"%&%1:7%_%"250m")
+                   "PHIHOX_M_sl"%&%1:7%_%"250m")
 
   # Obtain the soilgrids layers from the ISRIC geoserver
   ## Most steps here modification from http://gsif.isric.org/doku.php/wiki:tutorial_soilgrids

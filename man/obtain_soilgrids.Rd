@@ -12,8 +12,9 @@ obtain_soilgrids(project_path, shp_file = NULL,
 \item{project_path}{Path to the SWAT project / Path where soilgrids layers
 are saved}
 
-\item{shp_file}{Shape file to define the extent of the soilgrids layers. If
-\code{NULL} the shape file from the SWAT project will be used.}
+\item{shp_file}{Shape file (or path to shape file) to define the extent of
+the soilgrids layers. If \code{NULL} the shape file from the SWAT project
+will be used.}
 
 \item{wcs}{URL of the ISRIC soilgrids geoserver}
 
