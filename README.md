@@ -1,5 +1,5 @@
 # SWATsolaR
-SWAT - SOiLgrids data Aggregation in R
+**SWAT** - **so**i**l**grids data **a**ggregation in **R**
 
 
 ## Installation
