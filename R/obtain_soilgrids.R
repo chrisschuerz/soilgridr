@@ -12,7 +12,7 @@
 #' @importFrom sp CRS spTransform
 #' @importFrom raster extent
 #' @importFrom XML newXMLNode saveXML
-#' @importFrom pasta %//% %.% %_%
+#' @importFrom pasta %//% %.% %_% %&%
 #'
 #' @return Writes the requiered soilgrids layer to project_path/soilgrids.
 #' @export
