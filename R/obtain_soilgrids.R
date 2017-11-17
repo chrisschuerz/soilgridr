@@ -2,8 +2,9 @@
 #'
 #' @param project_path Path to the SWAT project / Path where soilgrids layers
 #'   are saved
-#' @param shp_file Shape file to define the extent of the soilgrids layers. If
-#'   \code{NULL} the shape file from the SWAT project will be used.
+#' @param shp_file Shape file (or path to shape file) to define the extent of
+#'   the soilgrids layers. If \code{NULL} the shape file from the SWAT project
+#'   will be used.
 #' @param wcs URL of the ISRIC soilgrids geoserver
 #' @param sg_ext Extent of the soilgrids layers at the geoserver
 #' @param sg_pxl Pixel size of the soilgrids layers at the geoserver. Check
@@ -29,15 +30,20 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
 
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
   if(is.null(shp_file)) {
-    shp_file <- rgdal::readOGR(dsn = project_path%//%"Watershed/shapes"%//%
+    shp_file <- readOGR(dsn = project_path%//%"Watershed/shapes"%//%
                                      "subs1.shp",
                                layer = "subs1")
+  } else if(is.character(shp_file)){
+    lyr <- strsplit(shp_file, "\\/|\\\\|\\.")[[1]]
+    lyr <- lyr[length(lyr) - 1]
+    shp_file <- readOGR(dsn = shp_file,
+                               layer = lyr)
   }
   # soilgrids data uses the WGS84 reference system. Projection of shape file
   # requiered for the extent and further clipping.
-  sg_crs <- sp::CRS("+proj=longlat +datum=WGS84 +no_defs")
-  shp_file <- sp::spTransform(x = shp_file, CRSobj = sg_crs)
-  shp_ext <- raster::extent(shp_file)
+  sg_crs <- CRS("+proj=longlat +datum=WGS84 +no_defs")
+  shp_file <- spTransform(x = shp_file, CRSobj = sg_crs)
+  shp_ext <- extent(shp_file)
 
   # Calculate the indices of the soilgrids raster for wcs access.
   sg_ind <- find_rasterindex(shp_ext, sg_ext, sg_pxl)
