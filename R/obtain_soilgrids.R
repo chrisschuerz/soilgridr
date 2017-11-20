@@ -46,6 +46,21 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
   shp_ext <- extent(shp_file)
 
   # Calculate the indices of the soilgrids raster for wcs access.
+  find_rasterindex <- function(shp_ext, sg_ext, sg_pxl) {
+    #Translation from shape extent to pixel indices.
+    sg_dim <- c(round((sg_ext[2] - sg_ext[1])/sg_pxl),
+                round((sg_ext[4] - sg_ext[3])/sg_pxl))
+    ind <- floor(sg_dim[1]*(shp_ext[1] - sg_ext[1])/(sg_ext[2] - sg_ext[1]))
+    ind <- c(ind,
+             floor(sg_dim[2]*(sg_ext[4] - shp_ext[4])/(sg_ext[4] - sg_ext[3])))
+    ind <- c(ind,
+             ceiling(sg_dim[1]*(shp_ext[2] - shp_ext[1])/(sg_ext[2] - sg_ext[1])))
+    ind <- c(ind,
+             ceiling(sg_dim[2]*(shp_ext[4] - shp_ext[3])/(sg_ext[4] - sg_ext[3])))
+
+    return(ind)
+  }
+
   sg_ind <- find_rasterindex(shp_ext, sg_ext, sg_pxl)
 
   #URL of the ISRIC Soilgrids WCS server
@@ -96,19 +111,4 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
   xml_files <- list.files(path = project_path%//%"soilgrids", pattern = ".xml$",
                           full.names = TRUE)
   file.remove(xml_files)
-}
-
-find_rasterindex <- function(shp_ext, sg_ext, sg_pxl) {
-  #Translation from shape extent to pixel indices.
-  sg_dim <- c(round((sg_ext[2] - sg_ext[1])/sg_pxl),
-              round((sg_ext[4] - sg_ext[3])/sg_pxl))
-  ind <- floor(sg_dim[1]*(shp_ext[1] - sg_ext[1])/(sg_ext[2] - sg_ext[1]))
-  ind <- c(ind,
-           floor(sg_dim[2]*(sg_ext[4] - shp_ext[4])/(sg_ext[4] - sg_ext[3])))
-  ind <- c(ind,
-           ceiling(sg_dim[1]*(shp_ext[2] - shp_ext[1])/(sg_ext[2] - sg_ext[1])))
-  ind <- c(ind,
-           ceiling(sg_dim[2]*(shp_ext[4] - shp_ext[3])/(sg_ext[4] - sg_ext[3])))
-
-  return(ind)
 }
