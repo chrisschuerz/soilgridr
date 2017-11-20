@@ -1,5 +1,4 @@
-
-#' Check the soilgrids meta data
+#' get the required soilgrids
 #' @param wcs URL of the ISRIC soilgrids geoserver
 #' @param raw logic, if TRUE raw text output is returned if FALSE (default) the
 #'   function returns the extracted values of the Tiff tiles pixel sizen and the
@@ -9,12 +8,13 @@
 #' @importFrom purrr map
 #' @importFrom magrittr %>% %<>% set_names
 #' @importFrom pasta %//% %.%
+#' @return Returns either a list with pixel size and extent of Tiffs as numerics
+#'   or the raw text output.
 #'
 #' @export
 
-check_soilgrids <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?", raw = FALSE) {
-
-
+get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
+                          raw = FALSE) {
 
   # first layer of the soilgrids data set for which to aqcuire info
   layer <- "BDRICM_M_250m"
@@ -51,9 +51,9 @@ check_soilgrids <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
     meta_out$Pixel_Size <- abs(meta_out$Pixel_Size[1])
     meta_out$Extent <- c(meta_out$Lower_Left[1], meta_out$Upper_Right[1],
                          meta_out$Lower_Left[2], meta_out$Upper_Right[2])
+    meta_out <- meta_out[c("Extent", "Pixel_Size")]
     names(meta_out) <- tolower(names(meta_out))
 
-    meta_out <- meta_out[c("Extent", "Pixel_Size")]
     return(meta_out)
   }
 }
