@@ -25,8 +25,8 @@
 
 obtain_soilgrids <- function(project_path, shp_file = NULL,
                              wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
-                             sg_ext = c(-180, 180, -56.0008104, 83.9991672),
-                             sg_pxl = 1/480) {
+                             layer_meta = list(extent = c(-180, 180, -56.0008104, 83.9991672),
+                                               pixel_size = 1/480)) {
 
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
   if(is.null(shp_file)) {
@@ -46,8 +46,10 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
   shp_ext <- extent(shp_file)
 
   # Calculate the indices of the soilgrids raster for wcs access.
-  find_rasterindex <- function(shp_ext, sg_ext, sg_pxl) {
+  find_rasterindex <- function(shp_ext, layer_meta) {
     #Translation from shape extent to pixel indices.
+    sg_ext <- layer_meta$extent
+    sg_pxl <- layer_meta$pixel_size
     sg_dim <- c(round((sg_ext[2] - sg_ext[1])/sg_pxl),
                 round((sg_ext[4] - sg_ext[3])/sg_pxl))
     ind <- floor(sg_dim[1]*(shp_ext[1] - sg_ext[1])/(sg_ext[2] - sg_ext[1]))
@@ -61,7 +63,7 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
     return(ind)
   }
 
-  sg_ind <- find_rasterindex(shp_ext, sg_ext, sg_pxl)
+  sg_ind <- find_rasterindex(shp_ext, layer_meta)
 
   #URL of the ISRIC Soilgrids WCS server
   wcs <- "http://data.isric.org/geoserver/sg250m/wcs?"
@@ -84,7 +86,7 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
                            shortPathName("C:/Program files/GDAL")%//%"gdal_translate.exe",
                            "gdal_translate")
   ## Pixel size x,y
-  pxl_dim <- paste(sg_pxl, sg_pxl, collapse = " ")
+  pxl_dim <- paste(layer_meta$pixel_size, layer_meta$pixel_size, collapse = " ")
   ## Creation option
   c_opt <- "\"COMPRESS=DEFLATE\""
   ## Subwindow dimensions of the shape file extent

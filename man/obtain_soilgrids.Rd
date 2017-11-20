@@ -5,8 +5,9 @@
 \title{Obtain soilgrids layer from the ISRIC geoserver}
 \usage{
 obtain_soilgrids(project_path, shp_file = NULL,
-  wcs = "http://data.isric.org/geoserver/sg250m/wcs?", sg_ext = c(-180, 180,
-  -56.0008104, 83.9991672), sg_pxl = 1/480)
+  wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
+  layer_meta = list(extent = c(-180, 180, -56.0008104, 83.9991672), pixel_size
+  = 1/480))
 }
 \arguments{
 \item{project_path}{Path to the SWAT project / Path where soilgrids layers
