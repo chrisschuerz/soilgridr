@@ -1,4 +1,4 @@
-cluster_soilgrids <- function(project_path, shp_file = NULL,  ) {
+cluster_soilgrids <- function(project_path, shp_file = NULL ) {
 
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
   if(is.null(shp_file)) {

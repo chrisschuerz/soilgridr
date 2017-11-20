@@ -4,10 +4,15 @@
 \alias{check_soilgrids}
 \title{Check the soilgrids meta data}
 \usage{
-check_soilgrids(wcs = "http://data.isric.org/geoserver/sg250m/wcs?")
+check_soilgrids(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
+  raw = FALSE)
 }
 \arguments{
 \item{wcs}{URL of the ISRIC soilgrids geoserver}
+
+\item{raw}{logic, if TRUE raw text output is returned if FALSE (default) the
+function returns the extracted values of the Tiff tiles pixel sizen and the
+extent.}
 }
 \description{
 Check the soilgrids meta data
