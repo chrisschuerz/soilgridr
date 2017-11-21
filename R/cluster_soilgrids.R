@@ -63,7 +63,6 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
 
   ## Add progress bar to loop
   pb <- progress_estimated(length(lyr_list))
-  pb$print()
 
   # Loop over all layers and arrange them in list
   for(lyr_i in lyr_list) {
@@ -89,7 +88,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     ## Add the extracted columns into list
     soil_list[[name_i]] <- lyr_tmp
 
-    pb$tick()
+    pb$tick()$print()
   }
 
 
