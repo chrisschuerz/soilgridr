@@ -30,3 +30,4 @@ Writes the requiered soilgrids layer to project_path/soilgrids.
 \description{
 Obtain soilgrids layer from the ISRIC geoserver
 }
+

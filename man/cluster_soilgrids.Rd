@@ -5,8 +5,9 @@
 \title{Title}
 \usage{
 cluster_soilgrids(project_path, shp_file = NULL, lower_bound = c(30, 100,
-  200), n_clust = 1:20)
+  200), n_class = 1:20)
 }
 \description{
 Title
 }
+

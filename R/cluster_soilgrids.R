@@ -11,14 +11,15 @@
 #'   progress_estimated ends_with
 #' @importFrom tibble as_tibble tibble
 #' @importFrom purrr map map2 map_at
-#' @importFrom magrittr %>% set_colnames set_names
+#' @importFrom magrittr %>% set_colnames set_rownames set_names
 #'
 #' @return
 #' @export
 #'
 #' @examples
 cluster_soilgrids <- function(project_path, shp_file = NULL,
-                              lower_bound = c(30, 100, 200), n_clust = 1:20 ) {
+                              lower_bound = c(30, 100, 200),
+                              n_class = 1:20 ) {
 
 
 # Reading shape file -----------------------------------------------------------
@@ -63,6 +64,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   soil_list <- list()
 
   ## Add progress bar to loop
+  cat("Read soilgrids layer:\n")
   pb <- progress_estimated(length(lyr_list))
 
   # Loop over all layers and arrange them in list
@@ -80,7 +82,18 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
       set_nodata(.) %>%
       projectRaster(., crs = crs(shp_file)) %>%
       crop(., extent(shp_file)) %>%
-      mask(., shp_file) %>%
+      mask(., shp_file)
+
+    if(length(soil_list) == 0){
+      lyr_meta <- list(has_value = lyr_tmp@data@values,
+                       len_rst = length(lyr_tmp),
+                       dim_rst = dim(lyr_tmp),
+                       extent  = extent(shp_file),
+                       crs     = crs(shp_file))
+      lyr_meta$has_value[!is.na(lyr_meta$has_value)] <- TRUE
+    }
+
+    lyr_tmp %<>%
       as.vector(.) %>%
       as_tibble() %>%
       filter(!is.na(.[,1])) %>%
@@ -91,6 +104,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
 
     pb$tick()$print()
   }
+  pb$stop()
 
 
 # Calculate additional soil parameters using the euptf package -----------------
@@ -189,15 +203,19 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   soil_km <- list()
   ssq <- c()
 
-  for(i_clust in n_clust) {
+  cat("\nCluster soil data:\n")
+  pb <- progress_estimated(length(n_class))
+  for(i_clust in n_class) {
     soil_km[["n"%_%i_clust]] <- kmeans(x = clst_tbl,centers = i_clust, iter.max = 100)
     ssq[i_clust] <- sum(soil_km[["n"%_%i_clust]]$withinss)
+
+    pb$tick()$print()
   }
+  pb$stop()
 
   out_list <- list(soil_layer = sol_aggr,
                    soil_cluster = soil_km,
-                   kmeans_eval = tibble(n_cluster = n_clust,
-                                        ssq = ssq))
+                   layer_meta = lyr_meta)
 
   return(out_list)
 }
