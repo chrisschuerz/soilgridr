@@ -6,7 +6,7 @@
 #' @importFrom rgdal readOGR
 #' @importFrom raster raster projectRaster crop mask crs extent
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr filter
+#' @importFrom dplyr select filter progress_estimated
 #' @importFrom magrittr %>% set_colnames
 #'
 #'
@@ -34,13 +34,12 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   }
 
 
-# Reading soilgrids layer ------------------------------------------------------
+# Reading soilgrids layer and arranging them in list ---------------------------
   # Define path where soilgrids layer are located
   lyr_dir <- project_path%//%"soilgrids"
 
-  # Read all obtained soilgrids raster and arrange them in a data frame
+  # List all layer names
   lyr_list <-  list.files(lyr_dir, pattern = "_250m.tif$")
-  soil_tbl <- list()
 
   ## Helper function to extract all wanted text strings
   select_label <- function(text) {
@@ -59,7 +58,14 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     return(rst)
   }
 
-  # Loop over all layers and arrange them in tibble
+  # Initiate list with soil data
+  soil_list <- list()
+
+  ## Add progress bar to loop
+  pb <- progress_estimated(length(lyr_list))
+  pb$print()
+
+  # Loop over all layers and arrange them in list
   for(lyr_i in lyr_list) {
     ## Extract label for the respective layer in final table
     name_i <- lyr_i %>%
@@ -81,14 +87,23 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
       set_colnames(name_i)
 
     ## Add the extracted columns into list
-    soil_tbl[[name_i]] <- lyr_tmp
+    soil_list[[name_i]] <- lyr_tmp
+
+    pb$tick()
   }
-  ## Convert the generated list into final soildata table
+
+
+# Calculate additional soil parameters using the euptf package -----------------
+  # Group soil layers according to layer depth and calculate further parameters
   soil_list <- soil_tbl %>%
     bind_cols() %>%
     as_tibble() %>%
     set_colnames(tolower(colnames(.))) %>%
-    map(c("brd","sl"%_%1:7), function(x){select(.,ends_with(x))})
+    map(c("bdr","sl"%&%1:7), function(x, tbl){select(tbl,ends_with(x))}, .) %>%
+    set_names(c("bdr","sl"%&%1:7)) %>%
+    map_at(., "sl"%&%1:4, function(tbl){mutate(tbl, TOPSOIL = "top")}) %>%
+    map_at(., "sl"%&%5:7, function(tbl){mutate(tbl, TOPSOIL = "sub")}) %>%
+
 
 
   sol_lyr <- list()
