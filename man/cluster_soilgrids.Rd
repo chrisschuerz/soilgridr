@@ -4,7 +4,8 @@
 \alias{cluster_soilgrids}
 \title{Title}
 \usage{
-cluster_soilgrids(project_path, shp_file = NULL)
+cluster_soilgrids(project_path, shp_file = NULL, lower_bound = c(30, 100,
+  200))
 }
 \description{
 Title
