@@ -7,7 +7,8 @@
 #' @importFrom raster raster projectRaster crop mask crs extent
 #' @importFrom euptf predict.ptf psd2classUS
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr select filter rename bind_cols progress_estimated ends_with
+#' @importFrom dplyr select filter mutate rename bind_cols
+#'   progress_estimated ends_with
 #' @importFrom tibble as_tibble tibble
 #' @importFrom purrr map map2 map_at
 #' @importFrom magrittr %>% set_colnames set_names
@@ -122,7 +123,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   }
 
   # Group soil layers according to layer depth and calculate further parameters
-  soil_list <- soil_tbl %>%
+  soil_list %<>%
     bind_cols() %>%
     as_tibble() %>%
     set_colnames(tolower(colnames(.))) %>%
