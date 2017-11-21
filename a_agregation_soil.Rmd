@@ -1,0 +1,315 @@
+---
+title: "SWAT Raab - SoilGrids setup for clustering"
+output:
+  html_notebook: default
+  html_document: default
+---
+
+###Input data
+
+Following input data needs to be place in the working directory of this script
+
+File/Folder   									Location
+-----         									-----
+Uncompressed "clValid" folder   				/root
+"SoilGrid250m" folder with TIFF files   		/root
+Empty folder "SoilGrid250m" for output files	/root/01_Datengrundlage/04_SOIL/
+Shape file subs1.shp							/root
+
+
+###Libraries
+To perform the unsupervised machine learning clustering the "optCluster" package needs to be installed. This package requires another one called "clValid", which was modified to improve the clustering of SOM, from unidimensional maps (1 x number of clusters) to rectangular or quadratic ones. Therefore this package "clValid" needs to be install before the installation of "optCluster".
+
+```{r}
+# install.packages("clValid", repos = NULL, type="source")
+
+require(euptf)
+require(raster)
+require(rgdal)
+require(sp)
+require(stats)
+require(optCluster)
+library(pasta)
+library(magrittr)
+library(dplyr)
+library(tibble)
+```
+
+###Preparation of spatial input file
+
+```{r}
+
+rst_dir <- "E:/Mostviertel/soilgrids"
+wrt_dir <- "E:/Mostviertel/sg_kmeans"
+
+#-------------------------------------------------------------------------#
+#Loading the Basin boundary as extent for creation of raster subsets from
+# the tiles.
+#-------------------------------------------------------------------------#
+shp_file <- "E:/Mostviertel/DEM/boundary.shp"
+bnd_shp <- readOGR(shp_file, layer = "boundary")
+#-------------------------------------------------------------------------#
+#Loading all GEO TIFF for the tile covering Austria.
+#-------------------------------------------------------------------------#
+tile_list <-  list.files(rst_dir, pattern = "_250m.tif$")
+
+rst_list <- list()
+
+select_label <- function(text) {
+  text[text %in% c("BDRICM", "BLDFIE", "CECSOL", "CLYPPT", 
+                   "CRFVOL", "ORCDRC", "PHIHOX", "SLTPPT", 
+                   "SNDPPT", "sl"%&%1:7)]
+}
+
+set_nodata <- function(rst) {
+  if (rst@data@min == 0 & rst@data@max == 255) {
+    rst@file@nodatavalue <- 255
+  } else {
+    rst@file@nodatavalue <- -32768
+  }
+  return(rst)
+}
+
+for(i_rst in tile_list) { 
+  i_name <- i_rst %>% 
+    strsplit(., "_") %>% 
+    unlist() %>% 
+    select_label(.) %>% 
+    substr(., 1, 3) %>% 
+    paste(., collapse = "_")
+  rst_tmp <- raster(rst_dir%//%i_rst) %>% 
+    set_nodata(.) %>% 
+    projectRaster(., crs = crs(bnd_shp)) %>% 
+    crop(., extent(bnd_shp)) %>% 
+    mask(., bnd_shp) %>% 
+    as.data.frame() %>% 
+    filter(!is.na(.[,1])) %>% 
+    set_colnames(i_name)
+  rst_list[[i_name]] <- rst_tmp
+}
+
+rst_tbl <- rst_list %>% 
+  bind_cols() %>% 
+  as_tibble() %>% 
+  set_colnames(tolower(colnames(.)))
+
+clst_tbl <- rst_tbl %>% 
+  dplyr::select(ends_with("sl1"), 
+         ends_with("sl3"), 
+         ends_with("sl6"), 
+         ends_with("bdr")) %>% 
+  mutate_at(vars(starts_with("orc")), funs(./10)) %>% 
+  mutate_at(vars(starts_with("bld")), funs(./1000)) %>% 
+  mutate_at(vars(starts_with("phi")), funs(./10)) %>% 
+  scale(., scale = TRUE, center = TRUE) %>% 
+  as.data.frame() %>% 
+  set_rownames("cell"%_%1:nrow(.))
+
+save(rst_tbl, file = wrt_dir%//%"rst_tbl.RData")
+load(wrt_dir%//%"rst_tbl.RData")
+
+rst_km <- list()
+wss <- (nrow(clst_tbl)-1)*sum(apply(clst_tbl,2,var))
+
+for(i in 1:20) {
+  rst_km[["n"%_%i]] <- kmeans(x = clst_tbl,centers = i, iter.max = 100)
+  wss[i] <- sum(rst_km[["n"%_%i]]$withinss)
+}
+
+plot(1:20, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares")
+
+```
+
+```{r}
+#Best choice here (when very low numbers are excluded) is 8 classes.
+
+clust_14 <- rst_km$n_2$cluster %>% 
+  enframe() %>% 
+  mutate(name = name %>% gsub("cell_", "", .) %>% as.numeric(.))
+
+# Selected 14 classes
+
+
+rst_dir <- "E:/Mostviertel/soilgrids"
+
+bnd_file <- "E:/Mostviertel/DEM/boundary.shp"
+
+bnd_shp <- readOGR(bnd_file, layer = "boundary")
+
+rst_i <- raster(rst_dir%//%"BLDFIE_M_sl1_250m.tif") %>% 
+  set_nodata(.) %>% 
+  projectRaster(crs = crs(bnd_shp))
+
+rst_i_c <- crop(rst_i, extent(bnd_shp)) %>% 
+  mask(., bnd_shp)
+
+len_rst <- length(rst_i_c)
+dim_rst <- dim(rst_i_c)
+
+clust_vct <- rep(NA, len_rst)
+clust_vct[which(!is.na(rst_i_c@data@values))] <- clust_14$value
+
+clust_rst <- clust_vct %>% 
+  matrix(ncol = dim_rst[1], nrow = dim_rst[2]) %>% 
+  t() %>% 
+  raster(crs = crs(bnd_shp))
+
+extent(clust_rst) <- extent(bnd_shp)
+
+clust_g <- as(clust_rst, 'SpatialGridDataFrame')
+writeGDAL(dataset = clust_g, fname =  wrt_dir%//%"sw_soil.tif", 
+          drivername = "GTiff", type = "Int16")
+
+
+# Load clip raster input files and and arrange in table
+tif_pth <- rst_dir
+
+tif_lst <- list.files(path = tif_pth, pattern = ".tif$")
+
+rst_layer <- list()
+for (i in tif_lst){
+  name_i <- i %>% strsplit("_") %>% unlist()
+  if(length(name_i) == 5){
+    name_i <- substr(name_i[2], 1, 3)%_%substr(name_i[4],3,3)
+    rst_layer[[name_i]] <- raster(tif_pth%//%i) %>% 
+      projectRaster(crs = crs(bnd_shp)) %>% 
+      crop(., extent(bnd_shp)) %>% 
+      mask(., bnd_shp) %>% 
+      as.data.frame() %>% 
+      filter(!is.na(.[,1]))
+  } else {
+    name_i <- "zmax"
+    rst_layer[[name_i]] <- raster(tif_pth%//%i) %>% 
+      projectRaster(crs = crs(bnd_shp)) %>% 
+      crop(., extent(bnd_shp)) %>% 
+      mask(., bnd_shp) %>% 
+      as.data.frame() %>% 
+      filter(!is.na(.[,1]))
+  }
+  }
+
+rst_tbl <- lapply(rst_layer, function(x){x})
+for(i in names(rst_tbl)) rst_tbl[[i]] %<>% set_colnames(i)
+
+sol_lyr <- list()
+
+for(i_lyr in 1:7){
+  sol_lyr[["lyr"%_%i_lyr]] <- rst_tbl %>% 
+    bind_cols() %>% 
+    dplyr::select(ends_with(as.character(i_lyr))) %>% 
+    set_colnames(substr(colnames(.),1,3)) %>% 
+    mutate(TOPSOIL = ifelse(i_lyr <= 4, "top", "sub")) %>% 
+    as_tibble()
+}
+
+calc_solpar <- function(tbl) {
+  tbl %>% 
+    mutate(USSAND = snd,
+           USSILT = slt,
+           USCLAY  = cly,
+           OC      = orc/10,
+           BD      = bld/1000,
+           CRF     = crf,
+           PH_H2O  = phi/10,
+           CEC     = cec) %>% 
+    dplyr::select(TOPSOIL, USSAND, USSILT, USCLAY, OC, BD, CRF, PH_H2O, CEC) %>% 
+    mutate(th_s  = predict.ptf(., ptf = "PTF06"),
+           th_fc = predict.ptf(., ptf = "PTF09"),
+           th_wp = predict.ptf(., ptf = "PTF12"),
+           k_s   = predict.ptf(., ptf = "PTF17"),
+           awc   = th_fc - th_wp) %>% 
+    rename(snd = USSAND,
+           slt = USSILT,
+           cly = USCLAY,
+           orc = OC,
+           bld = BD,
+           crf = CRF,
+           phi = PH_H2O,
+           cec = CEC) %>% 
+    dplyr::select(-TOPSOIL)
+}
+
+sol_lyr %<>% lapply(., calc_solpar)
+
+sol_lyr$lyr_0_30   <- ((sol_lyr$lyr_1*2.5 + sol_lyr$lyr_2*7.5 + 
+                        sol_lyr$lyr_3*12.5 + sol_lyr$lyr_4*7.5) / 30) %>% 
+  as_tibble()
+
+sol_lyr$lyr_30_100 <- ((sol_lyr$lyr_4*15 + sol_lyr$lyr_5*35 + 
+                        sol_lyr$lyr_6*20) / 70) %>% 
+  as_tibble()
+
+sol_lyr$lyr_100_200 <- ((sol_lyr$lyr_6*50 + sol_lyr$lyr_7*50) / 100) %>% 
+  as_tibble()
+  
+
+sol_lyr <- sol_lyr[c("lyr_0_30", "lyr_30_100", "lyr_100_200")]
+
+sol_lyr %<>% lapply(., function(x){
+  x %>% 
+    add_column(class = clust_14$value) %>% 
+    group_by(class) %>% 
+    summarise_all(funs(mean)) %>% 
+    mutate(tex = psd2classUS(snd, slt, cly, orc, option=TRUE))}) 
+
+sol_lyr$lyr_0_30    %<>% add_column(z = 300)
+sol_lyr$lyr_30_100  %<>% add_column(z = 1000)
+sol_lyr$lyr_100_200 %<>% add_column(z = rst_tbl$zmax %>% 
+                                          add_column(class = clust_14$value) %>% 
+                                          filter(!is.na(class)) %>% 
+                                          group_by(class) %>% 
+                                          summarise_all(funs(mean)) %>% 
+                                          .[[2]] %>% 
+                                          multiply_by(10))
+
+assign_hydgrp <- function(k_s){
+  hyd_grp <- c("D","C","B","A")
+  hyd_trs <- c(3.6,36,144,9999)
+  lapply(k_s, function(x) hyd_grp[hyd_trs > x][1]) %>% unlist()
+}
+
+arrange_lyr_i <- function(lyr_tbl) {
+  lyr_tbl %>% 
+    dplyr::select(z, bld, awc, k_s, orc, cly, slt, snd, crf) %>% 
+    mutate(alb    = 0.6/exp(0.4*orc),
+           usle_k = ((0.2 + 0.3*exp(-0.256*snd * (1 - slt/100)))) * 
+             ((slt/(cly + slt))^0.3) * 
+             (1 - 0.0256*orc / (orc + exp(3.72 - 2.95*orc))) *
+             ((1 - 0.7*(1 - snd/100) / 
+             ((1 - snd/100) + exp(-5.51 + 22.9*(1 - snd/100))))),
+           ec     = 0,
+           k_s = (10^k_s)/2.4)
+}
+
+gen <- tibble(objectid  = 1:nrow(sol_lyr[[1]]),
+              muid      = rep("", nrow(sol_lyr[[1]])),
+              seqn      = rep("", nrow(sol_lyr[[1]])),
+              snam      = "solclst"%&%sol_lyr[[1]]$class,
+              s5id      = rep("", nrow(sol_lyr[[1]])),
+              cmppct    = rep("", nrow(sol_lyr[[1]])),
+              nlayers   = length(sol_lyr),
+              hydgrp    = assign_hydgrp(sol_lyr$lyr_0_30$k_s),
+              sol_zmx   = sol_lyr$lyr_100_200$z,
+              anion_exc = 0.5, 
+              sol_crk   = 0.5,
+              texture   = sol_lyr[[1]]$tex%_%sol_lyr[[2]]$tex%_%
+                          sol_lyr[[3]]$tex)
+
+sol_lyr %<>% lapply(., arrange_lyr_i) %>% 
+  lapply(., round, digits = 2)
+
+
+sol_out <- bind_cols(gen, bind_cols(sol_lyr)) %>% 
+  bind_cols(., data.frame(matrix(0, nrow = nrow(sol_lyr[[1]]),
+                                    ncol = 152 - ncol(.))))
+
+write.table(sol_out, file = wrt_dir%//%"usersoil.csv", quote = FALSE, 
+          row.names = FALSE, col.names = FALSE, sep = ",")
+
+sol_lkp <- tibble(VALUE = substr(gen$snam, 9, 11),
+                  NAME  = gen$snam)
+
+write.table(sol_lkp, file = wrt_dir%//%"sol_lkp.csv", quote = FALSE, 
+            row.names = FALSE, col.names = TRUE, sep = ",")
+```
+
