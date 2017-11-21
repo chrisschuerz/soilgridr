@@ -94,6 +94,34 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
 
 
 # Calculate additional soil parameters using the euptf package -----------------
+  ## Function to calculate additional parameters and return required ones
+  calc_solpar <- function(tbl) {
+    tbl %>%
+      dplyr::mutate(USSAND = snd,
+                    USSILT = slt,
+                    USCLAY  = cly,
+                    OC      = orc/10,
+                    BD      = bld/1000,
+                    CRF     = crf,
+                    PH_H2O  = phi/10,
+                    CEC     = cec) %>%
+      dplyr::select(TOPSOIL, USSAND, USSILT, USCLAY, OC, BD, CRF, PH_H2O, CEC) %>%
+      dplyr::mutate(th_s  = predict.ptf(., ptf = "PTF06") %>% as.numeric(.),
+                    th_fc = predict.ptf(., ptf = "PTF09") %>% as.numeric(.),
+                    th_wp = predict.ptf(., ptf = "PTF12") %>% as.numeric(.),
+                    k_s   = predict.ptf(., ptf = "PTF17") %>% as.numeric(.),
+                    awc   = th_fc - th_wp) %>%
+      dplyr::rename(snd = USSAND,
+                    slt = USSILT,
+                    cly = USCLAY,
+                    orc = OC,
+                    bld = BD,
+                    crf = CRF,
+                    phi = PH_H2O,
+                    cec = CEC) %>%
+      dplyr::select(-TOPSOIL)
+  }
+
   # Group soil layers according to layer depth and calculate further parameters
   soil_list <- soil_tbl %>%
     bind_cols() %>%
@@ -101,64 +129,50 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     set_colnames(tolower(colnames(.))) %>%
     map(c("bdr","sl"%&%1:7), function(x, tbl){select(tbl,ends_with(x))}, .) %>%
     set_names(c("bdr","sl"%&%1:7)) %>%
+    map_at(., "sl"%&%1:7, function(tbl){names(tbl) <- substr(names(tbl), 1, 3)
+                                        return(tbl)}) %>%
     map_at(., "sl"%&%1:4, function(tbl){mutate(tbl, TOPSOIL = "top")}) %>%
     map_at(., "sl"%&%5:7, function(tbl){mutate(tbl, TOPSOIL = "sub")}) %>%
+    map_at(., "sl"%&%1:7, calc_solpar)
 
 
+# Aggregate soil layers over depth ---------------------------------------------
+  upper_bound <- c(0,lower_bound[1:length(lower_bound) - 1])
 
-  sol_lyr <- list()
-
-  for(i_lyr in 1:7){
-    sol_lyr[["lyr"%_%i_lyr]] <- rst_tbl %>%
-      bind_cols() %>%
-      dplyr::select(ends_with(as.character(i_lyr))) %>%
-      set_colnames(substr(colnames(.),1,3)) %>%
-      mutate(TOPSOIL = ifelse(i_lyr <= 4, "top", "sub")) %>%
-      as_tibble()
+  # Function to calculate the weights of each soil layer for the respective
+  # upper and lower boundaries in the soil depth aggregation.
+  calc_weights <- function(up_bnd, lw_bnd) {
+    sl_depth <- c(2.5, 7.5, 12.5, 22.5, 35, 70, 50)
+    sl_depth_cum <- cumsum(sl_depth)
+    lw_wgt <- (sl_depth_cum - up_bnd)
+    lw_pos <- which(lw_wgt >= 0)[1]
+    lw_wgt <- (lw_wgt == lw_wgt[lw_pos]) * lw_wgt
+    up_wgt <- lw_bnd - sl_depth_cum
+    up_pos <- which(up_wgt <= 0)[1]
+    up_wgt <- ((up_wgt == up_wgt[up_pos - 1]) * up_wgt)
+    up_wgt <- c(0, up_wgt)[1:7]
+    if((up_pos - 1) >= (lw_pos + 1)){
+      md_wgt <- sl_depth %in% sl_depth[(lw_pos + 1):(up_pos - 1)] * sl_depth
+    } else {
+      md_wgt <- rep(0, 7)
+    }
+    (lw_wgt + md_wgt + up_wgt)/(lw_bnd - up_bnd)
   }
 
-  calc_solpar <- function(tbl) {
-    tbl %>%
-      mutate(USSAND = snd,
-             USSILT = slt,
-             USCLAY  = cly,
-             OC      = orc/10,
-             BD      = bld/1000,
-             CRF     = crf,
-             PH_H2O  = phi/10,
-             CEC     = cec) %>%
-      dplyr::select(TOPSOIL, USSAND, USSILT, USCLAY, OC, BD, CRF, PH_H2O, CEC) %>%
-      mutate(th_s  = predict.ptf(., ptf = "PTF06"),
-             th_fc = predict.ptf(., ptf = "PTF09"),
-             th_wp = predict.ptf(., ptf = "PTF12"),
-             k_s   = predict.ptf(., ptf = "PTF17"),
-             awc   = th_fc - th_wp) %>%
-      rename(snd = USSAND,
-             slt = USSILT,
-             cly = USCLAY,
-             orc = OC,
-             bld = BD,
-             crf = CRF,
-             phi = PH_H2O,
-             cec = CEC) %>%
-      dplyr::select(-TOPSOIL)
-  }
+  lyr_weight <- map2(upper_bound, lower_bound, calc_weights)
 
-  sol_lyr %<>% lapply(., calc_solpar)
-
-  sol_lyr$lyr_0_30   <- ((sol_lyr$lyr_1*2.5 + sol_lyr$lyr_2*7.5 +
-                            sol_lyr$lyr_3*12.5 + sol_lyr$lyr_4*7.5) / 30) %>%
-    as_tibble()
-
-  sol_lyr$lyr_30_100 <- ((sol_lyr$lyr_4*15 + sol_lyr$lyr_5*35 +
-                            sol_lyr$lyr_6*20) / 70) %>%
-    as_tibble()
-
-  sol_lyr$lyr_100_200 <- ((sol_lyr$lyr_6*50 + sol_lyr$lyr_7*50) / 100) %>%
-    as_tibble()
+  sol_aggr <- map(lyr_weight, function(weight, soil_list){
+                                soil_list$sl1*weight[1] +
+                                soil_list$sl2*weight[2] +
+                                soil_list$sl3*weight[3] +
+                                soil_list$sl4*weight[4] +
+                                soil_list$sl5*weight[5] +
+                                soil_list$sl6*weight[6] +
+                                soil_list$sl7*weight[7]},
+                  soil_list) %>%
+    set_names("lyr"%_%1:length(upper_bound))
 
 
-  sol_lyr <- sol_lyr[c("lyr_0_30", "lyr_30_100", "lyr_100_200")]
 
   sol_lyr %<>% lapply(., function(x){
     x %>%
