@@ -5,19 +5,19 @@
 
 #' @importFrom rgdal readOGR
 #' @importFrom raster raster projectRaster crop mask crs extent
+#' @importFrom euptf predict.ptf psd2classUS
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr select filter progress_estimated
-#' @importFrom magrittr %>% set_colnames
-#'
-#'
-#'
+#' @importFrom dplyr select filter rename bind_cols progress_estimated ends_with
+#' @importFrom tibble as_tibble tibble
+#' @importFrom purrr map map2 map_at
+#' @importFrom magrittr %>% set_colnames set_names
 #'
 #' @return
 #' @export
 #'
 #' @examples
 cluster_soilgrids <- function(project_path, shp_file = NULL,
-                              lower_bound = c(30, 100, 200) ) {
+                              lower_bound = c(30, 100, 200), n_clust = 1:20 ) {
 
 
 # Reading shape file -----------------------------------------------------------
@@ -97,29 +97,29 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   ## Function to calculate additional parameters and return required ones
   calc_solpar <- function(tbl) {
     tbl %>%
-      dplyr::mutate(USSAND = snd,
-                    USSILT = slt,
-                    USCLAY  = cly,
-                    OC      = orc/10,
-                    BD      = bld/1000,
-                    CRF     = crf,
-                    PH_H2O  = phi/10,
-                    CEC     = cec) %>%
-      dplyr::select(TOPSOIL, USSAND, USSILT, USCLAY, OC, BD, CRF, PH_H2O, CEC) %>%
-      dplyr::mutate(th_s  = predict.ptf(., ptf = "PTF06") %>% as.numeric(.),
-                    th_fc = predict.ptf(., ptf = "PTF09") %>% as.numeric(.),
-                    th_wp = predict.ptf(., ptf = "PTF12") %>% as.numeric(.),
-                    k_s   = predict.ptf(., ptf = "PTF17") %>% as.numeric(.),
-                    awc   = th_fc - th_wp) %>%
-      dplyr::rename(snd = USSAND,
-                    slt = USSILT,
-                    cly = USCLAY,
-                    orc = OC,
-                    bld = BD,
-                    crf = CRF,
-                    phi = PH_H2O,
-                    cec = CEC) %>%
-      dplyr::select(-TOPSOIL)
+      mutate(USSAND = snd,
+             USSILT = slt,
+             USCLAY  = cly,
+             OC      = orc/10,
+             BD      = bld/1000,
+             CRF     = crf,
+             PH_H2O  = phi/10,
+             CEC     = cec) %>%
+      select(TOPSOIL, USSAND, USSILT, USCLAY, OC, BD, CRF, PH_H2O, CEC) %>%
+      mutate(th_s  = predict.ptf(., ptf = "PTF06") %>% as.numeric(.),
+             th_fc = predict.ptf(., ptf = "PTF09") %>% as.numeric(.),
+             th_wp = predict.ptf(., ptf = "PTF12") %>% as.numeric(.),
+             k_s   = predict.ptf(., ptf = "PTF17") %>% as.numeric(.),
+             awc   = th_fc - th_wp) %>%
+      rename(snd = USSAND,
+             slt = USSILT,
+             cly = USCLAY,
+             orc = OC,
+             bld = BD,
+             crf = CRF,
+             phi = PH_H2O,
+             cec = CEC) %>%
+      select(-TOPSOIL)
   }
 
   # Group soil layers according to layer depth and calculate further parameters
@@ -159,8 +159,10 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     (lw_wgt + md_wgt + up_wgt)/(lw_bnd - up_bnd)
   }
 
+  # Calculate the layer weights for each aggregated soil layer
   lyr_weight <- map2(upper_bound, lower_bound, calc_weights)
 
+  # Calculate the aggregated soil layers by summing up the weighted layers
   sol_aggr <- map(lyr_weight, function(weight, soil_list){
                                 soil_list$sl1*weight[1] +
                                 soil_list$sl2*weight[2] +
@@ -172,42 +174,30 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
                   soil_list) %>%
     set_names("lyr"%_%1:length(upper_bound))
 
+# Soil group clustering using kmeans -------------------------------------------
+  # Create scaled table to apply kmeans
+  clst_tbl <- sol_aggr %>%
+    map2(., 1:length(upper_bound), function(tbl, nm) {
+                                     names(tbl) <- names(tbl)%_%nm
+                                     return(tbl)}) %>%
+    bind_cols(.) %>%
+    bind_cols(., soil_list$bdr) %>%
+    scale(., scale = TRUE, center = TRUE) %>%
+    as.data.frame() %>%
+    set_rownames("cell"%_%1:nrow(.))
 
+  soil_km <- list()
+  ssq <- c()
 
-  sol_lyr %<>% lapply(., function(x){
-    x %>%
-      add_column(class = clust_14$value) %>%
-      group_by(class) %>%
-      summarise_all(funs(mean)) %>%
-      mutate(tex = psd2classUS(snd, slt, cly, orc, option=TRUE))})
-
-  sol_lyr$lyr_0_30    %<>% add_column(z = 300)
-  sol_lyr$lyr_30_100  %<>% add_column(z = 1000)
-  sol_lyr$lyr_100_200 %<>% add_column(z = rst_tbl$zmax %>%
-                                        add_column(class = clust_14$value) %>%
-                                        filter(!is.na(class)) %>%
-                                        group_by(class) %>%
-                                        summarise_all(funs(mean)) %>%
-                                        .[[2]] %>%
-                                        multiply_by(10))
-
-  assign_hydgrp <- function(k_s){
-    hyd_grp <- c("D","C","B","A")
-    hyd_trs <- c(3.6,36,144,9999)
-    lapply(k_s, function(x) hyd_grp[hyd_trs > x][1]) %>% unlist()
+  for(i_clust in n_clust) {
+    soil_km[["n"%_%i_clust]] <- kmeans(x = clst_tbl,centers = i_clust, iter.max = 100)
+    ssq[i_clust] <- sum(soil_km[["n"%_%i_clust]]$withinss)
   }
 
-  arrange_lyr_i <- function(lyr_tbl) {
-    lyr_tbl %>%
-      dplyr::select(z, bld, awc, k_s, orc, cly, slt, snd, crf) %>%
-      mutate(alb    = 0.6/exp(0.4*orc),
-             usle_k = ((0.2 + 0.3*exp(-0.256*snd * (1 - slt/100)))) *
-               ((slt/(cly + slt))^0.3) *
-               (1 - 0.0256*orc / (orc + exp(3.72 - 2.95*orc))) *
-               ((1 - 0.7*(1 - snd/100) /
-                   ((1 - snd/100) + exp(-5.51 + 22.9*(1 - snd/100))))),
-             ec     = 0,
-             k_s = (10^k_s)/2.4)
-  }
+  out_list <- list(soil_layer = sol_aggr,
+                   soil_cluster = soil_km,
+                   kmeans_eval = tibble(n_cluster = n_clust,
+                                        ssq = ssq))
 
+  return(out_list)
 }
