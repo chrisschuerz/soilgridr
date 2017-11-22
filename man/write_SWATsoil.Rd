@@ -4,7 +4,7 @@
 \alias{write_SWATsoil}
 \title{Title}
 \usage{
-write_SWATsoil(project_path, soilgrids_cluster, n_class)
+write_SWATsoil(project_path, sg_cluster, n_class, overwrite = FALSE)
 }
 \arguments{
 \item{n_class}{}
