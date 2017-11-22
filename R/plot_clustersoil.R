@@ -14,7 +14,7 @@
 #' @export
 #'
 #' @examples
-plot_clustersoil <- function(soilgrids_cluster, n_class){
+plot_soilmap <- function(soilgrids_cluster, n_class){
 
   clust_sel <- soilgrids_cluster$soil_cluster[["n"%_%n_class]]$cluster %>%
     enframe() %>%
