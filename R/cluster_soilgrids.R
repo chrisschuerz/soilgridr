@@ -61,7 +61,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   }
 
   # Initiate list with soil data
-  soil_list <- list()
+  sol_list <- list()
 
   ## Add progress bar to loop
   cat("Read soilgrids layer:\n")
@@ -84,12 +84,13 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
       crop(., extent(shp_file)) %>%
       mask(., shp_file)
 
-    if(length(soil_list) == 0){
+    if(length(sol_list) == 0){
       lyr_meta <- list(has_value = lyr_tmp@data@values,
                        len_rst = length(lyr_tmp),
                        dim_rst = dim(lyr_tmp),
                        extent  = extent(shp_file),
-                       crs     = crs(shp_file))
+                       crs     = crs(shp_file),
+                       depth   = lower_bound)
       lyr_meta$has_value[!is.na(lyr_meta$has_value)] <- TRUE
     }
 
@@ -100,7 +101,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
       set_colnames(name_i)
 
     ## Add the extracted columns into list
-    soil_list[[name_i]] <- lyr_tmp
+    sol_list[[name_i]] <- lyr_tmp
 
     pb$tick()$print()
   }
@@ -137,7 +138,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   }
 
   # Group soil layers according to layer depth and calculate further parameters
-  soil_list %<>%
+  sol_list %<>%
     bind_cols() %>%
     as_tibble() %>%
     set_colnames(tolower(colnames(.))) %>%
@@ -177,15 +178,15 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   lyr_weight <- map2(upper_bound, lower_bound, calc_weights)
 
   # Calculate the aggregated soil layers by summing up the weighted layers
-  sol_aggr <- map(lyr_weight, function(weight, soil_list){
-                                soil_list$sl1*weight[1] +
-                                soil_list$sl2*weight[2] +
-                                soil_list$sl3*weight[3] +
-                                soil_list$sl4*weight[4] +
-                                soil_list$sl5*weight[5] +
-                                soil_list$sl6*weight[6] +
-                                soil_list$sl7*weight[7]},
-                  soil_list) %>%
+  sol_aggr <- map(lyr_weight, function(weight, sol_list){
+                                sol_list$sl1*weight[1] +
+                                sol_list$sl2*weight[2] +
+                                sol_list$sl3*weight[3] +
+                                sol_list$sl4*weight[4] +
+                                sol_list$sl5*weight[5] +
+                                sol_list$sl6*weight[6] +
+                                sol_list$sl7*weight[7]},
+                  sol_list) %>%
     set_names("lyr"%_%1:length(upper_bound))
 
 # Soil group clustering using kmeans -------------------------------------------
@@ -195,7 +196,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
                                      names(tbl) <- names(tbl)%_%nm
                                      return(tbl)}) %>%
     bind_cols(.) %>%
-    bind_cols(., soil_list$bdr) %>%
+    bind_cols(., sol_list$bdr) %>%
     scale(., scale = TRUE, center = TRUE) %>%
     as.data.frame() %>%
     set_rownames("cell"%_%1:nrow(.))
@@ -212,6 +213,8 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     pb$tick()$print()
   }
   pb$stop()
+
+  sol_aggr$bdr <- sol_list$bdr
 
   out_list <- list(soil_layer = sol_aggr,
                    soil_cluster = soil_km,
