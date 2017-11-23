@@ -5,8 +5,8 @@
 #' @param n_class
 #'
 #' @importFrom tibble enframe add_column tibble
-#' @importFrom dplyr mutate select filter group_by summarise_all funs bind_cols
-#' @importFrom purrr map map2 map_df reduce
+#' @importFrom dplyr mutate select filter group_by summarise_all funs bind_cols full_join
+#' @importFrom purrr map map2 map_df map_dfc reduce
 #' @importFrom raster writeRaster extent<-
 #' @importMethodsFrom raster extent
 #' @importFrom rgdal writeGDAL
@@ -22,10 +22,12 @@
 write_SWATsoil <- function(project_path, sg_cluster, n_class,
                            overwrite = FALSE){
 
+  # Clustering results for the selected number of soil classes in a tibble
   clust_sel <- sg_cluster$soil_cluster[["n"%_%n_class]]$cluster %>%
     enframe() %>%
     mutate(name = name %>% gsub("cell_", "", .) %>% as.numeric(.))
 
+  # Create a vector that is further converted into the clustered soil map.
   clust_vct <- rep(NA, sg_cluster$layer_meta$len_rst)
   clust_vct[which(!is.na(sg_cluster$layer_meta$has_value))] <- clust_sel$value
 

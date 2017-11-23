@@ -2,12 +2,30 @@
 % Please edit documentation in R/cluster_soilgrids.R
 \name{cluster_soilgrids}
 \alias{cluster_soilgrids}
-\title{Title}
+\title{Create clustered soilmap from soilgrids data}
 \usage{
 cluster_soilgrids(project_path, shp_file = NULL, lower_bound = c(30, 100,
   200), n_class = 1:20)
 }
+\arguments{
+\item{project_path}{Path to the SWAT project / Path where downloaded
+soilgrids folder is located.}
+
+\item{shp_file}{Shape file (or path to shape file) for which an
+aggregated soil ma should be generated. If \code{NULL} the shape file
+from the SWAT project will be used.}
+
+\item{lower_bound}{A vector defining the lower bounds of the aggregated
+soil layers (depths in cm).}
+
+\item{n_class}{Vector of number of soil classes that should be generated
+with the kmeans clustering.}
+}
+\value{
+Returns a list that holds the soilgrids data and the clustering
+  results for further processing with \code{write_SWATsoil()}.
+}
 \description{
-Title
+Create clustered soilmap from soilgrids data
 }
 

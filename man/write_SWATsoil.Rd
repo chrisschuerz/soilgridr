@@ -2,7 +2,7 @@
 % Please edit documentation in R/write_SWATsoil.R
 \name{write_SWATsoil}
 \alias{write_SWATsoil}
-\title{Title}
+\title{write the required SWAT2012 soil inputs for clustered soilgrids}
 \usage{
 write_SWATsoil(project_path, sg_cluster, n_class, overwrite = FALSE)
 }
@@ -10,6 +10,6 @@ write_SWATsoil(project_path, sg_cluster, n_class, overwrite = FALSE)
 \item{n_class}{}
 }
 \description{
-Title
+write the required SWAT2012 soil inputs for clustered soilgrids
 }
 
