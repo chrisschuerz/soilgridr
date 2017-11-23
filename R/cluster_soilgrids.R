@@ -1,7 +1,14 @@
-#' Title
+#' Create clustered soilmap from soilgrids data
 #'
-#' @param project_path
-#' @param shp_file
+#' @param project_path Path to the SWAT project / Path where downloaded
+#'   soilgrids folder is located.
+#' @param shp_file Shape file (or path to shape file) for which an
+#'   aggregated soil ma should be generated. If \code{NULL} the shape file
+#'   from the SWAT project will be used.
+#' @param lower_bound A vector defining the lower bounds of the aggregated
+#'   soil layers (depths in cm).
+#' @param n_class Vector of number of soil classes that should be generated
+#'   with the kmeans clustering.
 
 #' @importFrom rgdal readOGR
 #' @importFrom raster raster projectRaster crop mask crs extent
@@ -13,15 +20,13 @@
 #' @importFrom purrr map map2 map_at
 #' @importFrom magrittr %>% set_colnames set_rownames set_names
 #'
-#' @return
+#' @return Returns a list that holds the soilgrids data and the clustering
+#'   results for further processing with \code{write_SWATsoil()}.
 #' @export
-#'
-#' @examples
+
 cluster_soilgrids <- function(project_path, shp_file = NULL,
                               lower_bound = c(30, 100, 200),
                               n_class = 1:20 ) {
-
-
 # Reading shape file -----------------------------------------------------------
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
   if(is.null(shp_file)) {
@@ -84,6 +89,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
       crop(., extent(shp_file)) %>%
       mask(., shp_file)
 
+    # In first loop run create meta data to save in final output list
     if(length(sol_list) == 0){
       lyr_meta <- list(has_value = lyr_tmp@data@values,
                        len_rst = length(lyr_tmp),
@@ -93,7 +99,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
                        depth   = lower_bound)
       lyr_meta$has_value[!is.na(lyr_meta$has_value)] <- TRUE
     }
-
+    # Convert raster layer to tibble with one named column for further merging.
     lyr_tmp %<>%
       as.vector(.) %>%
       as_tibble() %>%
@@ -190,7 +196,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     set_names("lyr"%_%1:length(upper_bound))
 
 # Soil group clustering using kmeans -------------------------------------------
-  # Create scaled table to apply kmeans
+  # Create scaled table to apply kmeans on
   clst_tbl <- sol_aggr %>%
     map2(., 1:length(upper_bound), function(tbl, nm) {
                                      names(tbl) <- names(tbl)%_%nm
@@ -201,21 +207,22 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     as.data.frame() %>%
     set_rownames("cell"%_%1:nrow(.))
 
+  # Empty list that furhter stores the clustering results
   soil_km <- list()
-  ssq <- c()
 
   cat("\nCluster soil data:\n")
   pb <- progress_estimated(length(n_class))
+  # Loop over all defined number of classes and apply kmeans to the soilgrids data.
   for(i_clust in n_class) {
     soil_km[["n"%_%i_clust]] <- kmeans(x = clst_tbl,centers = i_clust, iter.max = 100)
-    ssq[i_clust] <- sum(soil_km[["n"%_%i_clust]]$withinss)
-
     pb$tick()$print()
   }
   pb$stop()
 
+  # Add depth to bedrock layer to the aggregated soil layers
   sol_aggr$bdr <- sol_list$bdr
 
+  # Output with soil layer data, cluster results and spatial meta data
   out_list <- list(soil_layer = sol_aggr,
                    soil_cluster = soil_km,
                    layer_meta = lyr_meta)

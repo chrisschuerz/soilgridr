@@ -1,4 +1,4 @@
-#' Title
+#' write the required SWAT2012 soil inputs for clustered soilgrids
 #'
 #' @param project_path
 #' @param sg_cluster
