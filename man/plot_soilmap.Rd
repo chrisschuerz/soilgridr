@@ -12,4 +12,3 @@ plot_soilmap(sg_cluster, n_class)
 \description{
 Plot clustered soil map
 }
-

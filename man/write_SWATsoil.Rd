@@ -12,4 +12,3 @@ write_SWATsoil(project_path, sg_cluster, n_class, overwrite = FALSE)
 \description{
 write the required SWAT2012 soil inputs for clustered soilgrids
 }
-

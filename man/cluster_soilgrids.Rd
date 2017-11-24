@@ -28,4 +28,3 @@ Returns a list that holds the soilgrids data and the clustering
 \description{
 Create clustered soilmap from soilgrids data
 }
-

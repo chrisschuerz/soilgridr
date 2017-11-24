@@ -21,4 +21,3 @@ Returns either a list with pixel size and extent of Tiffs as numerics
 \description{
 get the required soilgrids
 }
-
