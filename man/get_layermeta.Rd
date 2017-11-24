@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_layermeta.R
 \name{get_layermeta}
 \alias{get_layermeta}
-\title{get the required soilgrids}
+\title{Get the required soilgrids meta information.}
 \usage{
 get_layermeta(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
   raw = FALSE)
@@ -19,5 +19,14 @@ Returns either a list with pixel size and extent of Tiffs as numerics
   or the raw text output.
 }
 \description{
-get the required soilgrids
+Get the required soilgrids meta information.
+}
+\examples{
+# To generate required input for obtain_soilgrids()
+  layer_meta <- get_layermeta()
+  layer_meta
+
+# To check all meta information
+# (also for crosschecking that function works properly)
+  get_layermeta(raw = TRUEB)
 }

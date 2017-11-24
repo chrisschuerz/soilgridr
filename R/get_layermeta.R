@@ -1,4 +1,4 @@
-#' get the required soilgrids
+#' Get the required soilgrids meta information.
 #' @param wcs URL of the ISRIC soilgrids geoserver
 #' @param raw logic, if TRUE raw text output is returned if FALSE (default) the
 #'   function returns the extracted values of the Tiff tiles pixel sizen and the
@@ -12,6 +12,14 @@
 #'   or the raw text output.
 #'
 #' @export
+#' @examples
+#' # To generate required input for obtain_soilgrids()
+#'   layer_meta <- get_layermeta()
+#'   layer_meta
+#'
+#' # To check all meta information
+#' # (also for crosschecking that function works properly)
+#'   get_layermeta(raw = TRUEB)
 
 get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
                           raw = FALSE) {
@@ -33,6 +41,7 @@ get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
   gdal_cmd <- paste(path_gdal_info, xml_out)
   meta <- system(gdal_cmd, intern = TRUE)
 
+  # Remove loaded .xml file
   file.remove(layer%.%"xml")
 
   if(raw){
@@ -48,6 +57,8 @@ get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
           gsub(" ", "_", .)})) %>%
       map(., function(x){x[2:3] %>% as.numeric(.)})
 
+    # Meta out containts numeric pixel size and the numeric extent vector
+    # required as inputs for obtain_soilgrids()
     meta_out$Pixel_Size <- abs(meta_out$Pixel_Size[1])
     meta_out$Extent <- c(meta_out$Lower_Left[1], meta_out$Upper_Right[1],
                          meta_out$Lower_Left[2], meta_out$Upper_Right[2])

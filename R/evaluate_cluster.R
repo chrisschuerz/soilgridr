@@ -8,8 +8,7 @@
 #' @return Returns a ggplot object plotting the within class SSE over the
 #'   Number of classes
 #' @export
-#'
-#' @examples
+
 evaluate_cluster <- function(sg_cluster) {
   sg_cluster$soil_cluster %>%
     map_dfr(., function(x){

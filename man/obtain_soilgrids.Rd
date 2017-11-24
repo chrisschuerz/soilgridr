@@ -19,10 +19,9 @@ will be used.}
 
 \item{wcs}{URL of the ISRIC soilgrids geoserver}
 
-\item{sg_ext}{Extent of the soilgrids layers at the geoserver}
-
-\item{sg_pxl}{Pixel size of the soilgrids layers at the geoserver. Check
-default values of with \code{check_soilgrids()}}
+\item{layer_meta}{List with the entries extent (Vector of length 4 with the
+soilgrids extent) and the soilgrids pixel_size. Check if these values are
+correct with \code{get_layermeta()]}}
 }
 \value{
 Writes the requiered soilgrids layer to project_path/soilgrids.

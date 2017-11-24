@@ -7,7 +7,12 @@
 plot_soilmap(sg_cluster, n_class)
 }
 \arguments{
-\item{n_class}{}
+\item{sg_cluster}{The cluster results output from \code{cluster_soilgrids()}}
+
+\item{n_class}{Numeric. Number of soil classes to plot in the soil map.}
+}
+\value{
+Plots the final soilmap with the selected number of soil classes.
 }
 \description{
 Plot clustered soil map

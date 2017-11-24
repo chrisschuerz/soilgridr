@@ -6,9 +6,9 @@
 #'   the soilgrids layers. If \code{NULL} the shape file from the SWAT project
 #'   will be used.
 #' @param wcs URL of the ISRIC soilgrids geoserver
-#' @param sg_ext Extent of the soilgrids layers at the geoserver
-#' @param sg_pxl Pixel size of the soilgrids layers at the geoserver. Check
-#'   default values of with \code{check_soilgrids()}
+#' @param layer_meta List with the entries extent (Vector of length 4 with the
+#'   soilgrids extent) and the soilgrids pixel_size. Check if these values are
+#'   correct with \code{get_layermeta()]}
 #' @importFrom rgdal readOGR
 #' @importFrom sp CRS spTransform
 #' @importFrom raster extent
@@ -17,11 +17,6 @@
 #'
 #' @return Writes the requiered soilgrids layer to project_path/soilgrids.
 #' @export
-
-###For testing
-# project_path <- "E:/R_project/SWAT_Raab"
-# library(pasta)
-# library(magrittr)
 
 obtain_soilgrids <- function(project_path, shp_file = NULL,
                              wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
@@ -80,7 +75,9 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
                    "PHIHOX_M_sl"%&%1:7%_%"250m")
 
   # Obtain the soilgrids layers from the ISRIC geoserver
-  ## Most steps here modification from http://gsif.isric.org/doku.php/wiki:tutorial_soilgrids
+  ## Most steps here modification from
+  ## http://gsif.isric.org/doku.php/wiki:tutorial_soilgrids
+
   ## Path to the installed gdal distro
   path_gdal_translate <- ifelse(.Platform$OS.type == "windows",
                            shortPathName("C:/Program files/GDAL")%//%"gdal_translate.exe",
@@ -110,6 +107,8 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
     system(gdal_cmd)
 
   }
+
+  # Further steps only require .tif files, teherefore all loaded .xml files are removed.
   xml_files <- list.files(path = project_path%//%"soilgrids", pattern = ".xml$",
                           full.names = TRUE)
   file.remove(xml_files)
