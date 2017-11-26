@@ -3,12 +3,12 @@
 #' @param project_path Path to the SWAT project / Path where downloaded
 #'   soilgrids folder is located.
 #' @param shp_file Shape file (or path to shape file) for which an
-#'   aggregated soil ma should be generated. If \code{NULL} the shape file
+#'   aggregated soil map should be generated. If \code{NULL} the shape file
 #'   from the SWAT project will be used.
 #' @param lower_bound A vector defining the lower bounds of the aggregated
 #'   soil layers (depths in cm).
 #' @param n_class Vector of number of soil classes that should be generated
-#'   with the kmeans clustering.
+#'   with k-means clustering.
 
 #' @importFrom rgdal readOGR
 #' @importFrom raster raster projectRaster crop mask crs extent
@@ -20,7 +20,7 @@
 #' @importFrom purrr map map2 map_at
 #' @importFrom magrittr %>% set_colnames set_rownames set_names
 #'
-#' @return Returns a list that holds the soilgrids data and the clustering
+#' @return A list that holds the soilgrids data and the clustering
 #'   results for further processing with \code{write_SWATsoil()}.
 #' @export
 
@@ -28,7 +28,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
                               lower_bound = c(30, 100, 200),
                               n_class = 1:20 ) {
 # Reading shape file -----------------------------------------------------------
-  # if no shp file provided subs1 shape frome SWAT watershed delineation used.
+  # if no .shp file provided, use subs1.shp from SWAT watershed delineation
   if(is.null(shp_file)) {
     shp_file <- readOGR(dsn = project_path%//%"Watershed/shapes"%//%
                           "subs1.shp",
@@ -42,7 +42,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
 
 
 # Reading soilgrids layer and arranging them in list ---------------------------
-  # Define path where soilgrids layer are located
+  # Define path to soilgrids layer
   lyr_dir <- project_path%//%"soilgrids"
 
   # List all layer names
@@ -56,6 +56,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   }
 
   ## Helper function to set the nodata values in the loaded raster files
+    # should be defined as seperate function outside :(
   set_nodata <- function(rst) {
     if (rst@data@min == 0 & rst@data@max == 255) {
       rst@file@nodatavalue <- 255
@@ -77,7 +78,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     ## Extract label for the respective layer in final table
     name_i <- lyr_i %>%
       strsplit(., "_") %>%
-      unlist() %>%
+      unlist(.) %>%
       select_label(.) %>%
       substr(., 1, 3) %>%
       paste(., collapse = "_")
@@ -89,22 +90,22 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
       crop(., extent(shp_file)) %>%
       mask(., shp_file)
 
-    # In first loop run create meta data to save in final output list
+    # In first loop-run create meta data to save in final output list
     if(length(sol_list) == 0){
       lyr_meta <- list(has_value = lyr_tmp@data@values,
-                       len_rst = length(lyr_tmp),
-                       dim_rst = dim(lyr_tmp),
-                       extent  = extent(shp_file),
-                       crs     = crs(shp_file),
-                       depth   = lower_bound)
+                       len_rst   = length(lyr_tmp),
+                       dim_rst   = dim(lyr_tmp),
+                       extent    = extent(shp_file),
+                       crs       = crs(shp_file),
+                       depth     = lower_bound)
       lyr_meta$has_value[!is.na(lyr_meta$has_value)] <- TRUE
     }
     # Convert raster layer to tibble with one named column for further merging.
     lyr_tmp %<>%
       as.vector(.) %>%
-      as_tibble() %>%
+      as_tibble(.) %>%
       filter(!is.na(.[,1])) %>%
-      set_colnames(name_i)
+      set_colnames(.,name_i)
 
     ## Add the extracted columns into list
     sol_list[[name_i]] <- lyr_tmp
@@ -145,8 +146,8 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
 
   # Group soil layers according to layer depth and calculate further parameters
   sol_list %<>%
-    bind_cols() %>%
-    as_tibble() %>%
+    bind_cols(.) %>%
+    as_tibble(.) %>%
     set_colnames(tolower(colnames(.))) %>%
     map(c("bdr","sl"%&%1:7), function(x, tbl){select(tbl,ends_with(x))}, .) %>%
     set_names(c("bdr","sl"%&%1:7)) %>%
@@ -204,7 +205,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
     bind_cols(.) %>%
     bind_cols(., sol_list$bdr) %>%
     scale(., scale = TRUE, center = TRUE) %>%
-    as.data.frame() %>%
+    as.data.frame(.) %>%
     set_rownames("cell"%_%1:nrow(.))
 
   # Empty list that furhter stores the clustering results
