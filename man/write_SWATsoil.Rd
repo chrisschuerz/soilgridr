@@ -2,14 +2,20 @@
 % Please edit documentation in R/write_SWATsoil.R
 \name{write_SWATsoil}
 \alias{write_SWATsoil}
-\title{write the required SWAT2012 soil inputs for clustered soilgrids}
+\title{Write the required SWAT2012 soil inputs for clustered soilgrids}
 \usage{
 write_SWATsoil(project_path, sg_cluster, n_class, overwrite = FALSE)
 }
 \arguments{
-\item{n_class}{}
+\item{project_path}{Project path where to write the SWAT soil data.}
+
+\item{sg_cluster}{The cluster results output from \code{cluster_soilgrids()}}
+
+\item{n_class}{Numeric. Number of soil classes to plot in the soil map.}
+}
+\value{
+Writes required aggregated SWAT soil data to folder project_path/soil_out
 }
 \description{
-write the required SWAT2012 soil inputs for clustered soilgrids
+Write the required SWAT2012 soil inputs for clustered soilgrids
 }
-

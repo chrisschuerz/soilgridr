@@ -1,8 +1,8 @@
-#' write the required SWAT2012 soil inputs for clustered soilgrids
+#' Write the required SWAT2012 soil inputs for clustered soilgrids
 #'
-#' @param project_path
-#' @param sg_cluster
-#' @param n_class
+#' @param project_path Project path where to write the SWAT soil data.
+#' @param sg_cluster The cluster results output from \code{cluster_soilgrids()}
+#' @param n_class Numeric. Number of soil classes to plot in the soil map.
 #'
 #' @importFrom tibble enframe add_column tibble
 #' @importFrom dplyr mutate select filter group_by summarise_all funs bind_cols full_join
@@ -15,10 +15,9 @@
 #' @importFrom pasta %//% %_%
 #' @import sp
 #'
-#' @return
+#' @return Writes required aggregated SWAT soil data to folder project_path/soil_out
 #' @export
-#'
-#' @examples
+
 write_SWATsoil <- function(project_path, sg_cluster, n_class,
                            overwrite = FALSE){
 
@@ -27,19 +26,22 @@ write_SWATsoil <- function(project_path, sg_cluster, n_class,
     enframe() %>%
     mutate(name = name %>% gsub("cell_", "", .) %>% as.numeric(.))
 
-  # Create a vector that is further converted into the clustered soil map.
-  clust_vct <- rep(NA, sg_cluster$layer_meta$len_rst)
-  clust_vct[which(!is.na(sg_cluster$layer_meta$has_value))] <- clust_sel$value
+  # Assign the cluster group indices to vector with length of the final raster map.
+  clust_rst <- rep(NA, sg_cluster$layer_meta$len_rst)
+  clust_rst[which(!is.na(sg_cluster$layer_meta$has_value))] <- clust_sel$value
 
-  clust_rst <- clust_vct %>%
+  # Reshape the vector and create raster map.
+  clust_rst %<>%
     matrix(ncol = sg_cluster$layer_meta$dim_rst[1],
            nrow = sg_cluster$layer_meta$dim_rst[2]) %>%
     t() %>%
     raster(crs = sg_cluster$layer_meta$crs)
 
+  # Assign the shape files' extent and provide a nodata value
   extent(clust_rst) <- sg_cluster$layer_meta$extent
   clust_rst@file@nodatavalue <- -32768
 
+  # Create rasta data for output writing to folder.
   clust_g <- as(clust_rst, 'SpatialGridDataFrame')
 
   write_path <- project_path%//%"soil_out"
@@ -48,19 +50,26 @@ write_SWATsoil <- function(project_path, sg_cluster, n_class,
   } else if(!overwrite) {
       stop("Folder 'soil_out' already exists and overwrite is set FALSE!")
     }
-  # writeRaster(clust_rst, filename = write_path%//%"soil.tif",
-  #             datatype = "INT4S", format = "GTiff")
 
+  # Write GDAL. Has the advantage over raster that attribute table is available
+  # in ArcGIS directly.
   writeGDAL(dataset = clust_g, fname =  write_path%//%"soil.tif",
                drivername = "GTiff", type = "Int16", mvFlag = -32768)
 
+  # Save the aggregated soil layers to variable for further shorter adressing.
   sol_lyr <- sg_cluster$soil_layer
+
+  # Extract the depth to bedrock and aggregate according to selected number of
+  # classes. Finally added at the end to output
   bdr <-  sol_lyr$bdr %>%
     add_column(., class = clust_sel$value) %>%
     group_by(., class) %>%
     summarise_all(., funs(mean))
 
+  # Remove the depth to bedrock. All further operations done on aggregated soil
+  # layers.
   sol_lyr$bdr <- NULL
+
 
   z_max <- sg_cluster$layer_meta$depth %>%
     set_names("lyr"%_%1:length(.)) %>%
