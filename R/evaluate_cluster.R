@@ -1,12 +1,14 @@
-#' Plotting the cluster results for decision for number of soil classes
+#' Plotting of the cluster results 
 #'
+#' Creates a plot of the results from the soilgrids clustering (\code(sg_cluster)).
+#' 
 #' @param sg_cluster Results of the soilgrids clustering
 #' @importFrom tibble tibble add_column
 #' @importFrom purrr map_dfr
 #' @importFrom ggplot2 ggplot aes geom_line geom_point theme_bw xlab ylab
 #'
-#' @return Returns a ggplot object plotting the within class SSE over the
-#'   Number of classes
+#' @return A ggplot object that shows the the SSE (within a the given classes) over the
+#'   number of classes
 #' @export
 
 evaluate_cluster <- function(sg_cluster) {
