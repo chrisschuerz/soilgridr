@@ -30,4 +30,3 @@ Get the required soilgrids meta information.
 # (also for crosschecking that function works properly)
   get_layermeta(raw = TRUEB)
 }
-

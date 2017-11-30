@@ -16,4 +16,3 @@ Returns a ggplot object plotting the within class SSE over the
 \description{
 Plotting the cluster results for decision for number of soil classes
 }
-
