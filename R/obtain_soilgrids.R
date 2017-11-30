@@ -2,7 +2,7 @@
 #'
 #' @param project_path Path to the SWAT project / Path where soilgrids layers
 #'   are saved
-#' @param shp_file Shape file (or path to shape file) to define the extent of
+#' @param shp_file Shape file (or path to shape file) that defines the extent of
 #'   the soilgrids layers. If \code{NULL} the shape file from the SWAT project
 #'   will be used.
 #' @param wcs URL of the ISRIC soilgrids geoserver
@@ -15,7 +15,7 @@
 #' @importFrom XML newXMLNode saveXML
 #' @importFrom pasta %//% %.% %_% %&%
 #'
-#' @return Writes the requiered soilgrids layer to project_path/soilgrids.
+#' @return Writes the required soilgrids layer to project_path/soilgrids.
 #' @export
 
 obtain_soilgrids <- function(project_path, shp_file = NULL,
@@ -35,7 +35,7 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
                                layer = lyr)
   }
   # soilgrids data uses the WGS84 reference system. Projection of shape file
-  # requiered for the extent and further clipping.
+  # required for the extent and further clipping.
   sg_crs <- CRS("+proj=longlat +datum=WGS84 +no_defs")
   shp_file <- spTransform(x = shp_file, CRSobj = sg_crs)
   shp_ext <- extent(shp_file)
@@ -108,7 +108,7 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
 
   }
 
-  # Further steps only require .tif files, teherefore all loaded .xml files are removed.
+  # Further steps only require .tif files, therefore all loaded .xml files are removed.
   xml_files <- list.files(path = project_path%//%"soilgrids", pattern = ".xml$",
                           full.names = TRUE)
   file.remove(xml_files)
