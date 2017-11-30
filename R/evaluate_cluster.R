@@ -1,6 +1,6 @@
 #' Plotting of the cluster results 
 #'
-#' Creates a plot of the results from the soilgrids clustering (\code(sg_cluster)).
+#' Creates a plot of the results from the soilgrids clustering (\code{sg_cluster}).
 #' 
 #' @param sg_cluster Results of the soilgrids clustering
 #' @importFrom tibble tibble add_column
