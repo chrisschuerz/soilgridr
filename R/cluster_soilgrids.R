@@ -3,9 +3,9 @@
 #' @param project_path Path to the SWAT project / Path where downloaded
 #'   soilgrids folder is located.
 #' @param shp_file Shape file (or path to shape file) for which an
-#'   aggregated soil map should be generated. If \code{NULL} the shape file
-#'   from the SWAT project will be used.
-#' @param lower_bound A vector defining the lower bounds of the aggregated
+#'   aggregated soil map should be generated. If none is provided (\code{NULL}) 
+#'   the shape file from the SWAT project will be used.
+#' @param lower_bound Vector defining the lower bounds of the aggregated
 #'   soil layers (depths in cm).
 #' @param n_class Vector of number of soil classes that should be generated
 #'   with k-means clustering.
@@ -20,7 +20,7 @@
 #' @importFrom purrr map map2 map_at
 #' @importFrom magrittr %>% set_colnames set_rownames set_names
 #'
-#' @return A list that holds the soilgrids data and the clustering
+#' @return List that holds the soilgrids data and the clustering
 #'   results for further processing with \code{write_SWATsoil()}.
 #' @export
 
