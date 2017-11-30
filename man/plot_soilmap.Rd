@@ -17,3 +17,4 @@ Plots the final soilmap with the selected number of soil classes.
 \description{
 Plot clustered soil map
 }
+

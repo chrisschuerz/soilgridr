@@ -13,16 +13,4 @@ Description: SWATsolaR provides a workflow to download soilgrids layer for a
 License: GPL-3.0
 Encoding: UTF-8
 LazyData: true
-Imports:
-    dplyr,
-    euptf,
-    ggplot2,
-    magrittr,
-    pasta,
-    purrr (>= 0.2.4),
-    raster,
-    rgdal,
-    sp,
-    tibble,
-    XML
 RoxygenNote: 6.0.1
