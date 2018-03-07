@@ -12,17 +12,17 @@ cluster_soilgrids(project_path, shp_file = NULL, lower_bound = c(30, 100,
 soilgrids folder is located.}
 
 \item{shp_file}{Shape file (or path to shape file) for which an
-aggregated soil map should be generated. If \code{NULL} the shape file
-from the SWAT project will be used.}
+aggregated soil map should be generated. If none is provided (\code{NULL}) 
+the shape file from the SWAT project will be used.}
 
-\item{lower_bound}{A vector defining the lower bounds of the aggregated
+\item{lower_bound}{Vector defining the lower bounds of the aggregated
 soil layers (depths in cm).}
 
 \item{n_class}{Vector of number of soil classes that should be generated
 with k-means clustering.}
 }
 \value{
-A list that holds the soilgrids data and the clustering
+List that holds the soilgrids data and the clustering
   results for further processing with \code{write_SWATsoil()}.
 }
 \description{

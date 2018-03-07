@@ -2,7 +2,7 @@
 % Please edit documentation in R/evaluate_cluster.R
 \name{evaluate_cluster}
 \alias{evaluate_cluster}
-\title{Plotting the cluster results for decision for number of soil classes}
+\title{Plotting of the cluster results}
 \usage{
 evaluate_cluster(sg_cluster)
 }
@@ -10,9 +10,9 @@ evaluate_cluster(sg_cluster)
 \item{sg_cluster}{Results of the soilgrids clustering}
 }
 \value{
-Returns a ggplot object plotting the within class SSE over the
-  Number of classes
+A ggplot object that shows the the SSE (within a the given classes) over the
+  number of classes
 }
 \description{
-Plotting the cluster results for decision for number of soil classes
+Creates a plot of the results from the soilgrids clustering (\code{sg_cluster}).
 }

@@ -13,7 +13,7 @@ obtain_soilgrids(project_path, shp_file = NULL,
 \item{project_path}{Path to the SWAT project / Path where soilgrids layers
 are saved}
 
-\item{shp_file}{Shape file (or path to shape file) to define the extent of
+\item{shp_file}{Shape file (or path to shape file) that defines the extent of
 the soilgrids layers. If \code{NULL} the shape file from the SWAT project
 will be used.}
 
@@ -24,7 +24,7 @@ soilgrids extent) and the soilgrids pixel_size. Check if these values are
 correct with \code{get_layermeta()]}}
 }
 \value{
-Writes the requiered soilgrids layer to project_path/soilgrids.
+Writes the required soilgrids layer to project_path/soilgrids.
 }
 \description{
 Obtain soilgrids layer from the ISRIC geoserver
