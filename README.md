@@ -1,11 +1,11 @@
-# SWATsolaR
-**SWAT** - **so**ilgrids **l**ayer **a**ggregation using **R**
+# solACE
+**soil** information **A**ggregation, **C**lustering and **E**stimation from soilgrids data
 
 
 ## Installation
 
 ### Install required software
-The *SWATsolaR* package requires some additional software and R packages (which needs to be installed prior to the installation of *SWATsolaR*). 
+The *solACE* package requires some additional software and R packages (which needs to be installed prior to the installation of *solACE*). 
 
 The software **GDAL** is needed to to access the *soilgrids* layers on the ISRIC geoserver from within an *R* session. The easiest way to obtain a version for 64bit Windows is to download it from this [link](http://download.gisinternals.com/sdk/downloads/release-1800-x64-gdal-2-1-3-mapserver-7-0-4/gdal-201-1800-x64-core.msi). Just install it with *typical installation*. Other options to obtain **GDAL** can be found [here](https://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries).
 
@@ -17,8 +17,8 @@ install.packages(c("rpart", "gWidgets", "gWidgetstcltk", "raster"))
 install.packages("Path:/to/source_file/euptf_1.4.tar.gz", repos = NULL, type = "source")
 ```
 
-### Install the SWATsolaR package
-After the required dependencies are installed the recent version of the **SWATsolaR** package can be obtained from this *github* repository. The easiest way to get it is to directly install it from a *github* repository by using the *devtools* package. Here is how you can do that:
+### Install the solACE package
+After the required dependencies are installed the recent version of the **solACE** package can be obtained from this *github* repository. The easiest way to get it is to directly install it from the *github* repository by using the *devtools* package. Here is how you can do that:
 ```{r}
 # Install package dependencies
 install.packages(c("devtools", "dplyr", "ggplot2", "magrittr", "pasta", "purrr", "raster", "rgdal", "sp", "tibble", "XML"))
