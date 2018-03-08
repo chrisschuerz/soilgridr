@@ -21,7 +21,8 @@ install.packages("Path:/to/source_file/euptf_1.4.tar.gz", repos = NULL, type = "
 After the required dependencies are installed the recent version of the **solACE** package can be obtained from this *github* repository. The easiest way to get it is to directly install it from the *github* repository by using the *devtools* package. Here is how you can do that:
 ```{r}
 # Install package dependencies
-install.packages(c("devtools", "dplyr", "ggplot2", "magrittr", "pasta", "purrr", "raster", "rgdal", "sp", "tibble", "XML"))
+install.packages(c("devtools", "dplyr", "ggplot2", "magrittr", "pasta", "purrr", 
+                   "raster", "rgdal", "sp", "tibble", "XML"))
 # Install SWATsolaR
 devtools::install_github("chrisschuerz/SWATsolaR")
 ```
