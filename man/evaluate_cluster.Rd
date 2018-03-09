@@ -16,3 +16,4 @@ A ggplot object that shows the the SSE (within a the given classes) over the
 \description{
 Creates a plot of the results from the soilgrids clustering (\code{sg_cluster}).
 }
+

@@ -13,7 +13,6 @@
 #' @importFrom pasta %//% %.%
 #' @return Returns either a list with pixel size and extent of Tiffs as numerics
 #'   or the raw text output.
-#'
 #' @examples
 #' # Generate the required input for `obtain_soilgrids()`:
 #'   layer_meta <- get_layermeta()
@@ -23,7 +22,8 @@
 #' # (also for crosschecking that function works properly)
 #'   get_layermeta(raw = TRUE)
 
-get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
+get_layermeta <- function(project_path,
+                          wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
                           raw = FALSE) {
 
   # first layer of the soilgrids data set for which to aqcuire info
@@ -31,7 +31,7 @@ get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
   loc   <- newXMLNode("WCS_GDAL")
   loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
   loc.l <- newXMLNode("CoverageName", layer, parent = loc)
-  xml_out <- self$data$project_path%//%"soilgrids"%//%layer%.%"xml"
+  xml_out <- project_path%//%"soil_layer"%//%layer%.%"xml" #self$data$  %//%"soilgrids"B
   saveXML(loc, file = xml_out)
 
   # path to the gdalinfo executable
@@ -44,7 +44,7 @@ get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
   meta <- system(gdal_cmd, intern = TRUE)
 
   # Remove loaded .xml file
-  file.remove(layer%.%"xml")
+  file.remove(xml_out)
 
   if(raw){
     return(meta)

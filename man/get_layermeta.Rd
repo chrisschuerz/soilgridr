@@ -4,8 +4,8 @@
 \alias{get_layermeta}
 \title{Soilgrids Metainformation}
 \usage{
-get_layermeta(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
-  raw = FALSE)
+get_layermeta(project_path,
+  wcs = "http://data.isric.org/geoserver/sg250m/wcs?", raw = FALSE)
 }
 \arguments{
 \item{wcs}{URL of the ISRIC soilgrids geoserver}
@@ -30,3 +30,4 @@ Get the required soilgrids meta information.
 # (also for crosschecking that function works properly)
   get_layermeta(raw = TRUE)
 }
+

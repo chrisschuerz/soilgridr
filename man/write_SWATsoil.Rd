@@ -19,3 +19,4 @@ Writes required aggregated SWAT soil data to folder project_path/soil_out
 \description{
 Write the required SWAT2012 soil inputs for clustered soilgrids
 }
+
