@@ -1,5 +1,5 @@
-#' Soilgrids Metainformation 
-#' 
+#' Soilgrids Metainformation
+#'
 #' Get the required soilgrids meta information.
 #'
 #' @param wcs URL of the ISRIC soilgrids geoserver
@@ -14,7 +14,6 @@
 #' @return Returns either a list with pixel size and extent of Tiffs as numerics
 #'   or the raw text output.
 #'
-#' @export
 #' @examples
 #' # Generate the required input for `obtain_soilgrids()`:
 #'   layer_meta <- get_layermeta()
@@ -32,7 +31,7 @@ get_layermeta <- function(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
   loc   <- newXMLNode("WCS_GDAL")
   loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
   loc.l <- newXMLNode("CoverageName", layer, parent = loc)
-  xml_out <- layer%.%"xml"
+  xml_out <- self$data$project_path%//%"soilgrids"%//%layer%.%"xml"
   saveXML(loc, file = xml_out)
 
   # path to the gdalinfo executable
