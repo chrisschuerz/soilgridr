@@ -5,6 +5,7 @@
 #' @import R6
 #' @import pasta
 #' @importFrom tibble tibble as_tibble
+#' @importFrom rgdal readOGR writeOGR
 #'
 #' @export
 
@@ -13,6 +14,7 @@ soil_project <- R6::R6Class(
   cloneable=FALSE,
   public = list(
     data = list(),
+
     initialize = function(project_path, shape_file) {
       if(dir.exists(project_path%//%"soil_layer")){
         stop("Soil project allready exists in"%&&%project_path)
@@ -26,39 +28,30 @@ soil_project <- R6::R6Class(
         }
 
       dir.create(project_path%//%"shape_file", recursive = TRUE)
-      writeOGR(obj = shp,
+      writeOGR(obj = shape_file,
                dsn = project_path%//%"shape_file"%//%"shp_file.shp",
                driver = "ESRI Shapefile",
                layer = "shp_file")
 
       self$data$project_path <- project_path
       self$data$shape_file <- shape_file
+      self$data$wcs <- "http://data.isric.org/geoserver/sg250m/wcs?"
     },
 
-    # soilgrids_metadata = function(
-    #   project_path = self$data$project_path,
-    #   wcs = "http://data.isric.org/geoserver/sg250m/wcs?"){
-    #     get_layermeta(project_path, wcs, raw)
-    # },
+    load_soilgrids = function(wcs = self$data$wcs){
+      cat("Downloading soilgrids layer:\n\n")
+      layer_meta <- get_layermeta(project_path = self$data$project_path,
+                                  wcs =  self$data$wcs)
 
-    load_soilgrids = function(
-      project_path = self$data$project_path,
-      wcs = "http://data.isric.org/geoserver/sg250m/wcs?"){
-      if(is.null(self$data$meta$soilgrids_extent)){
-        self$data$meta$soilgrids_extent <- c(-180, 180, -56.0008104, 83.9991672)
-        self$data$meta$soilgrids_pixel_size <- 1/480
-         layer_meta <- list(extent = c(-180, 180, -56.0008104, 83.9991672),
-                           pixel_size = 1/480)
-      } else {
-        print("works")
-      }
+      self$data$soilgrids_pixel_size <- layer_meta$pixel_size
+      self$data$soilgrids_extent <- layer_meta$Extent
 
+      obtain_soilgrids(project_path = self$data$project_path,
+                       shp_file = self$data$shape_file,
+                       wcs = wcs,
+                       layer_meta = layer_meta)
 
-      # Further steps only require .tif files, therefore all loaded .xml files are removed.
-      xml_files <- list.files(path = project_path%//%"soil_layer", pattern = ".xml$",
-                              full.names = TRUE)
-      file.remove(xml_files)
-
+      cat("Loading soilgrids layer into R:\n\n")
 
     }
     # print = function(...) {

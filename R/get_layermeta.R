@@ -22,17 +22,15 @@
 #' # (also for crosschecking that function works properly)
 #'   get_layermeta(raw = TRUE)
 
-get_soilgrids_meta <- function(project_path,
-  layer,
-  wcs = "http://data.isric.org/geoserver/sg250m/wcs?") {
+get_layermeta <- function(project_path, wcs) {
 
   # first layer of the soilgrids data set for which to aqcuire info
-  # layer <- "BDRICM_M_250m"
-  # loc   <- newXMLNode("WCS_GDAL")
-  # loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
-  # loc.l <- newXMLNode("CoverageName", layer, parent = loc)
+  layer <- "BDRICM_M_250m"
+  loc   <- newXMLNode("WCS_GDAL")
+  loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
+  loc.l <- newXMLNode("CoverageName", layer, parent = loc)
   xml_out <- project_path%//%"soil_layer"%//%layer%.%"xml"
-  # saveXML(loc, file = xml_out)
+  saveXML(loc, file = xml_out)
 
   # path to the gdalinfo executable
   path_gdal_info <- ifelse(.Platform$OS.type == "windows",
@@ -44,7 +42,7 @@ get_soilgrids_meta <- function(project_path,
   meta <- system(gdal_cmd, intern = TRUE)
 
   # Remove loaded .xml file
-  # file.remove(xml_out)
+  file.remove(xml_out)
 
   # Extract requiered output values
   meta_out <- meta[grepl("Pixel Size|Upper Left|Lower Left|Upper Right|Lower Right ",

@@ -18,9 +18,7 @@
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
 #' @export
 
-obtain_soilgrids <- function(project_path, shp_file = NULL,
-                             wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
-                             layer_meta) {
+obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta) {
 
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
   if(is.null(shp_file)) {
@@ -105,9 +103,9 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
                       "-co", c_opt, "-srcwin", src_win)
     system(gdal_cmd)
 
-    if(layer_i == layer_names[1] &
-       !file.exists(project_path%//%"soil_layer"%//%layer_i%.%"tif")){
-      stop("No files downloadad. Please check server path and set it with $set_server.")
-    }
+    # Further steps only require .tif files, therefore all loaded .xml files are removed.
+    xml_files <- list.files(path = project_path%//%"soil_layer", pattern = ".xml$",
+                            full.names = TRUE)
+    file.remove(xml_files)
   }
 }
