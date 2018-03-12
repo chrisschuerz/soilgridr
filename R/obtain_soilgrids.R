@@ -20,8 +20,7 @@
 
 obtain_soilgrids <- function(project_path, shp_file = NULL,
                              wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
-                             layer_meta = list(extent = c(-180, 180, -56.0008104, 83.9991672),
-                                               pixel_size = 1/480)) {
+                             layer_meta) {
 
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
   if(is.null(shp_file)) {
@@ -90,26 +89,25 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
   src_win <- paste(sg_ind, collapse=" ")
 
   ## Create soilgrids folder in Project directory
-  dir.create(project_path%//%"soilgrids")
+  # dir.create(project_path%//%"soil_layer")
 
   ## Looping over all layer names to obtain them from the ISRIC WCS
   for (layer_i in layer_names) {
     loc   <- newXMLNode("WCS_GDAL")
     loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
     loc.l <- newXMLNode("CoverageName", layer_i, parent = loc)
-    xml_out <- project_path%//%"soilgrids"%//%layer_i%.%"xml"
+    xml_out <- project_path%//%"soil_layer"%//%layer_i%.%"xml"
     saveXML(loc, file = xml_out)
-    tif_out <- project_path%//%"soilgrids"%//%layer_i%.%"tif"
+    tif_out <- project_path%//%"soil_layer"%//%layer_i%.%"tif"
 
     ### Pasting and sourcing gdal_translate command
     gdal_cmd <- paste(path_gdal_translate, xml_out, tif_out, "-tr", pxl_dim,
                       "-co", c_opt, "-srcwin", src_win)
     system(gdal_cmd)
 
+    if(layer_i == layer_names[1] &
+       !file.exists(project_path%//%"soil_layer"%//%layer_i%.%"tif")){
+      stop("No files downloadad. Please check server path and set it with $set_server.")
+    }
   }
-
-  # Further steps only require .tif files, therefore all loaded .xml files are removed.
-  xml_files <- list.files(path = project_path%//%"soilgrids", pattern = ".xml$",
-                          full.names = TRUE)
-  file.remove(xml_files)
 }
