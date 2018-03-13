@@ -52,7 +52,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
 
   # Initiate list with soil data
   sol_val_list <- list()
-  sol_lyr_lsit <- list()
+  sol_lyr_list <- list()
 
   ## Add progress bar to loop
   pb <- progress_estimated(length(lyr_list))
@@ -98,117 +98,17 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
   }
   pb$stop()
 
-
-  # Calculate additional soil parameters using the euptf package -----------------
-  ## Function to calculate additional parameters and return required ones
-  calc_solpar <- function(tbl) {
-    tbl %>%
-      mutate(USSAND = snd,
-             USSILT = slt,
-             USCLAY  = cly,
-             OC      = orc/10,
-             BD      = bld/1000,
-             CRF     = crf,
-             PH_H2O  = phi/10,
-             CEC     = cec) %>%
-      select(TOPSOIL, USSAND, USSILT, USCLAY, OC, BD, CRF, PH_H2O, CEC) %>%
-      mutate(th_s  = predict.ptf(., ptf = "PTF06") %>% as.numeric(.),
-             th_fc = predict.ptf(., ptf = "PTF09") %>% as.numeric(.),
-             th_wp = predict.ptf(., ptf = "PTF12") %>% as.numeric(.),
-             k_s   = predict.ptf(., ptf = "PTF17") %>% as.numeric(.),
-             awc   = th_fc - th_wp) %>%
-      rename(snd = USSAND,
-             slt = USSILT,
-             cly = USCLAY,
-             orc = OC,
-             bld = BD,
-             crf = CRF,
-             phi = PH_H2O,
-             cec = CEC) %>%
-      select(-TOPSOIL)
-  }
-
   # Group soil layers according to layer depth and calculate further parameters
-  sol_list %<>%
+  sol_tbl <- sol_val_list %>%
     bind_cols(.) %>%
     as_tibble(.) %>%
-    set_colnames(tolower(colnames(.))) %>%
-    map(c("bdr","sl"%&%1:7), function(x, tbl){select(tbl,ends_with(x))}, .) %>%
-    set_names(c("bdr","sl"%&%1:7)) %>%
-    map_at(., "sl"%&%1:7, function(tbl){names(tbl) <- substr(names(tbl), 1, 3)
-    return(tbl)}) %>%
-    map_at(., "sl"%&%1:4, function(tbl){mutate(tbl, TOPSOIL = "top")}) %>%
-    map_at(., "sl"%&%5:7, function(tbl){mutate(tbl, TOPSOIL = "sub")}) %>%
-    map_at(., "sl"%&%1:7, calc_solpar)
+    set_colnames(tolower(colnames(.)))
 
-
-  # Aggregate soil layers over depth ---------------------------------------------
-  upper_bound <- c(0,lower_bound[1:length(lower_bound) - 1])
-
-  # Function to calculate the weights of each soil layer for the respective
-  # upper and lower boundaries in the soil depth aggregation.
-  calc_weights <- function(up_bnd, lw_bnd) {
-    sl_depth <- c(2.5, 7.5, 12.5, 22.5, 35, 70, 50)
-    sl_depth_cum <- cumsum(sl_depth)
-    lw_wgt <- (sl_depth_cum - up_bnd)
-    lw_pos <- which(lw_wgt >= 0)[1]
-    lw_wgt <- (lw_wgt == lw_wgt[lw_pos]) * lw_wgt
-    up_wgt <- lw_bnd - sl_depth_cum
-    up_pos <- which(up_wgt <= 0)[1]
-    up_wgt <- ((up_wgt == up_wgt[up_pos - 1]) * up_wgt)
-    up_wgt <- c(0, up_wgt)[1:7]
-    if((up_pos - 1) >= (lw_pos + 1)){
-      md_wgt <- sl_depth %in% sl_depth[(lw_pos + 1):(up_pos - 1)] * sl_depth
-    } else {
-      md_wgt <- rep(0, 7)
-    }
-    (lw_wgt + md_wgt + up_wgt)/(lw_bnd - up_bnd)
-  }
-
-  # Calculate the layer weights for each aggregated soil layer
-  lyr_weight <- map2(upper_bound, lower_bound, calc_weights)
-
-  # Calculate the aggregated soil layers by summing up the weighted layers
-  sol_aggr <- map(lyr_weight, function(weight, sol_list){
-    sol_list$sl1*weight[1] +
-      sol_list$sl2*weight[2] +
-      sol_list$sl3*weight[3] +
-      sol_list$sl4*weight[4] +
-      sol_list$sl5*weight[5] +
-      sol_list$sl6*weight[6] +
-      sol_list$sl7*weight[7]},
-    sol_list) %>%
-    set_names("lyr"%_%1:length(upper_bound))
-
-  # Soil group clustering using kmeans -------------------------------------------
-  # Create scaled table to apply kmeans on
-  clst_tbl <- sol_aggr %>%
-    map2(., 1:length(upper_bound), function(tbl, nm) {
-      names(tbl) <- names(tbl)%_%nm
-      return(tbl)}) %>%
-    bind_cols(.) %>%
-    bind_cols(., sol_list$bdr) %>%
-    scale(., scale = TRUE, center = TRUE) %>%
-    as.data.frame(.) %>%
-    set_rownames("cell"%_%1:nrow(.))
-
-  # Empty list that furhter stores the clustering results
-  soil_km <- list()
-
-  cat("\nCluster soil data:\n")
-  pb <- progress_estimated(length(n_class))
-  # Loop over all defined number of classes and apply kmeans to the soilgrids data.
-  for(i_clust in n_class) {
-    soil_km[["n"%_%i_clust]] <- kmeans(x = clst_tbl,centers = i_clust, iter.max = 100)
-    pb$tick()$print()
-  }
-  pb$stop()
-
-  # Add depth to bedrock layer to the aggregated soil layers
-  sol_aggr$bdr <- sol_list$bdr
 
   # Output with soil layer data, cluster results and spatial meta data
-  out_list <- list(soil_layer = sol_aggr,
-                   soil_cluster = soil_km,
-                   layer_meta = lyr_meta)
+  out_list <- list(soil_table  = sol_tbl,
+                   soil_list   = sol_val_list,
+                   soil_raster = sol_lyr_list,
+                   layer_meta  = lyr_meta)
+  return(out_list)
 }

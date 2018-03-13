@@ -12,6 +12,7 @@
 soil_project <- R6::R6Class(
   "soil_project",
   cloneable=FALSE,
+  private = list(data_hidden = list()),
   public = list(
     data = list(),
 
@@ -62,10 +63,13 @@ soil_project <- R6::R6Class(
                                          "PHIHOX_M_sl"%&%1:7%_%"250m"))
 
       cat("\nLoading soilgrids layer into R:\n\n")
+      soil_data <- load_soilgrids(project_path = self$data$meta$project_path,
+                                  shp_file = self$data$shape_file,
+                                  layer_meta = self$data$meta$soilgrids$layer)
+      private$data_hidden$soil_list <- soil_data$soil_list
+      self$data$raster <- soil_data$soil_raster
+      sel$data$table <- soil_data$soil_table
 
     }
-    # print = function(...) {
-    #   print(tibble::as_tibble(self$sample_data))
-    #   invisible(self)}
   )
 )
