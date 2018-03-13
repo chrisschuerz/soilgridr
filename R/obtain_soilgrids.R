@@ -13,7 +13,7 @@
 #' @importFrom sp CRS spTransform
 #' @importFrom raster extent
 #' @importFrom XML newXMLNode saveXML
-#' @importFrom pasta %//% %.% %_% %&%
+#' @importFrom pasta %//% %.% %_% %&% %&&%
 #'
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
 #' @export
@@ -91,6 +91,9 @@ obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta) {
 
   ## Looping over all layer names to obtain them from the ISRIC WCS
   for (layer_i in layer_names) {
+    cat("Layer"%&&%which(layer_names == layer_i)%&&%"of"%&&%
+        length(layer_names)%&&%"Layers:"%&&%layer_i%&%"\n")
+
     loc   <- newXMLNode("WCS_GDAL")
     loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
     loc.l <- newXMLNode("CoverageName", layer_i, parent = loc)
