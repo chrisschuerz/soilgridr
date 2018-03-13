@@ -33,25 +33,35 @@ soil_project <- R6::R6Class(
                driver = "ESRI Shapefile",
                layer = "shp_file")
 
-      self$data$project_path <- project_path
+      self$data$meta$project_path <- project_path
       self$data$shape_file <- shape_file
-      self$data$wcs <- "http://data.isric.org/geoserver/sg250m/wcs?"
+      self$data$meta$soilgrids$server_path <-
+        "http://data.isric.org/geoserver/sg250m/wcs?"
     },
 
-    load_soilgrids = function(wcs = self$data$wcs){
+    load_soilgrids = function(soilgrids_server = self$data$meta$soilgrids$server_path){
       cat("Downloading soilgrids layer:\n\n")
-      layer_meta <- get_layermeta(project_path = self$data$project_path,
-                                  wcs =  self$data$wcs)
+      layer_meta <- get_layermeta(project_path = self$data$meta$project_path,
+                                  wcs = soilgrids_server )
 
-      self$data$soilgrids_pixel_size <- layer_meta$pixel_size
-      self$data$soilgrids_extent <- layer_meta$Extent
+      self$data$meta$soilgrids$pixel_size <- layer_meta$pixel_size
+      self$data$meta$soilgrids$extent <- layer_meta$extent
+      self$data$meta$soilgrids$layer <-
+        obtain_soilgrids(project_path = self$data$meta$project_path,
+                         shp_file = self$data$shape_file,
+                         wcs = soilgrids_server,
+                         layer_meta = layer_meta,
+                         layer_names = c("BDRICM_M_250m",
+                                         "BLDFIE_M_sl"%&%1:7%_%"250m",
+                                         "CLYPPT_M_sl"%&%1:7%_%"250m",
+                                         "CRFVOL_M_sl"%&%1:7%_%"250m",
+                                         "SLTPPT_M_sl"%&%1:7%_%"250m",
+                                         "SNDPPT_M_sl"%&%1:7%_%"250m",
+                                         "CECSOL_M_sl"%&%1:7%_%"250m",
+                                         "ORCDRC_M_sl"%&%1:7%_%"250m",
+                                         "PHIHOX_M_sl"%&%1:7%_%"250m"))
 
-      obtain_soilgrids(project_path = self$data$project_path,
-                       shp_file = self$data$shape_file,
-                       wcs = wcs,
-                       layer_meta = layer_meta)
-
-      cat("Loading soilgrids layer into R:\n\n")
+      cat("\nLoading soilgrids layer into R:\n\n")
 
     }
     # print = function(...) {

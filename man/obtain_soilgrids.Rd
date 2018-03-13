@@ -4,7 +4,7 @@
 \alias{obtain_soilgrids}
 \title{Obtain soilgrids layer from the ISRIC geoserver}
 \usage{
-obtain_soilgrids(project_path, shp_file, wcs, layer_meta)
+obtain_soilgrids(project_path, shp_file, wcs, layer_meta, layer_names)
 }
 \arguments{
 \item{project_path}{Path to the SWAT project / Path where soilgrids layers

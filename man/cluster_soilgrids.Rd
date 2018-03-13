@@ -12,7 +12,7 @@ cluster_soilgrids(project_path, shp_file = NULL, lower_bound = c(30, 100,
 soilgrids folder is located.}
 
 \item{shp_file}{Shape file (or path to shape file) for which an
-aggregated soil map should be generated. If none is provided (\code{NULL}) 
+aggregated soil map should be generated. If none is provided (\code{NULL})
 the shape file from the SWAT project will be used.}
 
 \item{lower_bound}{Vector defining the lower bounds of the aggregated

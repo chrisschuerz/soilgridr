@@ -3,7 +3,7 @@
 #' @param project_path Path to the SWAT project / Path where downloaded
 #'   soilgrids folder is located.
 #' @param shp_file Shape file (or path to shape file) for which an
-#'   aggregated soil map should be generated. If none is provided (\code{NULL}) 
+#'   aggregated soil map should be generated. If none is provided (\code{NULL})
 #'   the shape file from the SWAT project will be used.
 #' @param lower_bound Vector defining the lower bounds of the aggregated
 #'   soil layers (depths in cm).
@@ -26,7 +26,7 @@
 
 cluster_soilgrids <- function(project_path, shp_file = NULL,
                               lower_bound = c(30, 100, 200),
-                              n_class = 1:20 ) {
+                              n_class = 1:20) {
 # Reading shape file -----------------------------------------------------------
   # if no .shp file provided, use subs1.shp from SWAT watershed delineation
   if(is.null(shp_file)) {

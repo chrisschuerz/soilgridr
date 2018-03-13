@@ -18,7 +18,7 @@
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
 #' @export
 
-obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta) {
+obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_names) {
 
   # if no shp file provided subs1 shape frome SWAT watershed delineation used.
   if(is.null(shp_file)) {
@@ -60,16 +60,6 @@ obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta) {
   #URL of the ISRIC Soilgrids WCS server
   wcs <- "http://data.isric.org/geoserver/sg250m/wcs?"
 
-  #The following soil layers are required
-  layer_names <- c("BDRICM_M_250m",
-                   "BLDFIE_M_sl"%&%1:7%_%"250m",
-                   "CLYPPT_M_sl"%&%1:7%_%"250m",
-                   "CRFVOL_M_sl"%&%1:7%_%"250m",
-                   "SLTPPT_M_sl"%&%1:7%_%"250m",
-                   "SNDPPT_M_sl"%&%1:7%_%"250m",
-                   "CECSOL_M_sl"%&%1:7%_%"250m",
-                   "ORCDRC_M_sl"%&%1:7%_%"250m",
-                   "PHIHOX_M_sl"%&%1:7%_%"250m")
 
   # Obtain the soilgrids layers from the ISRIC geoserver
   ## Most steps here modification from
@@ -111,4 +101,5 @@ obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta) {
                             full.names = TRUE)
     file.remove(xml_files)
   }
+  return(layer_names)
 }
