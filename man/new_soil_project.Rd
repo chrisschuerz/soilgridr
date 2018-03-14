@@ -18,7 +18,8 @@ are saved}
 of the soilgrids layers.}
 }
 \value{
-Generates a new soil_project in the working environment (as an R6 object) and generates the prject folder in the project path.
+Generates a new soil_project in the working environment (as an R6
+  object) and generates the prject folder in the project path.
 }
 \description{
 Initiate a new soil project

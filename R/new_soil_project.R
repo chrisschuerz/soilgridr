@@ -10,7 +10,8 @@
 
 #' @importFrom pasta %//%
 #'
-#' @return Generates a new soil_project in the working environment (as an R6 object) and generates the prject folder in the project path.
+#' @return Generates a new soil_project in the working environment (as an R6
+#'   object) and generates the prject folder in the project path.
 #' @export
 
 new_soil_project <- function(project_name, project_path, shape_file) {

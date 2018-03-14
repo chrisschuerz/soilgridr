@@ -31,7 +31,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
   lyr_dir <- project_path%//%"soil_layer"
 
   # List all layer names including file sufix
-  lyr_list <-  layer_names%_%"250m.tif"
+  lyr_list <-  layer_names%.%"tif"
 
   ## Helper function to extract all wanted text strings
   select_label <- function(text, layer_names) {
@@ -63,7 +63,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     name_i <- lyr_i %>%
       strsplit(., "_") %>%
       unlist(.) %>%
-      # select_label(.) %>%
+      select_label(., layer_names = layer_names) %>%
       substr(., 1, 6) %>%
       paste(., collapse = "_")
 
@@ -75,7 +75,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
       mask(., shape_file)
 
     # In first loop-run create meta data to save in final output list
-    if(length(sol_list) == 0){
+    if(length(sol_val_list) == 0){
       lyr_meta <- list(has_value = lyr_tmp@data@values,
                        len_rst   = length(lyr_tmp),
                        dim_rst   = dim(lyr_tmp),
