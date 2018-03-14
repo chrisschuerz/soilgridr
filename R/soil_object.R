@@ -106,5 +106,9 @@ soil_project <- R6::R6Class(
       self$data$table <- soil_data$soil_table
 
     }
+
+    aggregate_depth = function() {
+
+    }
   )
 )

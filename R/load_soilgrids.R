@@ -98,17 +98,38 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
   }
   pb$stop()
 
-  # Group soil layers according to layer depth and calculate further parameters
-  sol_tbl <- sol_val_list %>%
+  # Derive the available soil depths
+  sl_lbl <- names(sol_val_list) %>%
+    substr(., 10,10) %>%
+    unique() %>%
+    .[which(nchar(.) == 1)]
+
+  # Get names of layer that have no separation in depth
+  other_lgc <- names(sol_val_list) %>%
+    substr(., 10,10) %>%
+    nchar(.) == 0
+
+  other_lbl <- names(sol_val_list)[other_lgc]
+
+  other_list <- sol_val_list[other_lbl] %>%
+    map(., function(x){x %>% set_colnames(tolower(colnames(x)))}) %>%
+    set_names(tolower(other_lbl))
+
+  # Group soil layers according to layer depth
+  sol_tbl_list <- sol_val_list %>%
     bind_cols(.) %>%
     as_tibble(.) %>%
-    set_colnames(tolower(colnames(.)))
-
+    set_colnames(tolower(colnames(.))) %>%
+    map(sl_lbl, function(x, tbl){select(tbl,ends_with(x))}, .) %>%
+    set_names(c("sl"%&%sl_lbl)) %>%
+    map_at(., "sl"%&%1:7, function(tbl){names(tbl) <- substr(names(tbl), 1, 6)
+    return(tbl)}) %>%
+    c(., other_list)
 
   # Output with soil layer data, cluster results and spatial meta data
-  out_list <- list(soil_table  = sol_tbl,
-                   soil_list   = sol_val_list,
+  out_list <- list(soil_list   = sol_tbl_list,
                    soil_raster = sol_lyr_list,
                    layer_meta  = lyr_meta)
+
   return(out_list)
 }
