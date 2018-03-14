@@ -1,20 +1,44 @@
-aggregate_layer <- function(soil_list) {
+#' Create clustered soilmap from soilgrids data
+#'
+#' @param project_path Path to the SWAT project / Path where downloaded
+#'   soilgrids folder is located.
+#' @param shp_file Shape file (or path to shape file) for which an
+#'   aggregated soil map should be generated. If none is provided (\code{NULL})
+#'   the shape file from the SWAT project will be used.
+#' @param lower_bound Vector defining the lower bounds of the aggregated
+#'   soil layers (depths in cm).
+#' @param n_class Vector of number of soil classes that should be generated
+#'   with k-means clustering.
 
-  # Derive the available soil depths
-  sl_lbl <- names(soil_list) %>%
-    substr(., 10,10) %>%
-    unique() %>%
-    .[which(nchar(.) == 1)]
+#' @importFrom rgdal readOGR
+#' @importFrom raster raster projectRaster crop mask crs extent
+#' @importFrom euptf predict.ptf psd2classUS
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr select filter mutate rename bind_cols
+#'   progress_estimated ends_with
+#' @importFrom tibble as_tibble tibble
+#' @importFrom purrr map map2 map_at
+#' @importFrom magrittr %>% set_colnames set_rownames set_names
 
-  # Group soil layers according to layer depth and calculate further parameters
-  soil_list %<>%
-    bind_cols(.) %>%
-    as_tibble(.) %>%
-    set_colnames(tolower(colnames(.))) %>%
-    map(sl_lbl, function(x, tbl){select(tbl,ends_with(x))}, .) %>%
-    set_names(c("sl"%&%sl_lbl)) %>%
-    map_at(., "sl"%&%1:7, function(tbl){names(tbl) <- substr(names(tbl), 1, 6)
-    return(tbl)})
+aggregate_layer <- function(soil_list, lower_bound) {
+
+  # Checking if the same layers are available for all seven soil depts.
+  depth_avail <- "sl"%&%1:7 %in% names(soil_list)
+  if(!all(depth_avail)) stop("Soil aggregation only allowed when all 7 soil depths are used")
+
+  unique_lyr <- soil_list["sl"%&%1:7] %>%
+    map(., colnames) %>%
+    unlist(.) %>%
+    unique(.)
+
+  lyr_missing <- soil_list["sl"%&%1:7] %>%
+    map(., function(x){!all(unique_lyr %in% colnames(x))}) %>%
+    unlist(.) %>%
+    any(.)
+
+  if(lyr_missing) stop("For depth aggregation respecktive layers must be available for all soil depths!")
+
+  soil_list %<>% map_at(., "sl"%&%1:7, function(x){x[unique_lyr]})
 
   # Aggregate soil layers over depth ---------------------------------------------
   upper_bound <- c(0,lower_bound[1:length(lower_bound) - 1])
@@ -43,14 +67,17 @@ aggregate_layer <- function(soil_list) {
   lyr_weight <- map2(upper_bound, lower_bound, calc_weights)
 
   # Calculate the aggregated soil layers by summing up the weighted layers
-  sol_aggr <- map(lyr_weight, function(weight, sol_list){
-    sol_list$sl1*weight[1] +
-      sol_list$sl2*weight[2] +
-      sol_list$sl3*weight[3] +
-      sol_list$sl4*weight[4] +
-      sol_list$sl5*weight[5] +
-      sol_list$sl6*weight[6] +
-      sol_list$sl7*weight[7]},
-    sol_list) %>%
-    set_names("lyr"%_%1:length(upper_bound))
+  soil_aggr <- map(lyr_weight, function(weight, soil_list){
+    soil_list$sl1*weight[1] +
+      soil_list$sl2*weight[2] +
+      soil_list$sl3*weight[3] +
+      soil_list$sl4*weight[4] +
+      soil_list$sl5*weight[5] +
+      soil_list$sl6*weight[6] +
+      soil_list$sl7*weight[7]},
+    soil_list) %>%
+    map(., as_tibble) %>%
+    set_names("sl"%&%1:length(upper_bound))
+
+  return(soil_aggr)
 }

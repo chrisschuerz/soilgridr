@@ -14,7 +14,7 @@ soil_project <- R6::R6Class(
   cloneable=FALSE,
   private = list(data_hidden = list()),
   public = list(
-    data = list(),
+    .data = list(),
 
     initialize = function(project_name, project_path, shape_file) {
       if(dir.exists(project_path%//%project_name%//%"soil_layer")){
@@ -34,15 +34,20 @@ soil_project <- R6::R6Class(
                driver = "ESRI Shapefile",
                layer = "shp_file")
 
-      self$data$meta$project_name <- project_name
-      self$data$meta$project_path <- project_path%//%project_name
+      self$.data$meta$project_name <- project_name
+      self$.data$meta$project_path <- project_path%//%project_name
 
-      self$data$shape_file <- shape_file
-      self$data$meta$soilgrids$server_path <-
-        "http://data.isric.org/geoserver/sg250m/wcs?"
+      self$.data$shape_file <- shape_file
+      self$.data$soilgrids$meta$server_path <-
+        "http://.data.isric.org/geoserver/sg250m/wcs?"
+    },
+    save = function(){
+      save(list = self$.data$meta$project_name,
+           file = self$.data$meta$project_path%//%"soil_project.RData",
+           envir = sys.frame(-1))
     },
 
-    load_soilgrids = function(soilgrids_server = self$data$meta$soilgrids$server_path,
+    load_soilgrids = function(soilgrids_server = self$.data$soilgrids$meta$server_path,
                               layer_names = c("BDRICM_M_250m",
                                               "BLDFIE_M_sl"%&%1:7%_%"250m",
                                               "CLYPPT_M_sl"%&%1:7%_%"250m",
@@ -53,26 +58,30 @@ soil_project <- R6::R6Class(
                                               "ORCDRC_M_sl"%&%1:7%_%"250m",
                                               "PHIHOX_M_sl"%&%1:7%_%"250m")){
       cat("Downloading soilgrids layer:\n\n")
-      layer_meta <- get_layermeta(project_path = self$data$meta$project_path,
+      layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
                                   wcs = soilgrids_server)
 
-      self$data$meta$soilgrids$pixel_size <- layer_meta$pixel_size
-      self$data$meta$soilgrids$extent <- layer_meta$extent
-      self$data$meta$soilgrids$layer_names <-
-        obtain_soilgrids(project_path = self$data$meta$project_path,
-                         shp_file = self$data$shape_file,
+      self$.data$soilgrids$meta$pixel_size <- layer_meta$pixel_size
+      self$.data$soilgrids$meta$extent <- layer_meta$extent
+
+      self$.data$soilgrids$meta$layer_names <-
+        obtain_soilgrids(project_path = self$.data$meta$project_path,
+                         shp_file = self$.data$shape_file,
                          wcs = soilgrids_server,
                          layer_meta = layer_meta,
                          layer_names = layer_names)
 
       cat("\nLoading soilgrids layer into R:\n\n")
-      soil_data <- load_soilgrids(project_path = self$data$meta$project_path,
-                                  shape_file   = self$data$shape_file,
-                                  layer_names  = self$data$meta$soilgrids$layer)
+      soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
+                                  shape_file   = self$.data$shape_file,
+                                  layer_names  = self$.data$soilgrids$meta$layer_names)
 
-      private$data_hidden$soil_list <- soil_data$soil_list
-      self$data$raster <- soil_data$soil_raster
-      self$data$table  <- soil_data$soil_table
+
+      self$.data$soilgrids$raster     <- soil_data$soil_raster
+      self$.data$soilgrids$table      <- soil_data$soil_table
+      self$.data$soilgrids$meta$layer <- soil_data$layer_meta
+
+      self$.data$table_processed      <- soil_data$soil_table
 
     },
 
@@ -86,9 +95,9 @@ soil_project <- R6::R6Class(
                                     "ORCDRC_M_sl"%&%1:7%_%"250m",
                                     "PHIHOX_M_sl"%&%1:7%_%"250m")){
 
-      self$data$meta$soilgrids$pixel_size <- 1/480
-      self$data$meta$soilgrids$extent <- c(-180, 179.99994, -56.00081, 83.99917)
-      self$data$meta$soilgrids$layer_names <- c("BDRICM_M_250m",
+      self$.data$soilgrids$meta$pixel_size <- 1/480
+      self$.data$soilgrids$meta$extent <- c(-180, 179.99994, -56.00081, 83.99917)
+      self$.data$soilgrids$meta$layer_names <- c("BDRICM_M_250m",
                                                 "BLDFIE_M_sl"%&%1:7%_%"250m",
                                                 "CLYPPT_M_sl"%&%1:7%_%"250m",
                                                 "CRFVOL_M_sl"%&%1:7%_%"250m",
@@ -98,17 +107,22 @@ soil_project <- R6::R6Class(
                                                 "ORCDRC_M_sl"%&%1:7%_%"250m",
                                                 "PHIHOX_M_sl"%&%1:7%_%"250m")
 
-      soil_data <- load_soilgrids(project_path = self$data$meta$project_path,
-                                  shape_file = self$data$shape_file,
-                                  layer_names = self$data$meta$soilgrids$layer)
-      private$data_hidden$soil_list <- soil_data$soil_list
-      self$data$raster <- soil_data$soil_raster
-      self$data$table <- soil_data$soil_table
+      soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
+                                  shape_file = self$.data$shape_file,
+                                  layer_names = self$.data$soilgrids$meta$layer_names)
+      self$.data$soilgrids$raster     <- soil_data$soil_raster
+      self$.data$soilgrids$data       <- soil_data$soil_list
+      self$.data$soilgrids$meta$layer <- soil_data$layer_meta
+      self$.data$data_processed       <- soil_data$soil_list
 
-    }
+      self$save()
 
-    aggregate_depth = function() {
+    },
 
+    aggregate_depth = function(lower_bound) {
+      self$.data$data_processed <-
+        aggregate_layer(soil_list = self$.data$data_processed,
+                        lower_bound)
     }
   )
 )
