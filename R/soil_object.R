@@ -124,6 +124,8 @@ soil_project <- R6::R6Class(
       self$.data$data_processed <-
         aggregate_layer(soil_list = self$.data$data_processed,
                         lower_bound)
+
+      self$.data$soilgrids$meta$layer$depths <- lower_bound
     }
   )
 )
