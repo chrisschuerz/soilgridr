@@ -24,7 +24,7 @@ aggregate_layer <- function(soil_list, lower_bound) {
 
   # Checking if the same layers are available for all seven soil depts.
   depth_avail <- "sl"%&%1:7 %in% names(soil_list)
-  if(!all(depth_avail)) stop("Soil aggregation only allowed when all 7 soil depths are used")
+  if(!all(depth_avail)) stop("Soil aggregation only allowed when all 7 soil depths are available.")
 
   unique_lyr <- soil_list["sl"%&%1:7] %>%
     map(., colnames) %>%
@@ -79,5 +79,8 @@ aggregate_layer <- function(soil_list, lower_bound) {
     map(., as_tibble) %>%
     set_names("sl"%&%1:length(upper_bound))
 
-  return(soil_aggr)
+  #Concatinate aggregated soil layer and layers where no aggregation was applied
+  soil_return <- c(soil_aggr, soil_list[!(names(soil_list) %in% ("sl"%&%1:100))])
+
+  return(soil_return)
 }

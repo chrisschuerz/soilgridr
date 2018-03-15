@@ -12,7 +12,6 @@
 soil_project <- R6::R6Class(
   "soil_project",
   cloneable=FALSE,
-  private = list(data_hidden = list()),
   public = list(
     .data = list(),
 
@@ -45,6 +44,9 @@ soil_project <- R6::R6Class(
       save(list = self$.data$meta$project_name,
            file = self$.data$meta$project_path%//%"soil_project.RData",
            envir = sys.frame(-1))
+    },
+    from_scratch = function(){
+      self$.data$data_processed <- self$.data$soilgrids$data
     },
 
     load_soilgrids = function(soilgrids_server = self$.data$soilgrids$meta$server_path,
@@ -86,46 +88,16 @@ soil_project <- R6::R6Class(
 
     },
 
-    test = function(layer_names = c("BDRICM_M_250m",
-                                    "BLDFIE_M_sl"%&%1:7%_%"250m",
-                                    "CLYPPT_M_sl"%&%1:7%_%"250m",
-                                    "CRFVOL_M_sl"%&%1:7%_%"250m",
-                                    "SLTPPT_M_sl"%&%1:7%_%"250m",
-                                    "SNDPPT_M_sl"%&%1:7%_%"250m",
-                                    "CECSOL_M_sl"%&%1:7%_%"250m",
-                                    "ORCDRC_M_sl"%&%1:7%_%"250m",
-                                    "PHIHOX_M_sl"%&%1:7%_%"250m")){
-
-      self$.data$soilgrids$meta$pixel_size <- 1/480
-      self$.data$soilgrids$meta$extent <- c(-180, 179.99994, -56.00081, 83.99917)
-      self$.data$soilgrids$meta$layer_names <- c("BDRICM_M_250m",
-                                                "BLDFIE_M_sl"%&%1:7%_%"250m",
-                                                "CLYPPT_M_sl"%&%1:7%_%"250m",
-                                                "CRFVOL_M_sl"%&%1:7%_%"250m",
-                                                "SLTPPT_M_sl"%&%1:7%_%"250m",
-                                                "SNDPPT_M_sl"%&%1:7%_%"250m",
-                                                "CECSOL_M_sl"%&%1:7%_%"250m",
-                                                "ORCDRC_M_sl"%&%1:7%_%"250m",
-                                                "PHIHOX_M_sl"%&%1:7%_%"250m")
-
-      soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
-                                  shape_file = self$.data$shape_file,
-                                  layer_names = self$.data$soilgrids$meta$layer_names)
-      self$.data$soilgrids$raster     <- soil_data$soil_raster
-      self$.data$soilgrids$data       <- soil_data$soil_list
-      self$.data$soilgrids$meta$layer <- soil_data$layer_meta
-      self$.data$data_processed       <- soil_data$soil_list
-
-      self$save()
-
-    },
-
     aggregate_depth = function(lower_bound) {
       self$.data$data_processed <-
         aggregate_layer(soil_list = self$.data$data_processed,
                         lower_bound)
 
       self$.data$soilgrids$meta$layer$depths <- lower_bound
+    },
+
+    write_output = function(format){
+      write_output()
     }
   )
 )
