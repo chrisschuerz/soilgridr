@@ -39,7 +39,7 @@ soil_project <- R6::R6Class(
 
       self$.data$shape_file <- shape_file
       self$.data$soilgrids$meta$server_path <-
-        "http://.data.isric.org/geoserver/sg250m/wcs?"
+        "http://data.isric.org/geoserver/sg250m/wcs?"
     },
     save = function(){
       save(list = self$.data$meta$project_name,
@@ -78,10 +78,11 @@ soil_project <- R6::R6Class(
 
 
       self$.data$soilgrids$raster     <- soil_data$soil_raster
-      self$.data$soilgrids$table      <- soil_data$soil_table
+      self$.data$soilgrids$data       <- soil_data$soil_list
       self$.data$soilgrids$meta$layer <- soil_data$layer_meta
+      self$.data$data_processed       <- soil_data$soil_list
 
-      self$.data$table_processed      <- soil_data$soil_table
+      self$save()
 
     },
 
