@@ -98,6 +98,8 @@ soil_project <- R6::R6Class(
     },
 
     cluster_soil = function(n_class){
+      self$.data$data_processed$soil_class <- NULL
+
       self$.data$soil_cluster <-
         cluster_soil(soil_list = self$.data$data_processed,
                      n_class = n_class)
@@ -117,21 +119,12 @@ soil_project <- R6::R6Class(
       }
 
       self$plot_cluster <- function(n_class = self$.data$soil_cluster$final_n_class) {
-        if(is.null(n_class)){
-          stop("No number of soil classes defined!\n"%&%
-               "Either set final number of classes with set_n_class()"%&&%
-               "or define the number of classes in the function!")
-        }
-        if(!("n"%_%n_class %in% names(self$.data$soil_cluster))){
-          stop("Selected number of classes not available!")
-        }
-
         plot_soilmap(soil_data = self$.data, n_class = n_class)
       }
     },
 
     write_output = function(format){
-      write_output()
+      write_output(soil_data = self$.data, format = format)
     }
   )
 )
