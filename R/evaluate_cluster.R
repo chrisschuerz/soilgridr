@@ -1,7 +1,7 @@
-#' Plotting of the cluster results 
+#' Plotting of the cluster results
 #'
 #' Creates a plot of the results from the soilgrids clustering (\code{sg_cluster}).
-#' 
+#'
 #' @param sg_cluster Results of the soilgrids clustering
 #' @importFrom tibble tibble add_column
 #' @importFrom purrr map_dfr
@@ -11,11 +11,11 @@
 #'   number of classes
 #' @export
 
-evaluate_cluster <- function(sg_cluster) {
-  sg_cluster$soil_cluster %>%
+evaluate_cluster <- function(cluster_result) {
+  cluster_result %>%
     map_dfr(., function(x){
                  tibble(norm_within_ssq  = x$tot.withinss/x$totss)}) %>%
-    add_column(n_class = names(sg_cluster$soil_cluster) %>%
+    add_column(n_class = names(cluster_result) %>%
                  gsub("n_", "", .) %>%
                  as.numeric(.), .before = 1) %>%
     ggplot(data = ., aes(x = n_class, y = norm_within_ssq)) +

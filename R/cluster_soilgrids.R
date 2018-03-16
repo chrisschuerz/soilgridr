@@ -56,7 +56,7 @@ cluster_soilgrids <- function(project_path, shp_file = NULL,
   }
 
   ## Helper function to set the nodata values in the loaded raster files
-    # should be defined as seperate function outside :(
+    # should be defined as seperat       e function outside :(
   set_nodata <- function(rst) {
     if (rst@data@min == 0 & rst@data@max == 255) {
       rst@file@nodatavalue <- 255

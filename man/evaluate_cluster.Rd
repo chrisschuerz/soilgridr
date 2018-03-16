@@ -4,7 +4,7 @@
 \alias{evaluate_cluster}
 \title{Plotting of the cluster results}
 \usage{
-evaluate_cluster(sg_cluster)
+evaluate_cluster(cluster_result)
 }
 \arguments{
 \item{sg_cluster}{Results of the soilgrids clustering}

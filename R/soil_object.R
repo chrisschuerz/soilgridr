@@ -11,7 +11,8 @@
 
 soil_project <- R6::R6Class(
   "soil_project",
-  cloneable=FALSE,
+  cloneable = FALSE,
+  lock_objects = FALSE,
   public = list(
     .data = list(),
 
@@ -94,6 +95,39 @@ soil_project <- R6::R6Class(
                         lower_bound)
 
       self$.data$soilgrids$meta$layer$depths <- lower_bound
+    },
+
+    cluster_soil = function(n_class){
+      self$.data$soil_cluster <-
+        cluster_soil(soil_list = self$.data$data_processed,
+                     n_class = n_class)
+
+      self$evaluate_cluster <- function(){
+        evaluate_cluster(cluster_result = self$.data$soil_cluster)
+      }
+
+      self$select_n_class <-  function(final_n_class){
+        if(!("n"%_%final_n_class %in% names(self$.data$soil_cluster))){
+          stop("Selected number of classes not available!")
+        }
+
+        self$.data$soil_cluster$final_n_class <- final_n_class
+        self$.data$data_processed$soil_class <-
+          tibble(soil_class = self$.data$soil_cluster[["n"%_%final_n_class]]$cluster)
+      }
+
+      self$plot_cluster <- function(n_class = self$.data$soil_cluster$final_n_class) {
+        if(is.null(n_class)){
+          stop("No number of soil classes defined!\n"%&%
+               "Either set final number of classes with set_n_class()"%&&%
+               "or define the number of classes in the function!")
+        }
+        if(!("n"%_%n_class %in% names(self$.data$soil_cluster))){
+          stop("Selected number of classes not available!")
+        }
+
+        plot_soilmap(soil_data = self$.data, n_class = n_class)
+      }
     },
 
     write_output = function(format){

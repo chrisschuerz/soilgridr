@@ -4,12 +4,12 @@
 \alias{plot_soilmap}
 \title{Plot clustered soil map}
 \usage{
-plot_soilmap(sg_cluster, n_class)
+plot_soilmap(soil_data, n_class)
 }
 \arguments{
-\item{sg_cluster}{The cluster results output from \code{cluster_soilgrids()}}
-
 \item{n_class}{Numeric. Number of soil classes to plot in the soil map.}
+
+\item{cluster_result}{The cluster results output from \code{cluster_soilgrids()}}
 }
 \value{
 Plots the final soilmap with the selected number of soil classes.
