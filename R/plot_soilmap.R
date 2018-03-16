@@ -21,7 +21,7 @@ plot_soilmap <- function(soil_data, n_class){
            "Either set final number of classes with set_n_class()"%&&%
            "or define the number of classes in the function!")
   }
-  if(!("n"%_%n_class %in% names(self$.data$soil_cluster))){
+  if(!("n"%_%n_class %in% names(soil_data$soil_cluster))){
     stop("Selected number of classes not available!")
   }
 
