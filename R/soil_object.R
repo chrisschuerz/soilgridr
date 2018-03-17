@@ -90,6 +90,11 @@ soil_project <- R6::R6Class(
       }
 
       self$aggregate_depth <- function(lower_bound) {
+        if(!is.null(self$.data$soil_cluster) &
+           is.null(self$.data$soil_cluster$final_n_class)){
+          stop("Define final number of soil classes before aggregating!")
+        }
+
         self$.data$data_processed <-
           aggregate_layer(soil_list = self$.data$data_processed,
                           lower_bound)
@@ -114,8 +119,8 @@ soil_project <- R6::R6Class(
           }
 
           self$.data$soil_cluster$final_n_class <- final_n_class
-          self$.data$data_processed$soil_class <-
-            tibble(soil_class = self$.data$soil_cluster[["n"%_%final_n_class]]$cluster)
+          self$.data$data_processed <-
+            set_cluster_data(soil_data = self$.data, n_class = final_n_class)
         }
 
         self$plot_cluster <- function(n_class = self$.data$soil_cluster$final_n_class) {
@@ -124,6 +129,11 @@ soil_project <- R6::R6Class(
       }
 
       self$write_output <- function(format){
+        if(!is.null(self$.data$soil_cluster) &
+           is.null(self$.data$soil_cluster$final_n_class)){
+          stop("Define final number of soil classes before writing outputs!")
+        }
+
         write_output(soil_data = self$.data, format = format)
       }
 

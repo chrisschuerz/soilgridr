@@ -14,10 +14,10 @@ suppressPackageStartupMessages(library(rgdal))
 The package *solACE* contains a demo shape file for the Little River Experimental Watershed in south‐central Georgia, United States. For the demostration example load the demo shap file into the workspace.
 
 ```{r}
-shapefile_path <- system.file("extdata", "demo.shp", package = "solACE")
+shape_path <- system.file("extdata", "demo.shp", package = "solACE")
 
-demo_shape <- readOGR(shapefile_path)
-plot(demo_shape)
+shape_demo <- readOGR(shape_path)
+plot(shape_demo)
 ```
 
 ## Starting a new soil project
@@ -27,9 +27,9 @@ To start a new soil project simply execute the function \code{new_soil_project()
 pro_path <- "define:/path/for/your/project"
 
 
-new_soil_project(project_name = "demo_soil", 
+new_soil_project(project_name = "soil_demo", 
                  project_path = pro_path,
-                 shape_file = demo_shape)
+                 shape_file = shape_demo)
 ```
 
 The new soil project is now located on the hard drive in the defined project path and is also an object in the global environment of your R session with the defined project name. The soil project is an R6 object providing now some functionality provided by the obeject internally. After the setup the following funcrtionality is given:
@@ -38,6 +38,9 @@ The new soil project is now located on the hard drive in the defined project pat
  - \code{demo_soil$load_soilgrids()} loads the soilgrids layer for the extent of the shape file into the project folder and afterwards loads the soilgrids layer into the R object. Loading the soilgrid layers unlocks further functionality that is described below.
  
 
+```{r}
+demo_soil$cluster_soil(n_class = 1:10)
+```
 
 
 
