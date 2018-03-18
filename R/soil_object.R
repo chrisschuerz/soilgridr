@@ -92,7 +92,7 @@ soil_project <- R6::R6Class(
       self$aggregate_depth <- function(lower_bound) {
         if(!is.null(self$.data$soil_cluster) &
            is.null(self$.data$soil_cluster$final_n_class)){
-          stop("Define final number of soil classes before aggregating!")
+          stop("Set final number of soil classes before aggregating!")
         }
 
         self$.data$data_processed <-
@@ -103,6 +103,11 @@ soil_project <- R6::R6Class(
       }
 
       self$cluster_soil <- function(n_class){
+        if(!is.null(self$.data$soil_cluster$final_n_class)){
+          stop("Clustering allready performed and final number of classes set!\n"%&%
+               "Start from scratch with $from_scratch() if you want to redo clustering.")
+        }
+
         self$.data$data_processed$soil_class <- NULL
 
         self$.data$soil_cluster <-
@@ -131,7 +136,7 @@ soil_project <- R6::R6Class(
       self$write_output <- function(format){
         if(!is.null(self$.data$soil_cluster) &
            is.null(self$.data$soil_cluster$final_n_class)){
-          stop("Define final number of soil classes before writing outputs!")
+          stop("Set final number of soil classes before writing outputs!")
         }
 
         write_output(soil_data = self$.data, format = format)

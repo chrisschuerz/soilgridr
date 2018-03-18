@@ -43,4 +43,9 @@ demo_soil$cluster_soil(n_class = 1:10)
 ```
 
 
+```{r}
+unlink(x = soil_demo$.data$meta$project_path, recursive = TRUE, force = TRUE)
+soil_tmp <- soil_demo$.data
+soil_demo$.data <- soil_tmp
+```
 
