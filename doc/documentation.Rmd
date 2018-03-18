@@ -24,7 +24,9 @@ plot(shape_demo)
 To start a new soil project simply execute the function \code{new_soil_project()}. For the setup the user has to provide the name of the new project, the path on the hard drive where the project will be located and the shape file for which the soil data will be computed. Once the path and the project name are defined these **must not be changed**. A change in the project name or the location of the project folder will affect the functionality of *solACE*.
 
 ```{r}
-pro_path <- "define:/path/for/your/project"
+load("E:/R_project/solACE_test/soil_demo/soil_project.RData")
+# pro_path <- "define:/path/for/your/project"
+pro_path <- "E:/R_project/solACE_test"
 
 
 new_soil_project(project_name = "soil_demo", 
