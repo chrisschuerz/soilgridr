@@ -40,14 +40,13 @@ soil_project <- R6::R6Class(
       self$.data$shape_file <- shape_file
       self$.data$soilgrids$meta$server_path <-
         "http://data.isric.org/geoserver/sg250m/wcs?"
+
     },
+
     save = function(){
       save(list = self$.data$meta$project_name,
            file = self$.data$meta$project_path%//%"soil_project.RData",
            envir = sys.frame(-1))
-    },
-    from_scratch = function(){
-      self$.data$data_processed <- self$.data$soilgrids$data
     },
 
     load_soilgrids = function(soilgrids_server = self$.data$soilgrids$meta$server_path,
@@ -85,46 +84,67 @@ soil_project <- R6::R6Class(
       self$.data$soilgrids$meta$layer <- soil_data$layer_meta
       self$.data$data_processed       <- soil_data$soil_list
 
-      self$save()
-
-    },
-
-    aggregate_depth = function(lower_bound) {
-      self$.data$data_processed <-
-        aggregate_layer(soil_list = self$.data$data_processed,
-                        lower_bound)
-
-      self$.data$soilgrids$meta$layer$depths <- lower_bound
-    },
-
-    cluster_soil = function(n_class){
-      self$.data$data_processed$soil_class <- NULL
-
-      self$.data$soil_cluster <-
-        cluster_soil(soil_list = self$.data$data_processed,
-                     n_class = n_class)
-
-      self$evaluate_cluster <- function(){
-        evaluate_cluster(cluster_result = self$.data$soil_cluster)
+      self$from_scratch <- function(){
+        self$.data$data_processed <- self$.data$soilgrids$data
+        self$.data$soil_cluster <- NULL
       }
 
-      self$select_n_class <-  function(final_n_class){
-        if(!("n"%_%final_n_class %in% names(self$.data$soil_cluster))){
-          stop("Selected number of classes not available!")
+      self$aggregate_depth <- function(lower_bound) {
+        if(!is.null(self$.data$soil_cluster) &
+           is.null(self$.data$soil_cluster$final_n_class)){
+          stop("Set final number of soil classes before aggregating!")
         }
 
-        self$.data$soil_cluster$final_n_class <- final_n_class
-        self$.data$data_processed$soil_class <-
-          tibble(soil_class = self$.data$soil_cluster[["n"%_%final_n_class]]$cluster)
+        self$.data$data_processed <-
+          aggregate_layer(soil_list = self$.data$data_processed,
+                          lower_bound)
+
+        self$.data$soilgrids$meta$layer$depths <- lower_bound
       }
 
-      self$plot_cluster <- function(n_class = self$.data$soil_cluster$final_n_class) {
-        plot_soilmap(soil_data = self$.data, n_class = n_class)
-      }
-    },
+      self$cluster_soil <- function(n_class){
+        if(!is.null(self$.data$soil_cluster$final_n_class)){
+          stop("Clustering allready performed and final number of classes set!\n"%&%
+               "Start from scratch with $from_scratch() if you want to redo clustering.")
+        }
 
-    write_output = function(format){
-      write_output(soil_data = self$.data, format = format)
+        self$.data$data_processed$soil_class <- NULL
+
+        self$.data$soil_cluster <-
+          cluster_soil(soil_list = self$.data$data_processed,
+                       n_class = n_class)
+
+        self$evaluate_cluster <- function(){
+          evaluate_cluster(cluster_result = self$.data$soil_cluster)
+        }
+
+        self$select_n_class <-  function(final_n_class){
+          if(!("n"%_%final_n_class %in% names(self$.data$soil_cluster))){
+            stop("Selected number of classes not available!")
+          }
+
+          self$.data$soil_cluster$final_n_class <- final_n_class
+          self$.data$data_processed <-
+            set_cluster_data(soil_data = self$.data, n_class = final_n_class)
+        }
+
+        self$plot_cluster <- function(n_class = self$.data$soil_cluster$final_n_class) {
+          plot_soilmap(soil_data = self$.data, n_class = n_class)
+        }
+      }
+
+      self$write_output <- function(format){
+        if(!is.null(self$.data$soil_cluster) &
+           is.null(self$.data$soil_cluster$final_n_class)){
+          stop("Set final number of soil classes before writing outputs!")
+        }
+
+        write_output(soil_data = self$.data, format = format)
+      }
+
+      self$save()
+
     }
+
   )
 )

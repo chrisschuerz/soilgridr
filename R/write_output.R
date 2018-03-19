@@ -1,17 +1,26 @@
-write_output <- function(soil_data, format) {
+write_output <- function(soil_data, format, overwrite) {
 
-  file_suffix <- tibble(suffix = c("ascii", "tif"), driver = c("AAIGrid", "GTiff"))
+  file_suffix <- tibble(suffix = c("ascii", "tif"),
+                        driver = c("AAIGrid", "GTiff"))
 
 
   # Create layer table that should be exported as raster layers
-  suffix <- "_"%&%names(soil_list)
+  suffix <- "_"%&%names(soil_data)
   suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
 
-  raster_tbl <- soil_list %>%
-    map2(., suffix, function(tbl, nm) {
-      names(tbl) <- names(tbl)%&%nm
-      return(tbl)}) %>%
-    bind_cols(.)
+  if("soil_class" %in% names(soil_data)){
+    raster_tbl <- soil_data$soil_class
+    class_tbl  <- soil_data[names(soil_data) != "soil_class"]
+
+    #Here continue with writing soil class table
+  } else {
+    raster_tbl <- soil_data %>%
+      map2(., suffix, function(tbl, nm) {
+        names(tbl) <- names(tbl)%&%nm
+        return(tbl)}) %>%
+      bind_cols(.)
+  }
+
 
   data_type <- map_chr(raster_tbl, typeof)
 
@@ -51,8 +60,9 @@ write_output <- function(soil_data, format) {
   raster_list <- map(raster_tbl, rasterize, soil_data$soilgrids$meta$layer)
 
   if(dir.exists(soil_data$meta$project_path%//%"output") & !overwrite){
-    stop("Output allready available for this project. For overwriting set overwrite = TRUE.")
+    stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
   }
+  unlink(soil_data$meta$project_path%//%"output")
   dir.create(soil_data$meta$project_path%//%"output")
 
   driver_name <- file_suffix %>%
