@@ -17,7 +17,7 @@ The package *solACE* contains a demo shape file for the Little River Experimenta
 shape_path <- system.file("extdata", "demo.shp", package = "solACE")
 
 shape_demo <- readOGR(shape_path)
-# plot(shape_demo)
+plot(shape_demo)
 ```
 
 ## Starting a new soil project
