@@ -1,18 +1,58 @@
+#' Write the required SWAT2012 soil inputs for clustered soilgrids
+#'
+#' @param soil_data soil data.
+#' @param format tif, ascii etc...
+#' @param overwrite Logical
+#'
+#' @importFrom tibble tibble
+#' @importFrom dplyr mutate select filter group_by summarise_all funs bind_cols full_join
+#' @importFrom purrr map map2 map_df map_dfc reduce
+#' @importFrom raster writeRaster extent<-
+#' @importMethodsFrom raster extent
+#' @importFrom rgdal writeGDAL
+#' @importFrom euptf psd2classUS
+#' @importFrom magrittr %>% multiply_by set_names
+#' @importFrom pasta %//% %_%
+#' @import sp
+#'
+#' @return Writes required aggregated SWAT soil data to folder project_path/soil_out
+
+
 write_output <- function(soil_data, format, overwrite) {
+
+  if(dir.exists(soil_data$meta$project_path%//%"output") & !overwrite){
+    stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
+  }
+  unlink(soil_data$meta$project_path%//%"output")
+  dir.create(soil_data$meta$project_path%//%"output")
 
   file_suffix <- tibble(suffix = c("ascii", "tif"),
                         driver = c("AAIGrid", "GTiff"))
 
 
   # Create layer table that should be exported as raster layers
-  suffix <- "_"%&%names(soil_data)
+  suffix <- "_"%&%names(soil_data$data_processed)
   suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
 
-  if("soil_class" %in% names(soil_data)){
-    raster_tbl <- soil_data$soil_class
-    class_tbl  <- soil_data[names(soil_data) != "soil_class"]
 
-    #Here continue with writing soil class table
+
+  if("soil_class" %in% names(soil_data)){
+    suffix <- suffix[1:(length(suffix) - 1)]
+    soil_class <- soil_data$data_processed[[1]]$soil_class
+
+    raster_tbl <- soil_data$data_processed$soil_class
+    class_tbl  <- soil_data$data_processed[
+      names(soil_data$data_processed) != "soil_class"] %>%
+      map2_dfc(., suffix, function(tbl, sfx){
+        tbl %<>%
+          select(.,- soil_class) %>%
+          set_colnames(., colnames(.)%&%sfx)}) %>%
+      add_column(., soil_class = soil_class, .before = 1)
+
+    write.csv(class_tbl,
+              file = soil_data$meta$project_path%//%"output"%//%"soil_class.csv",
+              quote = FALSE, row.names = FALSE)
+
   } else {
     raster_tbl <- soil_data %>%
       map2(., suffix, function(tbl, nm) {
@@ -58,12 +98,6 @@ write_output <- function(soil_data, format, overwrite) {
   }
 
   raster_list <- map(raster_tbl, rasterize, soil_data$soilgrids$meta$layer)
-
-  if(dir.exists(soil_data$meta$project_path%//%"output") & !overwrite){
-    stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
-  }
-  unlink(soil_data$meta$project_path%//%"output")
-  dir.create(soil_data$meta$project_path%//%"output")
 
   driver_name <- file_suffix %>%
     filter(suffix == format) %>%

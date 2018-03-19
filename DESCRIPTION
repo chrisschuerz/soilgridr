@@ -12,9 +12,11 @@ Description: solACE provides a workflow to download soilgrids layer for a
     the input layers over the depth and clusters the soil layers in space to
     define soil groups.
 Imports:
+    ggplot2,
     magrittr,
     pasta,
     purrr,
+    RColorBrewer,
     tibble,
     XML
 License: GPL-3.0

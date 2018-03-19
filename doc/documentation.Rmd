@@ -17,7 +17,7 @@ The package *solACE* contains a demo shape file for the Little River Experimenta
 shape_path <- system.file("extdata", "demo.shp", package = "solACE")
 
 shape_demo <- readOGR(shape_path)
-plot(shape_demo)
+# plot(shape_demo)
 ```
 
 ## Starting a new soil project
@@ -26,7 +26,7 @@ To start a new soil project simply execute the function \code{new_soil_project()
 ```{r}
 load("E:/R_project/solACE_test/soil_demo/soil_project.RData")
 # pro_path <- "define:/path/for/your/project"
-pro_path <- "E:/R_project/solACE_test"
+pro_path <- "E:/Projects_R/solACE_test"
 
 
 new_soil_project(project_name = "soil_demo", 
@@ -41,7 +41,9 @@ The new soil project is now located on the hard drive in the defined project pat
  
 
 ```{r}
-demo_soil$cluster_soil(n_class = 1:10)
+soil_demo$load_soilgrids()
+
+soil_demo$cluster_soil(n_class = 1:20)
 ```
 
 

@@ -1,12 +1,14 @@
 #' Plot clustered soil map
 #'
-#' @param cluster_result The cluster results output from \code{cluster_soilgrids()}
+#' @param soil_data The cluster results output from \code{cluster_soilgrids()}
 #' @param n_class Numeric. Number of soil classes to plot in the soil map.
 #'
-#' @importMethodsFrom  raster plot
-#' @importFrom tibble enframe
-#' @importFrom dplyr mutate
-#' @importFrom magrittr %>% %<>%
+#' @import  ggplot2
+#' @import RColorBrewer
+#' @importFrom raster raster rasterToPoints extent
+#' @importFrom tibble enframe as_tibble
+#' @importFrom dplyr mutate full_join
+#' @importFrom magrittr %>% %<>% set_colnames
 #' @importFrom pasta %//% %_%
 
 #'
