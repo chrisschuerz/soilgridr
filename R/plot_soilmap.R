@@ -59,15 +59,15 @@ plot_soilmap <- function(soil_data, n_class){
 
   n_col <- ceiling(length(fill_col) / 15)
 
-  shape <- soil_data$shape_file
-  shape@data$id <- rownames(shape@data)
-  shape_points <- fortify(shape, region = "id")
-  shape_df <- full_join(shape_points, shape@data, by = "id")
+  # shape <- soil_data$shape_file
+  # shape@data$id <- rownames(shape@data)
+  # shape_points <- fortify(shape, region = "id")
+  # shape_df <- full_join(shape_points, shape@data, by = "id")
 
   clust_plot <- ggplot() +
     geom_raster(data = clust_tbl, aes(x = x, y = y, fill = soil_class)) +
     scale_fill_manual(values = fill_col, guide = guide_legend(ncol = n_col)) +
-    geom_polygon(data = shape_df, aes(x = long, y = lat, group = Subbasin), col = "black", fill = NA) +
+    # geom_polygon(data = shape_df, aes(x = long, y = lat, group = Subbasin), col = "black", fill = NA) +
     coord_equal() +
     theme_bw() +
     theme(axis.text.y = element_text(angle = 90, hjust = 0.5))
