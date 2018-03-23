@@ -52,7 +52,8 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
 
   ## Function to maks raster only when shape file is available
   mask_if <- function(rst, shp){
-    if(!is.null(shp)) mask(rst, shp)
+    if(!is.null(shp)) rst <- mask(rst, shp)
+    return(rst)
   }
 
   # Initiate list with soil data
@@ -120,6 +121,11 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     map(., function(x){x %>% set_colnames(tolower(colnames(x)))}) %>%
     set_names(tolower(other_lbl))
 
+  c_if <- function(dat, add_dat){
+    if(!is.null(add_dat)) dat <- c(dat, add_dat)
+    return(dat)
+  }
+
   # Group soil layers according to layer depth
   sol_tbl_list <- sol_val_list %>%
     bind_cols(.) %>%
@@ -129,7 +135,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     set_names(c("sl"%&%sl_lbl)) %>%
     map_at(., "sl"%&%1:7, function(tbl){names(tbl) <- substr(names(tbl), 1, 6)
     return(tbl)}) %>%
-    c(., other_list)
+    c_if(., other_list)
 
   # Output with soil layer data, cluster results and spatial meta data
   out_list <- list(soil_list   = sol_tbl_list,

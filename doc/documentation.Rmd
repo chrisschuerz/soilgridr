@@ -17,6 +17,8 @@ The package *solACE* contains a demo shape file for the Little River Experimenta
 shape_path <- system.file("extdata", "demo.shp", package = "solACE")
 
 shape_demo <- readOGR(shape_path)
+shape_ext <- c(5100, 39800, 1088900, 1119600)
+shape_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=clrk66 +units=m +no_defs"
 plot(shape_demo)
 ```
 

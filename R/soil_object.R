@@ -6,7 +6,7 @@
 #' @import pasta
 #' @importFrom tibble tibble as_tibble
 #' @importFrom rgdal readOGR writeOGR
-#' @importFrom raster crs extent
+#' @importFrom raster crs extent shapefile
 #'
 #' @export
 
@@ -30,6 +30,11 @@ soil_project <- R6::R6Class(
         } else if(class(shape_file)[1] != "SpatialPolygonsDataFrame"){
           stop("shape_file must be either a shape file of the path to the shape_file!")
           }
+        dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
+        writeOGR(obj = shape_file,
+                 dsn = project_path%//%project_name%//%"shape_file"%//%"shp_file.shp",
+                 driver = "ESRI Shapefile",
+                 layer = "shp_file")
       } else if(any(is.null(ext), is.null(crs))){
         stop("Either shape_file or extent and crs must be defined!")
       } else {
@@ -37,11 +42,6 @@ soil_project <- R6::R6Class(
         if(class(crs) != "CRS") crs <- crs(crs)
       }
 
-      dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
-      writeOGR(obj = shape_file,
-               dsn = project_path%//%project_name%//%"shape_file"%//%"shp_file.shp",
-               driver = "ESRI Shapefile",
-               layer = "shp_file")
 
       self$.data$meta$project_name <- project_name
       self$.data$meta$project_path <- project_path%//%project_name

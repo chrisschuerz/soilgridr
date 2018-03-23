@@ -11,7 +11,7 @@
 #'   correct with \code{get_layermeta()]}
 #' @importFrom rgdal readOGR
 #' @importFrom sp spTransform SpatialPolygons
-#' @importFrom raster extent crs
+#' @importFrom raster extent crs extent<- crs<-
 #' @importFrom XML newXMLNode saveXML
 #' @importFrom pasta %//% %.% %_% %&% %&&%
 #' @importFrom magrittr %>%
