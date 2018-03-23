@@ -4,7 +4,7 @@
 \alias{write_output}
 \title{Write the required SWAT2012 soil inputs for clustered soilgrids}
 \usage{
-write_output(soil_data, format, overwrite)
+write_output(soil_data, format, overwrite = FALSE)
 }
 \arguments{
 \item{soil_data}{soil data.}

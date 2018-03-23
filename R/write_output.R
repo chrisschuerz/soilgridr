@@ -4,21 +4,20 @@
 #' @param format tif, ascii etc...
 #' @param overwrite Logical
 #'
-#' @importFrom tibble tibble
-#' @importFrom dplyr mutate select filter group_by summarise_all funs bind_cols full_join
-#' @importFrom purrr map map2 map_df map_dfc reduce
-#' @importFrom raster writeRaster extent<-
+#' @importFrom tibble tibble add_column
+#' @importFrom dplyr filter bind_cols
+#' @importFrom purrr map map_chr map2 map2_dfc walk2
+#' @importFrom raster raster extent extent<-
 #' @importMethodsFrom raster extent
 #' @importFrom rgdal writeGDAL
-#' @importFrom euptf psd2classUS
-#' @importFrom magrittr %>% multiply_by set_names
-#' @importFrom pasta %//% %_%
-#' @import sp
+#' @importFrom magrittr %>% %<>% set_colnames
+#' @importFrom pasta %//% %_% %&%
+#' @importFrom sp SpatialGridDataFrame
 #'
 #' @return Writes required aggregated SWAT soil data to folder project_path/soil_out
 
 
-write_output <- function(soil_data, format, overwrite) {
+write_output <- function(soil_data, format, overwrite = FALSE) {
 
   if(dir.exists(soil_data$meta$project_path%//%"output") & !overwrite){
     stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
@@ -54,7 +53,7 @@ write_output <- function(soil_data, format, overwrite) {
               quote = FALSE, row.names = FALSE)
 
   } else {
-    raster_tbl <- soil_data %>%
+    raster_tbl <- soil_data$data_processed %>%
       map2(., suffix, function(tbl, nm) {
         names(tbl) <- names(tbl)%&%nm
         return(tbl)}) %>%
