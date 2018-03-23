@@ -50,6 +50,11 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     return(rst)
   }
 
+  ## Function to maks raster only when shape file is available
+  mask_if <- function(rst, shp){
+    if(!is.null(shp)) mask(rst, shp)
+  }
+
   # Initiate list with soil data
   sol_val_list <- list()
   sol_lyr_list <- list()
@@ -70,17 +75,17 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     ## Read layer, clip with shape file and convert values from raster into table
     lyr_tmp <- raster(lyr_dir%//%lyr_i) %>%
       set_nodata(.) %>%
-      projectRaster(., crs = crs(shape_file)) %>%
-      crop(., extent(shape_file)) %>%
-      mask(., shape_file)
+      projectRaster(., crs = shape_file$crs) %>%
+      crop(., shape_file$extent) %>%
+      mask_if(., shape_file$shape)
 
     # In first loop-run create meta data to save in final output list
     if(length(sol_val_list) == 0){
       lyr_meta <- list(has_value = lyr_tmp@data@values,
                        len_rst   = length(lyr_tmp),
                        dim_rst   = dim(lyr_tmp),
-                       extent    = extent(shape_file),
-                       crs       = crs(shape_file))
+                       extent    = shape_file$extent,
+                       crs       = shape_file$crs)
       lyr_meta$has_value[!is.na(lyr_meta$has_value)] <- TRUE
     }
     # Convert raster layer to tibble with one named column for further merging.

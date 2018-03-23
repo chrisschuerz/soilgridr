@@ -4,7 +4,8 @@
 \alias{new_soil_project}
 \title{Initiate a new soil project}
 \usage{
-new_soil_project(project_name, project_path, shape_file)
+new_soil_project(project_name, project_path, shape_file = NULL,
+  extent = NULL, crs = NULL)
 }
 \arguments{
 \item{project_name}{the name of the soil project. This will be the name of
