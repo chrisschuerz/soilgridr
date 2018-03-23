@@ -10,32 +10,31 @@
 #'   soilgrids extent) and the soilgrids pixel_size. Check if these values are
 #'   correct with \code{get_layermeta()]}
 #' @importFrom rgdal readOGR
-#' @importFrom sp CRS spTransform
-#' @importFrom raster extent
+#' @importFrom sp spTransform SpatialPolygons
+#' @importFrom raster extent crs
 #' @importFrom XML newXMLNode saveXML
 #' @importFrom pasta %//% %.% %_% %&% %&&%
+#' @importFrom magrittr %>%
 #'
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
 #' @export
 
 obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_names) {
 
-  # if no shp file provided subs1 shape frome SWAT watershed delineation used.
-  if(is.null(shp_file)) {
-    shp_file <- readOGR(dsn = project_path%//%"Watershed/shapes"%//%
-                                     "subs1.shp",
-                               layer = "subs1")
-  } else if(is.character(shp_file)){
-    lyr <- strsplit(shp_file, "\\/|\\\\|\\.")[[1]]
-    lyr <- lyr[length(lyr) - 1]
-    shp_file <- readOGR(dsn = shp_file,
-                               layer = lyr)
-  }
   # soilgrids data uses the WGS84 reference system. Projection of shape file
   # required for the extent and further clipping.
-  sg_crs <- CRS("+proj=longlat +datum=WGS84 +no_defs")
-  shp_file <- spTransform(x = shp_file, CRSobj = sg_crs)
-  shp_ext <- extent(shp_file)
+  sg_crs <- crs("+proj=longlat +datum=WGS84 +no_defs")
+
+  if(is.null(shp_file$shape)){
+    shp_ext <- shp_file$extent %>%
+      as(., "SpatialPolygons")
+    crs(shp_ext) <- shp_file$crs
+    shp_ext <- spTransform(x = shp_ext, CRSobj = sg_crs) %>%
+      extent(.)
+  } else {
+    shp_ext <- spTransform(x = shp_file$shape, CRSobj = sg_crs) %>%
+      extent(.)
+  }
 
   # Calculate the indices of the soilgrids raster for wcs access.
   find_rasterindex <- function(shp_ext, layer_meta) {
