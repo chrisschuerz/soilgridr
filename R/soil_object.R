@@ -16,17 +16,25 @@ soil_project <- R6::R6Class(
   public = list(
     .data = list(),
 
-    initialize = function(project_name, project_path, shape_file) {
+    initialize = function(project_name, project_path, shape_file, ext, crs) {
       if(dir.exists(project_path%//%project_name%//%"soil_layer")){
         stop("Soil project allready exists in"%&&%project_path)
       } else {
         dir.create(project_path%//%project_name%//%"soil_layer", recursive = TRUE)
       }
-      if(is.character(shape_file)){
-        shape_file <- readOGR(shape_file, verbose = FALSE)
-      } else if(class(shape_file)[1] != "SpatialPolygonsDataFrame"){
-        stop("shape_file must be either a shape file of the path to the shape_file!")
-        }
+
+      if(!is.null(shape_file) & is.null(ext) & is.null(crs)){
+        if(is.character(shape_file)){
+          shape_file <- readOGR(shape_file, verbose = FALSE)
+        } else if(class(shape_file)[1] != "SpatialPolygonsDataFrame"){
+          stop("shape_file must be either a shape file of the path to the shape_file!")
+          }
+      } else if(any(is.null(ext), is.null(crs))){
+        stop("Either shape_file or extent and crs must be defined!")
+      } else {
+        if(class(ext) != "Extent") ext <- extent(ext)
+        if(class(crs) != "CRS") crs <- crs(crs)
+      }
 
       dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
       writeOGR(obj = shape_file,
