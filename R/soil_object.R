@@ -6,6 +6,7 @@
 #' @import pasta
 #' @importFrom tibble tibble as_tibble
 #' @importFrom rgdal readOGR writeOGR
+#' @importFrom raster crs extent
 #'
 #' @export
 
@@ -25,7 +26,7 @@ soil_project <- R6::R6Class(
 
       if(!is.null(shape_file) & is.null(ext) & is.null(crs)){
         if(is.character(shape_file)){
-          shape_file <- readOGR(shape_file, verbose = FALSE)
+          shape_file <- shapefile(shape_file)
         } else if(class(shape_file)[1] != "SpatialPolygonsDataFrame"){
           stop("shape_file must be either a shape file of the path to the shape_file!")
           }
@@ -45,7 +46,15 @@ soil_project <- R6::R6Class(
       self$.data$meta$project_name <- project_name
       self$.data$meta$project_path <- project_path%//%project_name
 
-      self$.data$shape_file <- shape_file
+      self$.data$shape_file$shape <- shape_file
+      if(is.null(shape_file)){
+        self$.data$shape_file$extent <- ext
+        self$.data$shape_file$crs <- crs
+      } else {
+        self$.data$shape_file$extent <- extent(shape_file)
+        self$.data$shape_file$crs <- crs(shape_file)
+      }
+
       self$.data$soilgrids$meta$server_path <-
         "http://data.isric.org/geoserver/sg250m/wcs?"
 
