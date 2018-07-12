@@ -25,4 +25,3 @@ Generates a new soil_project in the working environment (as an R6
 \description{
 Initiate a new soil project
 }
-

@@ -2,29 +2,15 @@
 % Please edit documentation in R/set_cluster_data.R
 \name{set_cluster_data}
 \alias{set_cluster_data}
-\title{Create clustered soilmap from soilgrids data}
+\title{Define the final number of clusters and set the respective clustered soil data}
 \usage{
 set_cluster_data(soil_data, n_class)
 }
 \arguments{
-\item{n_class}{Vector of number of soil classes that should be generated
-with k-means clustering.}
+\item{soil_data}{saved soil information in the soil_object}
 
-\item{project_path}{Path to the SWAT project / Path where downloaded
-soilgrids folder is located.}
-
-\item{shp_file}{Shape file (or path to shape file) for which an
-aggregated soil map should be generated. If none is provided (\code{NULL})
-the shape file from the SWAT project will be used.}
-
-\item{lower_bound}{Vector defining the lower bounds of the aggregated
-soil layers (depths in cm).}
-}
-\value{
-List that holds the soilgrids data and the clustering
-  results for further processing with \code{write_SWATsoil()}.
+\item{n_class}{Numeric value of final number of classes.}
 }
 \description{
-Create clustered soilmap from soilgrids data
+Define the final number of clusters and set the respective clustered soil data
 }
-

@@ -2,17 +2,17 @@
 #'
 #' Get the required soilgrids meta information.
 #'
+#' @param project_path Path where the soil_project is located
 #' @param wcs URL of the ISRIC soilgrids geoserver
-#' @param raw logic, if \code{TRUE}  raw text output is returned if \code{FALSE} (default) the
-#'   function returns the extracted values of the Tiff tiles pixel size and the
-#'   extent.
 #'
-#' @importFrom XML newXMLNode saveXML
-#' @importFrom purrr map
 #' @importFrom magrittr %>% %<>% set_names
 #' @importFrom pasta %//% %.%
+#' @importFrom purrr map
+#' @importFrom XML newXMLNode saveXML
+#'
 #' @return Returns either a list with pixel size and extent of Tiffs as numerics
 #'   or the raw text output.
+
 #' @examples
 #' # Generate the required input for `obtain_soilgrids()`:
 #'   layer_meta <- get_layermeta()

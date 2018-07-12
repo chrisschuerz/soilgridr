@@ -2,7 +2,7 @@
 % Please edit documentation in R/write_output.R
 \name{write_output}
 \alias{write_output}
-\title{Write the required SWAT2012 soil inputs for clustered soilgrids}
+\title{Write the modified soilgrids layer}
 \usage{
 write_output(soil_data, format, overwrite = FALSE)
 }
@@ -14,9 +14,8 @@ write_output(soil_data, format, overwrite = FALSE)
 \item{overwrite}{Logical}
 }
 \value{
-Writes required aggregated SWAT soil data to folder project_path/soil_out
+Writes the modified soilgrids layers in the defined format
 }
 \description{
-Write the required SWAT2012 soil inputs for clustered soilgrids
+Write the modified soilgrids layer
 }
-

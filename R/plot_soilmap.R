@@ -3,17 +3,16 @@
 #' @param soil_data The cluster results output from \code{cluster_soilgrids()}
 #' @param n_class Numeric. Number of soil classes to plot in the soil map.
 #'
-#' @import  ggplot2
-#' @import RColorBrewer
-#' @importFrom raster raster rasterToPoints extent
-#' @importFrom tibble enframe as_tibble
 #' @importFrom dplyr mutate full_join
+#' @importFrom ggplot2 aes coord_equal geom_raster ggplot guide_legend
+#'   scale_fill_manual theme theme_bw element_text
 #' @importFrom magrittr %>% %<>% set_colnames
 #' @importFrom pasta %//% %_%
-
+#' @importFrom raster extent raster rasterToPoints
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom tibble as_tibble enframe
 #'
 #' @return Plots the final soilmap with the selected number of soil classes.
-#' @export
 
 plot_soilmap <- function(soil_data, n_class){
 

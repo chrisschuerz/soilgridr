@@ -1,20 +1,20 @@
-#' Write the required SWAT2012 soil inputs for clustered soilgrids
+#' Write the modified soilgrids layer
 #'
 #' @param soil_data soil data.
 #' @param format tif, ascii etc...
 #' @param overwrite Logical
 #'
-#' @importFrom tibble tibble add_column
 #' @importFrom dplyr filter bind_cols
+#' @importFrom magrittr %>% %<>% set_colnames
+#' @importFrom pasta %//% %_% %&%
 #' @importFrom purrr map map_chr map2 map2_dfc walk2
 #' @importFrom raster raster extent extent<-
 #' @importMethodsFrom raster extent
 #' @importFrom rgdal writeGDAL
-#' @importFrom magrittr %>% %<>% set_colnames
-#' @importFrom pasta %//% %_% %&%
 #' @importFrom sp SpatialGridDataFrame
+#' @importFrom tibble tibble add_column
 #'
-#' @return Writes required aggregated SWAT soil data to folder project_path/soil_out
+#' @return Writes the modified soilgrids layers in the defined format
 
 
 write_output <- function(soil_data, format, overwrite = FALSE) {

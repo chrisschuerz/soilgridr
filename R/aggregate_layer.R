@@ -1,24 +1,12 @@
-#' Create clustered soilmap from soilgrids data
+#' Aggregate soilgrids layers over depth.
 #'
-#' @param project_path Path to the SWAT project / Path where downloaded
-#'   soilgrids folder is located.
-#' @param shp_file Shape file (or path to shape file) for which an
-#'   aggregated soil map should be generated. If none is provided (\code{NULL})
-#'   the shape file from the SWAT project will be used.
-#' @param lower_bound Vector defining the lower bounds of the aggregated
-#'   soil layers (depths in cm).
-#' @param n_class Vector of number of soil classes that should be generated
-#'   with k-means clustering.
+#' @param soil_list List of tibbles holding soil parameters for the respective
+#'   soil layers.
+#' @param lower_bound Vector defining the lower bounds of the aggregated soil
+#'   layers (depths in cm).
 
-#' @importFrom rgdal readOGR
-#' @importFrom raster raster projectRaster crop mask crs extent
-#' @importFrom euptf predict.ptf psd2classUS
-#' @importFrom tibble as_tibble
-#' @importFrom dplyr select filter mutate rename bind_cols
-#'   progress_estimated ends_with
-#' @importFrom tibble as_tibble tibble
+#' @importFrom magrittr %>% set_names
 #' @importFrom purrr map map2 map_at
-#' @importFrom magrittr %>% set_colnames set_rownames set_names
 
 aggregate_layer <- function(soil_list, lower_bound) {
 

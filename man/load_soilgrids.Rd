@@ -2,29 +2,17 @@
 % Please edit documentation in R/load_soilgrids.R
 \name{load_soilgrids}
 \alias{load_soilgrids}
-\title{Create clustered soilmap from soilgrids data}
+\title{Load soilgrids layers into soil object}
 \usage{
 load_soilgrids(project_path, shape_file, layer_names)
 }
 \arguments{
-\item{project_path}{Path to the SWAT project / Path where downloaded
-soilgrids folder is located.}
+\item{project_path}{Path to the soil project}
 
-\item{shape_file}{Shape file (or path to shape file) for which an
-aggregated soil map should be generated. If none is provided (\code{NULL})
-the shape file from the SWAT project will be used.}
+\item{shape_file}{Shape file of the study area}
 
-\item{lower_bound}{Vector defining the lower bounds of the aggregated
-soil layers (depths in cm).}
-
-\item{n_class}{Vector of number of soil classes that should be generated
-with k-means clustering.}
-}
-\value{
-List that holds the soilgrids data and the clustering
-  results for further processing with \code{write_SWATsoil()}.
+\item{layer_names}{Character vector defining the soilgrids layers to load}
 }
 \description{
-Create clustered soilmap from soilgrids data
+Load soilgrids layers into soil object
 }
-

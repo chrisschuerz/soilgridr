@@ -2,29 +2,17 @@
 % Please edit documentation in R/cluster_soil.R
 \name{cluster_soil}
 \alias{cluster_soil}
-\title{Create clustered soilmap from soilgrids data}
+\title{Cluster soilgrids layers using kmeans clustering}
 \usage{
 cluster_soil(soil_list, n_class)
 }
 \arguments{
+\item{soil_list}{List of tibbles holding soil parameters for the respective
+soil layers.}
+
 \item{n_class}{Vector of number of soil classes that should be generated
 with k-means clustering.}
-
-\item{project_path}{Path to the SWAT project / Path where downloaded
-soilgrids folder is located.}
-
-\item{shp_file}{Shape file (or path to shape file) for which an
-aggregated soil map should be generated. If none is provided (\code{NULL})
-the shape file from the SWAT project will be used.}
-
-\item{lower_bound}{Vector defining the lower bounds of the aggregated
-soil layers (depths in cm).}
-}
-\value{
-List that holds the soilgrids data and the clustering
-  results for further processing with \code{write_SWATsoil()}.
 }
 \description{
-Create clustered soilmap from soilgrids data
+Cluster soilgrids layers using kmeans clustering
 }
-

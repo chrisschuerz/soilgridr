@@ -2,18 +2,19 @@
 % Please edit documentation in R/evaluate_cluster.R
 \name{evaluate_cluster}
 \alias{evaluate_cluster}
-\title{Plotting of the cluster results}
+\title{Evaluate the cluster result calculating the sum of squared differences for
+each clustering}
 \usage{
 evaluate_cluster(cluster_result)
 }
 \arguments{
-\item{sg_cluster}{Results of the soilgrids clustering}
+\item{cluster_result}{Results of the soilgrids clustering stored in soil_object}
 }
 \value{
-A ggplot object that shows the the SSE (within a the given classes) over the
-  number of classes
+A ggplot object that shows the the SSE (within a the given classes)
+  over the number of classes
 }
 \description{
-Creates a plot of the results from the soilgrids clustering (\code{sg_cluster}).
+Evaluate the cluster result calculating the sum of squared differences for
+each clustering
 }
-

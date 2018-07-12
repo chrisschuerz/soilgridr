@@ -1,29 +1,14 @@
-#' Create clustered soilmap from soilgrids data
+#' Load soilgrids layers into soil object
 #'
-#' @param project_path Path to the SWAT project / Path where downloaded
-#'   soilgrids folder is located.
-#' @param shape_file Shape file (or path to shape file) for which an
-#'   aggregated soil map should be generated. If none is provided (\code{NULL})
-#'   the shape file from the SWAT project will be used.
-#' @param lower_bound Vector defining the lower bounds of the aggregated
-#'   soil layers (depths in cm).
-#' @param n_class Vector of number of soil classes that should be generated
-#'   with k-means clustering.
+#' @param project_path Path to the soil project
+#' @param shape_file Shape file of the study area
+#' @param layer_names Character vector defining the soilgrids layers to load
 
-#' @importFrom rgdal readOGR
-#' @importFrom raster raster projectRaster crop mask crs extent
-#' @importFrom euptf predict.ptf psd2classUS
+#' @importFrom dplyr bind_cols ends_with filter progress_estimated select
+#' @importFrom magrittr %>% set_colnames set_names
+#' @importFrom purrr map map_at
+#' @importFrom raster raster projectRaster crop mask
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr select filter mutate rename bind_cols
-#'   progress_estimated ends_with
-#' @importFrom tibble as_tibble tibble
-#' @importFrom purrr map map2 map_at
-#' @importFrom magrittr %>% set_colnames set_rownames set_names
-#'
-#' @return List that holds the soilgrids data and the clustering
-#'   results for further processing with \code{write_SWATsoil()}.
-#' @export
-
 
 load_soilgrids <- function(project_path, shape_file, layer_names) {
   # Reading soilgrids layer and arranging them in list ---------------------------
@@ -31,7 +16,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
   lyr_dir <- project_path%//%"soil_layer"
 
   ## Helper function to set the nodata values in the loaded raster files
-  # should be defined as seperate function outside :(
+  ## should be defined as seperate function outside :(
   set_nodata <- function(rst) {
     if (rst@data@min == 0 & rst@data@max == 255) {
       rst@file@nodatavalue <- 255
@@ -46,6 +31,13 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     if(!is.null(shp)) rst <- mask(rst, shp)
     return(rst)
   }
+
+  ## Concatenate if function
+  c_if <- function(dat, add_dat){
+    if(!is.null(add_dat)) dat <- c(dat, add_dat)
+    return(dat)
+  }
+
 
   # Initiate list with soil data
   sol_val_list <- list()
@@ -103,7 +95,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     gsub("\\D","",.) %>%
     nchar(.) == 0
 
-  # go trough different options and compute sol_tbl_list:
+  # go through different options and compute sol_tbl_list:
   if ( (sum(other_lgc) >= 1) & (length(sl_lbl) == 0) ) {
     other_lbl <- names(sol_val_list)[other_lgc]
 
@@ -151,7 +143,3 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
   return(out_list)
 }
 
-c_if <- function(dat, add_dat){
-  if(!is.null(add_dat)) dat <- c(dat, add_dat)
-  return(dat)
-}

@@ -9,7 +9,9 @@
 #' @param layer_meta List with the entries extent (Vector of length 4 with the
 #'   soilgrids extent) and the soilgrids pixel_size. Check if these values are
 #'   correct with \code{get_layermeta()]}
-#' @importFrom rgdal readOGR
+#' @param layer_names Character vector of names of the soilgrids layers to be
+#'   downloadad.
+#'
 #' @importFrom sp spTransform SpatialPolygons
 #' @importFrom raster extent crs extent<- crs<-
 #' @importFrom XML newXMLNode saveXML

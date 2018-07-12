@@ -2,25 +2,17 @@
 % Please edit documentation in R/aggregate_layer.R
 \name{aggregate_layer}
 \alias{aggregate_layer}
-\title{Create clustered soilmap from soilgrids data}
+\title{Aggregate soilgrids layers over depth.}
 \usage{
 aggregate_layer(soil_list, lower_bound)
 }
 \arguments{
-\item{lower_bound}{Vector defining the lower bounds of the aggregated
-soil layers (depths in cm).}
+\item{soil_list}{List of tibbles holding soil parameters for the respective
+soil layers.}
 
-\item{project_path}{Path to the SWAT project / Path where downloaded
-soilgrids folder is located.}
-
-\item{shp_file}{Shape file (or path to shape file) for which an
-aggregated soil map should be generated. If none is provided (\code{NULL})
-the shape file from the SWAT project will be used.}
-
-\item{n_class}{Vector of number of soil classes that should be generated
-with k-means clustering.}
+\item{lower_bound}{Vector defining the lower bounds of the aggregated soil
+layers (depths in cm).}
 }
 \description{
-Create clustered soilmap from soilgrids data
+Aggregate soilgrids layers over depth.
 }
-

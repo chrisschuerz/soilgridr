@@ -19,6 +19,9 @@ will be used.}
 \item{layer_meta}{List with the entries extent (Vector of length 4 with the
 soilgrids extent) and the soilgrids pixel_size. Check if these values are
 correct with \code{get_layermeta()]}}
+
+\item{layer_names}{Character vector of names of the soilgrids layers to be
+downloadad.}
 }
 \value{
 Writes the required soilgrids layer to project_path/soilgrids.
@@ -26,4 +29,3 @@ Writes the required soilgrids layer to project_path/soilgrids.
 \description{
 Obtain soilgrids layer from the ISRIC geoserver
 }
-
