@@ -1,6 +1,6 @@
 # solACE
 **soil** information **A**ggregation, **C**lustering and **E**stimation from soilgrids data
-
+**Readme is deprecated and will be updated soon (hopefully...)**
 
 ## Installation
 
