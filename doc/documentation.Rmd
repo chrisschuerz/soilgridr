@@ -28,7 +28,7 @@ To start a new soil project simply execute the function \code{new_soil_project()
 ```{r}
 load("E:/R_project/solACE_test/soil_demo/soil_project.RData")
 # pro_path <- "define:/path/for/your/project"
-pro_path <- "E:/Projects_R/solACE_test"
+pro_path <- here("demo_test")
 
 
 new_soil_project(project_name = "soil_demo", 
