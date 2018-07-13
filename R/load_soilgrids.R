@@ -1,8 +1,12 @@
 #' Load soilgrids layers into soil object
 #'
-#' @param project_path Path to the soil project
-#' @param shape_file Shape file of the study area
-#' @param layer_names Character vector defining the soilgrids layers to load
+#' Loads a set of layers, defined by \code{layer_names} character-vector, from
+#'  \href{soilGrids}{https://soilgrids.org/} into the soilgrids project-path
+#'  (see: \code{\link{new_soil_project}}) and into R.
+#'
+#' @param project_path Path to the soil project.
+#' @param shape_file Shape file of the study area.
+#' @param layer_names Character vector for defining the soilgrids layers to load, e.g "BDRICM_M_250m".
 
 #' @importFrom dplyr bind_cols ends_with filter progress_estimated select
 #' @importFrom magrittr %>% set_colnames set_names
@@ -10,8 +14,10 @@
 #' @importFrom raster raster projectRaster crop mask
 #' @importFrom tibble as_tibble
 
-load_soilgrids <- function(project_path, shape_file, layer_names) {
-  # Reading soilgrids layer and arranging them in list ---------------------------
+load_soilgrids <- function(project_path,
+                           shape_file,
+                           layer_names) {
+  # Reading soilgrids layer and arranging them in list --------------------
   # Define path to soilgrids layer
   lyr_dir <- project_path%//%"soil_layer"
 
@@ -26,18 +32,11 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
     return(rst)
   }
 
-  ## Function to maks raster only when shape file is available
+  ## Function to mask raster only when shape file is available
   mask_if <- function(rst, shp){
     if(!is.null(shp)) rst <- mask(rst, shp)
     return(rst)
   }
-
-  ## Concatenate if function
-  c_if <- function(dat, add_dat){
-    if(!is.null(add_dat)) dat <- c(dat, add_dat)
-    return(dat)
-  }
-
 
   # Initiate list with soil data
   sol_val_list <- list()
@@ -127,7 +126,7 @@ load_soilgrids <- function(project_path, shape_file, layer_names) {
       set_names(c("sl"%&%sl_lbl)) %>%
       map_at(., "sl"%&%1:7, function(tbl){names(tbl) <- substr(names(tbl), 1, 6)
       return(tbl)}) %>%
-      c_if(., other_list)
+      c_if(., !is.null(other_list), other_list)
   } else {
     stop("could not aggregate layers (with or withouth depth)")
   }
