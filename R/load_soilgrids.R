@@ -1,7 +1,7 @@
-#' Load soilgrids layers into soil object
+#' Load soilGrids-Layers into the Soil Object
 #'
 #' Loads a set of layers, defined by \code{layer_names} character-vector, from
-#'  \href{soilGrids}{https://soilgrids.org/} into the soilgrids project-path
+#'  \href{https://soilgrids.org/}{soilGrids}} into the soilgrids project-path
 #'  (see: \code{\link{new_soil_project}}) and into R.
 #'
 #' @param project_path Path to the soil project.
