@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster_soil.R
 \name{cluster_soil}
 \alias{cluster_soil}
-\title{Cluster soilgrids layers using kmeans clustering}
+\title{Cluster Layers}
 \usage{
 cluster_soil(soil_list, n_class)
 }
@@ -14,5 +14,5 @@ soil layers.}
 with k-means clustering.}
 }
 \description{
-Cluster soilgrids layers using kmeans clustering
+Cluster soilgrids layers using kmeans clustering.
 }
