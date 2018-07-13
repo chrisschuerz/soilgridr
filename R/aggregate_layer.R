@@ -1,4 +1,8 @@
-#' Aggregate soilgrids layers over depth.
+#' Aggregate soilGrids Layers over Depth.
+#'
+#' Aggregate soilgrids layers over depth. By convention most 
+#'  \href{https://soilgrids.org/}{soilGrids}} layers are divided into 7 depth-classes. 
+#'  This function allows to aggregated them over chosen depths.  
 #'
 #' @param soil_list List of tibbles holding soil parameters for the respective
 #'   soil layers.
@@ -10,7 +14,7 @@
 
 aggregate_layer <- function(soil_list, lower_bound) {
 
-  # Checking if the same layers are available for all seven soil depts.
+  # Checking if the same layers are available for all seven soil depths:
   depth_avail <- "sl"%&%1:7 %in% names(soil_list)
   if(!all(depth_avail)) stop("Soil aggregation only allowed when all 7 soil depths are available.")
 
@@ -28,11 +32,10 @@ aggregate_layer <- function(soil_list, lower_bound) {
 
   soil_list %<>% map_at(., "sl"%&%1:7, function(x){x[unique_lyr]})
 
-  # Aggregate soil layers over depth ---------------------------------------------
+  # Aggregate soil layers over depth: --------------------------------------------
   upper_bound <- c(0,lower_bound[1:length(lower_bound) - 1])
 
-  # Function to calculate the weights of each soil layer for the respective
-  # upper and lower boundaries in the soil depth aggregation.
+  # Function - calc weights of each layer for respective lower/upper bounds:
   calc_weights <- function(up_bnd, lw_bnd) {
     sl_depth <- c(2.5, 7.5, 12.5, 22.5, 35, 70, 50)
     sl_depth_cum <- cumsum(sl_depth)
@@ -51,10 +54,10 @@ aggregate_layer <- function(soil_list, lower_bound) {
     (lw_wgt + md_wgt + up_wgt)/(lw_bnd - up_bnd)
   }
 
-  # Calculate the layer weights for each aggregated soil layer
+  # Calc the layer weights for each aggregated soil layer
   lyr_weight <- map2(upper_bound, lower_bound, calc_weights)
 
-  # Calculate the aggregated soil layers by summing up the weighted layers
+  # Calc the aggregated soil layers by summing up the weighted layers
   soil_aggr <- map(lyr_weight, function(weight, soil_list){
     soil_list$sl1*weight[1] +
       soil_list$sl2*weight[2] +
