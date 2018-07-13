@@ -2,17 +2,14 @@
 % Please edit documentation in R/load_soilgrids.R
 \name{load_soilgrids}
 \alias{load_soilgrids}
-\title{Load soilgrids layers into soil object}
+\title{Load soilGrids-Layers into the Soil Object}
 \usage{
 load_soilgrids(project_path, shape_file, layer_names)
 }
 \arguments{
-\item{project_path}{Path to the soil project}
+\item{project_path}{Path to the soil project.}
 
-\item{shape_file}{Shape file of the study area}
+\item{shape_file}{Shape file of the study area.}
 
-\item{layer_names}{Character vector defining the soilgrids layers to load}
-}
-\description{
-Load soilgrids layers into soil object
+\item{layer_names}{Character vector for defining the soilgrids layers to load, e.g "BDRICM_M_250m".}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/aggregate_layer.R
 \name{aggregate_layer}
 \alias{aggregate_layer}
-\title{Aggregate soilgrids layers over depth.}
+\title{Aggregate soilGrids Layers over Depth.}
 \usage{
 aggregate_layer(soil_list, lower_bound)
 }
@@ -12,7 +12,4 @@ soil layers.}
 
 \item{lower_bound}{Vector defining the lower bounds of the aggregated soil
 layers (depths in cm).}
-}
-\description{
-Aggregate soilgrids layers over depth.
 }

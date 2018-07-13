@@ -7,9 +7,9 @@
 get_layermeta(project_path, wcs)
 }
 \arguments{
-\item{project_path}{Path where the soil_project is located}
+\item{project_path}{Path where the soil_project is located.}
 
-\item{wcs}{URL of the ISRIC soilgrids geoserver}
+\item{wcs}{URL of the ISRIC soilgrids geoserver.}
 }
 \value{
 Returns either a list with pixel size and extent of Tiffs as numerics
@@ -26,4 +26,6 @@ Get the required soilgrids meta information.
 # Check all meta information:
 # (also for crosschecking that function works properly)
   get_layermeta(raw = TRUE)
+
 }
+\keyword{internal}

@@ -2,15 +2,16 @@
 % Please edit documentation in R/set_cluster_data.R
 \name{set_cluster_data}
 \alias{set_cluster_data}
-\title{Define the final number of clusters and set the respective clustered soil data}
+\title{Set Final Cluster Number}
 \usage{
 set_cluster_data(soil_data, n_class)
 }
 \arguments{
-\item{soil_data}{saved soil information in the soil_object}
+\item{soil_data}{Saved soil information in the soil_object.}
 
 \item{n_class}{Numeric value of final number of classes.}
 }
 \description{
-Define the final number of clusters and set the respective clustered soil data
+Define the final number of clusters and set the respective clustered soil data.
 }
+\keyword{internal}

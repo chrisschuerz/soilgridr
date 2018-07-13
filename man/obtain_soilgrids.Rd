@@ -2,7 +2,7 @@
 % Please edit documentation in R/obtain_soilgrids.R
 \name{obtain_soilgrids}
 \alias{obtain_soilgrids}
-\title{Obtain soilgrids layer from the ISRIC geoserver}
+\title{Obtain Soilgrids}
 \usage{
 obtain_soilgrids(project_path, shp_file, wcs, layer_meta, layer_names)
 }
@@ -27,5 +27,6 @@ downloadad.}
 Writes the required soilgrids layer to project_path/soilgrids.
 }
 \description{
-Obtain soilgrids layer from the ISRIC geoserver
+Obtain soilgrids layer from the ISRIC geoserver.
 }
+\keyword{internal}

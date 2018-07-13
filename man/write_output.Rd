@@ -2,20 +2,10 @@
 % Please edit documentation in R/write_output.R
 \name{write_output}
 \alias{write_output}
-\title{Write the modified soilgrids layer}
-\usage{
-write_output(soil_data, format, overwrite = FALSE)
-}
+\title{Write Soil Project Output}
 \arguments{
-\item{soil_data}{soil data.}
-
-\item{format}{tif, ascii etc...}
-
-\item{overwrite}{Logical}
-}
-\value{
-Writes the modified soilgrids layers in the defined format
+\item{format}{Output format provided to the \link[rgdal]{writeGDAL} function (tif, ascii, etc.).}
 }
 \description{
-Write the modified soilgrids layer
+Write the modified soilgrids layer to a file.
 }

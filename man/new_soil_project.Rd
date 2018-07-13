@@ -2,26 +2,28 @@
 % Please edit documentation in R/new_soil_project.R
 \name{new_soil_project}
 \alias{new_soil_project}
-\title{Initiate a new soil project}
+\title{Initiate a Soil Project}
 \usage{
 new_soil_project(project_name, project_path, shape_file = NULL,
   extent = NULL, crs = NULL)
 }
 \arguments{
-\item{project_name}{the name of the soil project. This will be the name of
-the project folder and the soil project in the working environment. The
-name of this object should not be changed!}
+\item{project_name}{The name of the soil project. This will be the name of
+the project folder and the soil project in the working environment.
+Once initialized \strong{the name should not be changed}!}
 
 \item{project_path}{Path to the SWAT project / Path where soilgrids layers
-are saved}
+are saved. Once initialized \strong{the path should not be changed}!}
 
 \item{shape_file}{Shape file (or path to shape file) that defines the extent
-of the soilgrids layers.}
+of the soilgrids layers. Alternatively, the extend (\code{extend}) and
+coordinate-system (\code{crs}) of a spatial object can be used.}
 }
 \value{
-Generates a new soil_project in the working environment (as an R6
-  object) and generates the prject folder in the project path.
+New \code{\link{soil_project}} in the working environment (as an R6
+  object), as well as the project folder in the project path.
 }
 \description{
-Initiate a new soil project
+Generates a new soil project (see: \code{\link{soil_project}}), together with
+ a fixed link to the project folder and project path (used to save the data).
 }
