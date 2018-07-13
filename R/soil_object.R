@@ -160,7 +160,7 @@ soil_project <- R6::R6Class(
           stop("Set final number of soil classes before writing outputs!")
         }
 
-        write_output(soil_data = self$.data, format = format)
+        write_out(soil_data = self$.data, format = format)
       }
 
       self$save()
