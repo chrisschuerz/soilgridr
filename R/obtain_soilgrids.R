@@ -1,4 +1,6 @@
-#' Obtain soilgrids layer from the ISRIC geoserver
+#' Obtain Soilgrids
+#'
+#' Obtain soilgrids layer from the ISRIC geoserver.
 #'
 #' @param project_path Path to the SWAT project / Path where soilgrids layers
 #'   are saved
@@ -19,7 +21,9 @@
 #' @importFrom magrittr %>%
 #'
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
+#'
 #' @keywords internal
+
 obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_names) {
 
   # soilgrids data uses the WGS84 reference system. Projection of shape file

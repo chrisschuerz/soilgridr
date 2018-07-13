@@ -1,8 +1,10 @@
-#' Write the modified soilgrids layer
+#' Write Soil Project Output
 #'
-#' @param soil_data soil data.
-#' @param format tif, ascii etc...
-#' @param overwrite Logical
+#' Internal writing function. Write the modified soilgrids layer.
+#'
+#' @param soil_data Soil data.
+#' @param format Output format provided to the \link[rgdal]{writeGDAL} function (e.g. tif, ascii, etc.).
+#' @param overwrite Logical. Defines if potentially existing outputs should overwritten or not.
 #'
 #' @importFrom dplyr filter bind_cols
 #' @importFrom magrittr %>% %<>% set_colnames
@@ -14,11 +16,9 @@
 #' @importFrom sp SpatialGridDataFrame
 #' @importFrom tibble tibble add_column
 #'
-#' @return Writes the modified soilgrids layers in the defined format
-
+#' @return Writes the modified soilgrids layers in the defined format.
 
 write_output <- function(soil_data, format, overwrite = FALSE) {
-
   if(dir.exists(soil_data$meta$project_path%//%"output") & !overwrite){
     stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
   }

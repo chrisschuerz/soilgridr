@@ -1,6 +1,8 @@
 #' Plot clustered soil map
 #'
-#' @param soil_data The cluster results output from \code{cluster_soilgrids()}
+#' Internal/Actual general-function to plot the clustered soil map.
+#'
+#' @param soil_data The cluster results output from \code{cluster_soilgrids()}.
 #' @param n_class Numeric. Number of soil classes to plot in the soil map.
 #'
 #' @importFrom dplyr mutate full_join
@@ -13,7 +15,9 @@
 #' @importFrom tibble as_tibble enframe
 #'
 #' @return Plots the final soilmap with the selected number of soil classes.
+#'
 #' @keywords internal
+
 plot_soilmap <- function(soil_data, n_class){
 
   #Checking of number of soil classes

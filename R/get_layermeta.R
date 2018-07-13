@@ -2,8 +2,8 @@
 #'
 #' Get the required soilgrids meta information.
 #'
-#' @param project_path Path where the soil_project is located
-#' @param wcs URL of the ISRIC soilgrids geoserver
+#' @param project_path Path where the soil_project is located.
+#' @param wcs URL of the ISRIC soilgrids geoserver.
 #'
 #' @importFrom magrittr %>% %<>% set_names
 #' @importFrom pasta %//% %.%
@@ -21,7 +21,9 @@
 #' # Check all meta information:
 #' # (also for crosschecking that function works properly)
 #'   get_layermeta(raw = TRUE)
+#'
 #' @keywords internal
+
 get_layermeta <- function(project_path, wcs) {
 
   # first layer of the soilgrids data set for which to aqcuire info

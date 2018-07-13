@@ -1,12 +1,16 @@
-#' Define the final number of clusters and set the respective clustered soil data
+#' Set Final Cluster Number
 #'
-#' @param soil_data saved soil information in the soil_object
+#' Define the final number of clusters and set the respective clustered soil data.
+#'
+#' @param soil_data Saved soil information in the soil_object.
 #' @param n_class Numeric value of final number of classes.
 
 #' @importFrom tibble add_column tibble
 #' @importFrom dplyr group_by summarise_all
 #' @importFrom purrr map
 #' @importFrom magrittr %>%
+#'
+#' @keywords internal
 
 set_cluster_data <- function(soil_data, n_class) {
 

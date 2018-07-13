@@ -170,6 +170,11 @@ soil_project <- R6::R6Class(
   )
 )
 
+
+
+#  Implicit Function Descriptions: ----------------------------------------
+
+
 #' Start Soil Project from Scratch
 #'
 #' Provides a simple reset for the soil project, by restarting it from scratch.
@@ -180,7 +185,7 @@ NULL
 #' Plot clustered soil map
 #'
 #' Plot a clustered soilmap (where the number of clusters is defined by the
-#' \code{\link{select_n_class}} function)
+#' \code{\link{select_n_class}} function).
 #'
 #' @name plot_cluster
 NULL
