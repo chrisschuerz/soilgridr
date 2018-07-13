@@ -1,6 +1,6 @@
 #' Plot clustered soil map
 #'
-#' Internal/Actual general-function to plot the clustered soil map.
+#' Internal/Actual general-function to plot the clustered soil maps.
 #'
 #' @param soil_data The cluster results output from \code{cluster_soilgrids()}.
 #' @param n_class Numeric. Number of soil classes to plot in the soil map.

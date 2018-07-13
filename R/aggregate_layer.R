@@ -1,8 +1,9 @@
-#' Aggregate soilGrids Layers over Depth.
+#' Aggregate soilgrids Layers over Depth.
 #'
-#' Aggregate soilgrids layers over depth. By convention most 
-#'  \href{https://soilgrids.org/}{soilGrids}} layers are divided into 7 depth-classes. 
-#'  This function allows to aggregated them over chosen depths.  
+#' Aggregate the \href{https://soilgrids.org/}{soilgrids}} layers within the
+#'  \strong{soil project} over their respective depth. By convention most
+#'  layers are divided into 7 depth-classes.This function allows to aggregated
+#'  them over chosen depths.
 #'
 #' @param soil_list List of tibbles holding soil parameters for the respective
 #'   soil layers.
@@ -70,7 +71,7 @@ aggregate_layer <- function(soil_list, lower_bound) {
     map(., as_tibble) %>%
     set_names("sl"%&%1:length(upper_bound))
 
-  #Concatinate aggregated soil layer and layers where no aggregation was applied
+  #Concatenate aggregated soil layer and layers where no aggregation was applied
   soil_return <- c(soil_aggr, soil_list[!(names(soil_list) %in% ("sl"%&%1:100))])
 
   return(soil_return)

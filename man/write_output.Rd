@@ -6,6 +6,3 @@
 \arguments{
 \item{format}{Output format provided to the \link[rgdal]{writeGDAL} function (tif, ascii, etc.).}
 }
-\description{
-Write the modified soilgrids layer to a file.
-}

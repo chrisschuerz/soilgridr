@@ -1,7 +1,9 @@
-#' Evaluate the cluster result calculating the sum of squared differences for
-#' each clustering
+#' Evaluate Clustering Results
 #'
-#' @param cluster_result Results of the soilgrids clustering stored in soil_object
+#' Evaluate the results of the different kmeans clusters by calculating the
+#'  sum of squared differences for each one.
+#'
+#' @param cluster_result Results of the soilgrids clustering stored in the \strong{soil project}.
 #'
 #' @importFrom ggplot2 ggplot aes geom_line geom_point theme_bw xlab ylab
 #' @importFrom tibble tibble add_column

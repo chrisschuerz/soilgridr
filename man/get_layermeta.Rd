@@ -16,7 +16,7 @@ Returns either a list with pixel size and extent of Tiffs as numerics
   or the raw text output.
 }
 \description{
-Get the required soilgrids meta information.
+Get the required soilgrids meta-information.
 }
 \examples{
 # Generate the required input for `obtain_soilgrids()`:

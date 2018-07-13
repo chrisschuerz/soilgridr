@@ -1,6 +1,6 @@
 #' Soilgrids Metainformation
 #'
-#' Get the required soilgrids meta information.
+#' Get the required soilgrids meta-information.
 #'
 #' @param project_path Path where the soil_project is located.
 #' @param wcs URL of the ISRIC soilgrids geoserver.

@@ -24,6 +24,7 @@ New \code{\link{soil_project}} in the working environment (as an R6
   object), as well as the project folder in the project path.
 }
 \description{
-Generates a new soil project (see: \code{\link{soil_project}}), together with
- a fixed link to the project folder and project path (used to save the data).
+Generates a new \strong{soil project} (see: \code{\link{soil_project}}),
+  together with a fixed link to the project folder and project path
+  (used to save the data).
 }

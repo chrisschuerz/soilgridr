@@ -1,6 +1,6 @@
 #' Write Soil Project Output
 #'
-#' Write the modified soilgrids layer to a file.
+#' Write the modified \href{https://soilgrids.org/}{soilgrids}} layer to a file.
 #'
 #' @param format Output format provided to the \link[rgdal]{writeGDAL} function (tif, ascii, etc.).
 #' @name write_output

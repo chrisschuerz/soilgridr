@@ -2,7 +2,7 @@
 % Please edit documentation in R/load_soilgrids.R
 \name{load_soilgrids}
 \alias{load_soilgrids}
-\title{Load soilGrids-Layers into the Soil Object}
+\title{Load soilgrids}
 \usage{
 load_soilgrids(project_path, shape_file, layer_names)
 }

@@ -1,7 +1,7 @@
 #' Soil Project Class
 #'
-#' Basic \code{solACE} building block
-#'  (see: \href{https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html}{Introduction to R6}). \cr
+#' The \strong{soil project} itself. Constitutes the basic \code{solACE}
+#'   building block (see: \href{https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html}{Introduction to R6}). \cr
 #'  Generate a soil project with the \code{\link{new_soil_project}} function.
 #'
 #' @rdname soil_project

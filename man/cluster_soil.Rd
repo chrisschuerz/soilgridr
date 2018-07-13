@@ -14,5 +14,6 @@ soil layers.}
 with k-means clustering.}
 }
 \description{
-Cluster soilgrids layers using kmeans clustering.
+Cluster the layers within the \strong{soil project} by using kmeans
+  clustering.
 }

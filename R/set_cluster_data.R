@@ -1,6 +1,7 @@
 #' Set Final Cluster Number
 #'
-#' Define the final number of clusters and set the respective clustered soil data.
+#' Define the final number of clusters within the \strong{soil project} and
+#' set the respective clustered soil data.
 #'
 #' @param soil_data Saved soil information in the soil_object.
 #' @param n_class Numeric value of final number of classes.

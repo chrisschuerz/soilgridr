@@ -12,6 +12,7 @@ set_cluster_data(soil_data, n_class)
 \item{n_class}{Numeric value of final number of classes.}
 }
 \description{
-Define the final number of clusters and set the respective clustered soil data.
+Define the final number of clusters within the \strong{soil project} and
+set the respective clustered soil data.
 }
 \keyword{internal}

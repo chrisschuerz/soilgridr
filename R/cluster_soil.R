@@ -1,6 +1,7 @@
 #' Cluster Layers
 #'
-#' Cluster soilgrids layers using kmeans clustering.
+#' Cluster the layers within the \strong{soil project} by using kmeans
+#'   clustering.
 #'
 #' @param soil_list List of tibbles holding soil parameters for the respective
 #'   soil layers.
@@ -25,7 +26,7 @@ cluster_soil <- function(soil_list, n_class){
     scale(., scale = TRUE, center = TRUE) %>%
     as.data.frame(.)
 
-  # Empty list that furhter stores the clustering results
+  # Empty list that further stores the clustering results
   soil_km <- list()
 
   cat("\nCluster soil data:\n")

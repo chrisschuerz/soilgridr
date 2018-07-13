@@ -15,6 +15,6 @@ plot_soilmap(soil_data, n_class)
 Plots the final soilmap with the selected number of soil classes.
 }
 \description{
-Internal/Actual general-function to plot the clustered soil map.
+Internal/Actual general-function to plot the clustered soil maps.
 }
 \keyword{internal}

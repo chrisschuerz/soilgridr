@@ -1,7 +1,8 @@
 #' Initiate a Soil Project
 #'
-#' Generates a new soil project (see: \code{\link{soil_project}}), together with
-#'  a fixed link to the project folder and project path (used to save the data).
+#' Generates a new \strong{soil project} (see: \code{\link{soil_project}}),
+#'   together with a fixed link to the project folder and project path
+#'   (used to save the data).
 #'
 #' @param project_name The name of the soil project. This will be the name of
 #'   the project folder and the soil project in the working environment.
