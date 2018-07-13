@@ -1,4 +1,6 @@
-#' Cluster soilgrids layers using kmeans clustering
+#' Cluster Layers
+#'
+#' Cluster soilgrids layers using kmeans clustering.
 #'
 #' @param soil_list List of tibbles holding soil parameters for the respective
 #'   soil layers.
@@ -9,9 +11,8 @@
 #' @importFrom magrittr %>%
 #' @importFrom purrr map2
 
-
 cluster_soil <- function(soil_list, n_class){
-  # Soil group clustering using kmeans -------------------------------------------
+  # Soil group clustering using kmeans ------------------------------------
   # Create scaled table to apply kmeans on
   suffix <- "_"%&%names(soil_list)
   suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
