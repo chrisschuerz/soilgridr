@@ -19,8 +19,7 @@
 #' @importFrom magrittr %>%
 #'
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
-#' @export
-
+#' @keywords internal
 obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_names) {
 
   # soilgrids data uses the WGS84 reference system. Projection of shape file
@@ -68,8 +67,8 @@ obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_name
 
   ## Path to the installed gdal distro
   path_gdal_translate <- ifelse(.Platform$OS.type == "windows",
-                           shortPathName("C:/Program files/GDAL")%//%"gdal_translate.exe",
-                           "gdal_translate")
+                                shortPathName("C:/Program files/GDAL")%//%"gdal_translate.exe",
+                                "gdal_translate")
   ## Pixel size x,y
   pxl_dim <- paste(layer_meta$pixel_size, layer_meta$pixel_size, collapse = " ")
   ## Creation option
@@ -83,7 +82,7 @@ obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_name
   ## Looping over all layer names to obtain them from the ISRIC WCS
   for (layer_i in layer_names) {
     cat("Layer"%&&%which(layer_names == layer_i)%&&%"of"%&&%
-        length(layer_names)%&&%"Layers:"%&&%layer_i%&%"\n")
+          length(layer_names)%&&%"Layers:"%&&%layer_i%&%"\n")
 
     loc   <- newXMLNode("WCS_GDAL")
     loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)

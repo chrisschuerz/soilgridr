@@ -13,7 +13,7 @@
 #' @importFrom tibble as_tibble enframe
 #'
 #' @return Plots the final soilmap with the selected number of soil classes.
-
+#' @keywords internal
 plot_soilmap <- function(soil_data, n_class){
 
   #Checking of number of soil classes
