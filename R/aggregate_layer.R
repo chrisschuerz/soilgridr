@@ -11,27 +11,31 @@
 #'   layers (depths in cm).
 
 #' @importFrom magrittr %>% set_names
-#' @importFrom purrr map map2 map_at
+#' @importFrom purrr map map2 map_at reduce
 
 aggregate_layer <- function(soil_list, lower_bound) {
 
-  # Checking if the same layers are available for all seven soil depths:
-  depth_avail <- "sl"%&%1:7 %in% names(soil_list)
-  if(!all(depth_avail)) stop("Soil aggregation only allowed when all 7 soil depths are available.")
+  # Checking if all depth for intended aggregation are available:
+  depth_soilgrids <- c(0, 2.5, 10, 22.5, 45, 80, 150)
+  depth_required  <- ("sl"%&%1:7)[depth_soilgrids <= max(lower_bound)]
+  depth_avail <- depth_required %in% names(soil_list)
+  if(!all(depth_avail)) stop("Required soil depths for intended aggregation missing!")
 
-  unique_lyr <- soil_list["sl"%&%1:7] %>%
+  soil_list_aggr <- soil_list[depth_required]
+
+  unique_lyr <- soil_list_aggr %>%
     map(., colnames) %>%
     unlist(.) %>%
     unique(.)
 
-  lyr_missing <- soil_list["sl"%&%1:7] %>%
+  layer_missing <- soil_list_aggr %>%
     map(., function(x){!all(unique_lyr %in% colnames(x))}) %>%
     unlist(.) %>%
     any(.)
 
-  if(lyr_missing) stop("For depth aggregation respecktive layers must be available for all soil depths!")
+  if(layer_missing) stop("For depth aggregation respective layers must be available for all soil depths!")
 
-  soil_list %<>% map_at(., "sl"%&%1:7, function(x){x[unique_lyr]})
+  soil_list_aggr %<>% map(., function(x){x[unique_lyr]})
 
   # Aggregate soil layers over depth: --------------------------------------------
   upper_bound <- c(0,lower_bound[1:length(lower_bound) - 1])
@@ -56,18 +60,15 @@ aggregate_layer <- function(soil_list, lower_bound) {
   }
 
   # Calc the layer weights for each aggregated soil layer
-  lyr_weight <- map2(upper_bound, lower_bound, calc_weights)
+  layer_weight <- map2(upper_bound, lower_bound, calc_weights) %>%
+    map(., ~.x[1:sum(depth_avail)])
 
   # Calc the aggregated soil layers by summing up the weighted layers
-  soil_aggr <- map(lyr_weight, function(weight, soil_list){
-    soil_list$sl1*weight[1] +
-      soil_list$sl2*weight[2] +
-      soil_list$sl3*weight[3] +
-      soil_list$sl4*weight[4] +
-      soil_list$sl5*weight[5] +
-      soil_list$sl6*weight[6] +
-      soil_list$sl7*weight[7]},
-    soil_list) %>%
+  soil_aggr <- layer_weight %>%
+    map(., function(weight, layer_list){
+      map2(weight, layer_list, ~.x*.y) %>%
+      reduce(`+`)},
+    soil_list_aggr) %>%
     map(., as_tibble) %>%
     set_names("sl"%&%1:length(upper_bound))
 

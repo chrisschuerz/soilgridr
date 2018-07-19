@@ -117,6 +117,11 @@ soil_project <- R6::R6Class(
           stop("Set final number of soil classes before aggregating!")
         }
 
+        if(!is.null(self$.data$soilgrids$meta$layer$depths)){
+          stop("Aggregation of soil layers allready performed."%&%
+               "Aggregation only possible after starting from_scratch()!")
+        }
+
         self$.data$data_processed <-
           aggregate_layer(soil_list = self$.data$data_processed,
                           lower_bound)

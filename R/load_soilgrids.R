@@ -12,7 +12,7 @@
 #' @importFrom dplyr bind_cols ends_with filter progress_estimated select
 #' @importFrom magrittr %>% set_colnames set_names
 #' @importFrom purrr map map_at
-#' @importFrom raster raster projectRaster crop mask
+#' @importFrom raster raster projectRaster crop mask dataType
 #' @importFrom tibble as_tibble
 #'
 #' @keywords internal
@@ -98,7 +98,7 @@ load_soilgrids <- function(project_path,
     gsub("\\D","",.) %>% # make sure empy char is returned if no soil-depth are available
     .[which(nchar(.) == 1)]
   # Get names of layer that have no separation in depth
-  other_lgc <-  gsub(".*sl","",names_sol_val) %>%
+  other_lgc <-  gsub(".*sl","",names_sol_value) %>%
     gsub("\\D","",.) %>%
     nchar(.) == 0
 
