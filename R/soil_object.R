@@ -36,10 +36,7 @@ soil_project <- R6::R6Class(
           }
         dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
         shapefile(shape_file, project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
-        # writeOGR(obj = shape_file,
-        #          dsn = project_path%//%project_name%//%"shape_file"%//%"shp_file.shp",
-        #          driver = "ESRI Shapefile",
-        #          layer = "shp_file")
+        shp_from_ext <- FALSE
       } else if(any(is.null(ext), is.null(crs))){
         stop("Either shape_file or extent AND crs must be defined!")
       } else {
@@ -50,6 +47,7 @@ soil_project <- R6::R6Class(
         crs(shp_ext) <- crs
         shapefile(shp_ext, project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
         shape_file <- shapefile(project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
+        shp_from_ext <- TRUE
       }
 
 
@@ -57,13 +55,9 @@ soil_project <- R6::R6Class(
       self$.data$meta$project_path <- project_path%//%project_name
 
       self$.data$shape_file$shape <- shape_file
-      if(is.null(shape_file)){
-        self$.data$shape_file$extent <- ext
-        self$.data$shape_file$crs <- crs
-      } else {
-        self$.data$shape_file$extent <- extent(shape_file)
-        self$.data$shape_file$crs <- crs(shape_file)
-      }
+      self$.data$shape_file$extent <- extent(shape_file)
+      self$.data$shape_file$crs <- crs(shape_file)
+      self$.data$shape_file$shape_from_extent <- shp_from_ext
 
       self$.data$soilgrids$meta$server_path <-
         "http://data.isric.org/geoserver/sg250m/wcs?"
