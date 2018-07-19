@@ -30,16 +30,8 @@ obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_name
   # required for the extent and further clipping.
   sg_crs <- crs("+proj=longlat +datum=WGS84 +no_defs")
 
-  if(is.null(shp_file$shape)){
-    shp_ext <- shp_file$extent %>%
-      as(., "SpatialPolygons")
-    crs(shp_ext) <- shp_file$crs
-    shp_ext <- spTransform(x = shp_ext, CRSobj = sg_crs) %>%
-      extent(.)
-  } else {
-    shp_ext <- spTransform(x = shp_file$shape, CRSobj = sg_crs) %>%
-      extent(.)
-  }
+  shp_ext <- spTransform(x = shp_file$shape, CRSobj = sg_crs) %>%
+    extent(.)
 
   # Calculate the indices of the soilgrids raster for wcs access.
   find_rasterindex <- function(shp_ext, layer_meta) {

@@ -13,3 +13,4 @@ load_soilgrids(project_path, shape_file, layer_names)
 
 \item{layer_names}{Character vector for defining the soilgrids layers to load, e.g "BDRICM_M_250m".}
 }
+\keyword{internal}

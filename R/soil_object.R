@@ -83,7 +83,7 @@ soil_project <- R6::R6Class(
                                               "PHIHOX_M_sl"%&%1:7%_%"250m")){
       cat("Downloading soilgrids layer:\n\n")
       layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
-                                  wacs = soilgrids_server)
+                                  wcs = soilgrids_server)
 
       self$.data$soilgrids$meta$pixel_size <- layer_meta$pixel_size
       self$.data$soilgrids$meta$extent <- layer_meta$extent
