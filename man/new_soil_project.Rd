@@ -9,15 +9,17 @@ new_soil_project(project_name, project_path, shape_file = NULL,
 }
 \arguments{
 \item{project_name}{The name of the soil project. This will be the name of
-the project folder and the soil project in the working environment.
-Once initialized \strong{the name should not be changed}!}
+the project folder and the soil project in the working environment.}
 
-\item{project_path}{Path to the SWAT project / Path where soilgrids layers
-are saved. Once initialized \strong{the path should not be changed}!}
+\item{project_path}{Path where the soil project and its data are saved.}
 
 \item{shape_file}{Shape file (or path to shape file) that defines the extent
-of the soilgrids layers. Alternatively, the extend (\code{extend}) and
+of the soilgrids layers. Alternatively, the extent (\code{extent}) and
 coordinate-system (\code{crs}) of a spatial object can be used.}
+
+\item{extent}{Extent of the window for which SoilGrids data should be loaded.}
+
+\item{crs}{Coordinate system of the provided extent.}
 }
 \value{
 New \code{\link{soil_project}} in the working environment (as an R6
@@ -25,6 +27,6 @@ New \code{\link{soil_project}} in the working environment (as an R6
 }
 \description{
 Generates a new \strong{soil project} (see: \code{\link{soil_project}}),
-  together with a fixed link to the project folder and project path
-  (used to save the data).
+together with a fixed link to the project folder and project path (used to
+save the data).
 }

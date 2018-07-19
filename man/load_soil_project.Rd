@@ -7,20 +7,11 @@
 load_soil_project(soil_project)
 }
 \arguments{
-\item{project_name}{The name of the soil project. This will be the name of
-the project folder and the soil project in the working environment.
-Once initialized \strong{the name should not be changed}!}
-
-\item{project_path}{Path to the SWAT project / Path where soilgrids layers
-are saved. Once initialized \strong{the path should not be changed}!}
-
-\item{shape_file}{Shape file (or path to shape file) that defines the extent
-of the soilgrids layers. Alternatively, the extend (\code{extend}) and
-coordinate-system (\code{crs}) of a spatial object can be used.}
+\item{soil_project}{Character string providing path to the soil project.}
 }
 \value{
-New \code{\link{soil_project}} in the working environment (as an R6
-  object), as well as the project folder in the project path.
+The loaded \code{\link{soil_project}} in the working environment (as an R6
+  object).
 }
 \description{
 Loads an existing \strong{soil project} (see: \code{\link{soil_project}}),
