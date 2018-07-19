@@ -10,8 +10,7 @@
 #' @importFrom dplyr quo mutate
 #' @importFrom magrittr %<>%
 #' @importFrom purrr map map2 map_at
-#'
-#' @export
+
 
 
 calculate_soilproperty <- function(soil_list, sl = NULL, ...) {
@@ -19,6 +18,8 @@ calculate_soilproperty <- function(soil_list, sl = NULL, ...) {
   fun_list <- as.list(match.call(expand.dots = FALSE))$...
 
   if(is.numeric(sl)) sl <- "sl"%&%sl
+  if(is.null(sl)) sl <- names(soil_list) %>% .[grepl("sl",.)]
+
   layer_avail <- sl %in% names(soil_list)
   if(!all(layer_avail)) stop("Soil layer given with 'sl' are missing!")
 
