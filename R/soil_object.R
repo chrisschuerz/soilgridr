@@ -9,8 +9,8 @@
 #' @import R6
 #' @import pasta
 #' @importFrom tibble tibble as_tibble
-#' @importFrom rgdal readOGR writeOGR
 #' @importFrom raster crs extent shapefile
+#' @importFrom sp SpatialPolygons
 #'
 #' @export
 
@@ -32,18 +32,24 @@ soil_project <- R6::R6Class(
         if(is.character(shape_file)){
           shape_file <- shapefile(shape_file)
         } else if(class(shape_file)[1] != "SpatialPolygonsDataFrame"){
-          stop("shape_file must be either a shape file of the path to the shape_file!")
+          stop("'shape_file' must be either a shape file or a character string providing the path to a shape file!")
           }
         dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
-        writeOGR(obj = shape_file,
-                 dsn = project_path%//%project_name%//%"shape_file"%//%"shp_file.shp",
-                 driver = "ESRI Shapefile",
-                 layer = "shp_file")
+        shapefile(shape_file, project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
+        # writeOGR(obj = shape_file,
+        #          dsn = project_path%//%project_name%//%"shape_file"%//%"shp_file.shp",
+        #          driver = "ESRI Shapefile",
+        #          layer = "shp_file")
       } else if(any(is.null(ext), is.null(crs))){
-        stop("Either shape_file or extent and crs must be defined!")
+        stop("Either shape_file or extent AND crs must be defined!")
       } else {
         if(class(ext) != "Extent") ext <- extent(ext)
-        if(class(crs) != "CRS") crs <- crs(crs)
+        if(class(crs) != "CRS")    crs <- crs(crs)
+        dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
+        shp_ext <- as(ext, 'SpatialPolygons')
+        crs(shp_ext) <- crs
+        shapefile(shp_ext, project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
+        shape_file <- shapefile(project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
       }
 
 
@@ -65,9 +71,10 @@ soil_project <- R6::R6Class(
     },
 
     save = function(){
-      save(list = self$.data$meta$project_name,
-           file = self$.data$meta$project_path%//%"soil_project.RData",
-           envir = sys.frame(-1))
+      obj_save <- get(x = self$.data$meta$project_name,
+                      envir = sys.frame(-1))
+      saveRDS(object = obj_save,
+              file = self$.data$meta$project_path%//%"sol.proj")
     },
 
     load_soilgrids = function(soilgrids_server = self$.data$soilgrids$meta$server_path,
@@ -82,7 +89,7 @@ soil_project <- R6::R6Class(
                                               "PHIHOX_M_sl"%&%1:7%_%"250m")){
       cat("Downloading soilgrids layer:\n\n")
       layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
-                                  wcs = soilgrids_server)
+                                  wacs = soilgrids_server)
 
       self$.data$soilgrids$meta$pixel_size <- layer_meta$pixel_size
       self$.data$soilgrids$meta$extent <- layer_meta$extent

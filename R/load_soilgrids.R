@@ -33,12 +33,6 @@ load_soilgrids <- function(project_path,
     return(rst)
   }
 
-  ## Function to mask raster only when shape file is available
-  mask_if <- function(rst, shp){
-    if(!is.null(shp)) rst <- mask(rst, shp)
-    return(rst)
-  }
-
   # Initiate list with soil data
   sol_val_list <- list()
   sol_lyr_list <- list()
@@ -59,7 +53,7 @@ load_soilgrids <- function(project_path,
       set_nodata(.) %>%
       projectRaster(., crs = shape_file$crs) %>%
       crop(., shape_file$extent) %>%
-      mask_if(., shape_file$shape)
+      mask(., shape_file$shape)
 
     # In first loop-run create meta data to save in final output list
     if(length(sol_val_list) == 0){
