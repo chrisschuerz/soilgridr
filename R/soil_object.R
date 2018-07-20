@@ -8,6 +8,7 @@
 #'
 #' @import R6
 #' @import pasta
+#' @importFrom dplyr quo
 #' @importFrom tibble tibble as_tibble
 #' @importFrom raster crs extent shapefile
 #' @importFrom sp SpatialPolygons
