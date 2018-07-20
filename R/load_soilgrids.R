@@ -12,7 +12,7 @@
 #' @importFrom dplyr bind_cols ends_with filter progress_estimated select
 #' @importFrom magrittr %>% set_colnames set_names
 #' @importFrom purrr map map_at
-#' @importFrom raster raster projectRaster crop mask dataType
+#' @importFrom raster raster projectRaster crop mask dataType getValues
 #' @importFrom tibble as_tibble
 #'
 #' @keywords internal
@@ -70,7 +70,7 @@ load_soilgrids <- function(project_path,
 
     # In first loop-run create meta data to save in final output list
     if(length(sol_value_list) == 0){
-      layer_meta <- list(has_value = layer_tmp@data@values,
+      layer_meta <- list(has_value = getValues(layer_tmp),
                        len_rst   = length(layer_tmp),
                        dim_rst   = dim(layer_tmp),
                        extent    = shape_file$extent,

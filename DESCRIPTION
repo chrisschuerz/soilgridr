@@ -2,7 +2,7 @@ Package: solACE
 Type: Package
 Title: Soil information aggregation, clustering and estimation from soilgrids
     data
-Version: 0.1.0
+Version: 0.2.0
 Author: person("Christoph", "Schuerz",
     email = "c.schuerz@gmail.com",
     role = c("aut", "cre"))

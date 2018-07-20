@@ -11,18 +11,8 @@
 #' @importFrom dplyr quo mutate
 #' @importFrom magrittr %<>% %>%
 #' @importFrom purrr map map2 map_at
-#'
-#' @export
 
-
-
-calculate_soilproperty <- function(soil_list, sl = NULL, ...) {
-
-  fun_list <- as.list(match.call(expand.dots = FALSE))$...
-  new_var <- names(fun_list)
-  fun_list %<>% unname()
-  for(i in 1:length(fun_list)) {fun_list[[new_var[i]]] <- quo(!!fun_list[[i]])}
-  fun_list <- fun_list[new_var]
+calculate_soilproperty <- function(soil_list, sl = NULL, fun_list) {
 
   if(is.numeric(sl)) sl <- "sl"%&%sl
   if(is.null(sl)) sl <- names(soil_list) %>% .[grepl("sl",.)]
@@ -45,15 +35,8 @@ calculate_soilproperty <- function(soil_list, sl = NULL, ...) {
 #' @importFrom dplyr quo select
 #' @importFrom magrittr %>%
 #' @importFrom purrr map_at
-#'
-#' @export
 
-
-
-select_soilproperty <- function(soil_list, sl = NULL, ...) {
-
-  vars <- as.list(match.call(expand.dots = FALSE))$...
-  sel_expr <- quo(c(!!!vars))
+select_soilproperty <- function(soil_list, sl = NULL, sel_expr) {
 
   if(is.numeric(sl)) sl <- "sl"%&%sl
   if(is.null(sl)) sl <- names(soil_list) %>% .[grepl("sl",.)]

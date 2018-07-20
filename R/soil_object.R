@@ -109,6 +109,31 @@ soil_project <- R6::R6Class(
       self$from_scratch <- function(){
         self$.data$data_processed <- self$.data$soilgrids$data
         self$.data$soil_cluster <- NULL
+        self$.data$soilgrids$meta$layer$depths <- NULL
+        self$evaluate_cluster <- NULL
+        self$select_cluster_k <-  NULL
+        self$plot_cluster <- NULL
+      }
+
+      self$calculate_soilproperty <- function(..., sl = NULL) {
+        fun_list <- as.list(match.call(expand.dots = FALSE))$...
+        new_var <- names(fun_list)
+        fun_list %<>% unname()
+        for(i in 1:length(fun_list)) {fun_list[[new_var[i]]] <- quo(!!fun_list[[i]])}
+        fun_list <- fun_list[new_var]
+
+        self$.data$data_processed <-
+          calculate_soilproperty(soil_list = self$.data$data_processed,
+                                 sl = sl, fun_list = fun_list)
+      }
+
+      self$select_soilproperty <- function(..., sl = NULL) {
+        vars <- as.list(match.call(expand.dots = FALSE))$...
+        sel_expr <- quo(c(!!!vars))
+
+        self$.data$data_processed <-
+          select_soilproperty(soil_list = self$.data$data_processed,
+                              sl = sl, sel_expr = sel_expr)
       }
 
       self$aggregate_depth <- function(lower_bound) {
@@ -118,8 +143,8 @@ soil_project <- R6::R6Class(
         }
 
         if(!is.null(self$.data$soilgrids$meta$layer$depths)){
-          stop("Aggregation of soil layers allready performed."%&%
-               "Aggregation only possible after starting from_scratch()!")
+          stop("Aggregation of soil layers allready performed!\n"%&%
+                 "Start from scratch with $from_scratch() if you want to redo an aggregation over depth.")
         }
 
         self$.data$data_processed <-
@@ -145,18 +170,18 @@ soil_project <- R6::R6Class(
           evaluate_cluster(cluster_result = self$.data$soil_cluster)
         }
 
-        self$select_n_class <-  function(final_n_class){
-          if(!("n"%_%final_n_class %in% names(self$.data$soil_cluster))){
+        self$select_cluster_k <-  function(cluster_k){
+          if(!("n"%_%cluster_k %in% names(self$.data$soil_cluster))){
             stop("Selected number of classes not available!")
           }
 
-          self$.data$soil_cluster$final_n_class <- final_n_class
+          self$.data$soil_cluster$cluster_k <- cluster_k
           self$.data$data_processed <-
-            set_cluster_data(soil_data = self$.data, n_class = final_n_class)
+            set_cluster_data(soil_data = self$.data, n_class = cluster_k)
         }
 
-        self$plot_cluster <- function(n_class = self$.data$soil_cluster$final_n_class) {
-          plot_soilmap(soil_data = self$.data, n_class = n_class)
+        self$plot_cluster <- function(cluster_k = self$.data$soil_cluster$cluster_k) {
+          plot_soilmap(soil_data = self$.data, n_class = cluster_k)
         }
       }
 
