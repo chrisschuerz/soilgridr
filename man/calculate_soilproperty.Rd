@@ -14,3 +14,7 @@ soil layers.}
 
 \item{...}{Further arguments provide functions to calculate new soil porperties in \code{dplyr::mutate} style.}
 }
+\description{
+Calculate new soil properties from the \href{https://soilgrids.org/}{soilgrids}
+layers within the \strong{soil project}
+}

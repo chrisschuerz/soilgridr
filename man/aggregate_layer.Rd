@@ -13,3 +13,9 @@ soil layers.}
 \item{lower_bound}{Vector defining the lower bounds of the aggregated soil
 layers (depths in cm).}
 }
+\description{
+Aggregate the \href{https://soilgrids.org/}{soilgrids} layers within the
+ \strong{soil project} over their respective depth. By convention most
+ layers are divided into 7 depth-classes.This function allows to aggregated
+ them over chosen depths.
+}

@@ -6,3 +6,6 @@
 \arguments{
 \item{format}{Output format provided to the \link[rgdal]{writeGDAL} function (tif, ascii, etc.).}
 }
+\description{
+Write the modified \href{https://soilgrids.org/}{soilgrids} layer to a file.
+}

@@ -1,6 +1,6 @@
 #' Calculate new soil properties.
 #'
-#' Calculate new soil properties from the \href{https://soilgrids.org/}{soilgrids}}
+#' Calculate new soil properties from the \href{https://soilgrids.org/}{soilgrids}
 #' layers within the \strong{soil project}
 #'
 #' @param soil_list List of tibbles holding soil parameters for the respective

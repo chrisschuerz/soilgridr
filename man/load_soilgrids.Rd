@@ -13,4 +13,10 @@ load_soilgrids(project_path, shape_file, layer_names)
 
 \item{layer_names}{Character vector for defining the soilgrids layers to load, e.g "BDRICM_M_250m".}
 }
+\description{
+Loads a set of layers (defined by \code{layer_names} character-vector) from
+ \href{https://soilgrids.org/}{soilgrids} into the \strong{soil project}
+ (this includes files in the defined path and the R environment, see:
+ \code{\link{new_soil_project}}).
+}
 \keyword{internal}
