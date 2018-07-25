@@ -1,8 +1,12 @@
 #' Soil Project Class
 #'
-#' The \strong{soil project} itself. Constitutes the basic \code{solACE}
-#'   building block (see: \href{https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html}{Introduction to R6}). \cr
-#'  Generate a soil project with the \code{\link{new_soil_project}} function.
+#' The \strong{soil project} class constitutes the basic building block of
+#'   \code{solACE}. One can Generate a soil project with the
+#'   \code{\link{new_soil_project}} function. \cr
+#'   In case you are interested in the technical details: The soil
+#'   project class is realised by using object-oriented approach from the R6
+#'   package. Read more at: \href{https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html}{Introduction to R6}.
+#'
 #'
 #' @rdname soil_project
 #'
@@ -14,7 +18,6 @@
 #' @importFrom sp SpatialPolygons
 #'
 #' @export
-
 soil_project <- R6::R6Class(
   "soil_project",
   cloneable = FALSE,
@@ -33,13 +36,13 @@ soil_project <- R6::R6Class(
         if(is.character(shape_file)){
           shape_file <- shapefile(shape_file)
         } else if(class(shape_file)[1] != "SpatialPolygonsDataFrame"){
-          stop("'shape_file' must be either a shape file or a character string providing the path to a shape file!")
+          stop("The variable 'shape_file' must be either a shape file or a character string providing the path to a shape file!")
           }
         dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
         shapefile(shape_file, project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
         shp_from_ext <- FALSE
       } else if(any(is.null(ext), is.null(crs))){
-        stop("Either shape_file or extent AND crs must be defined!")
+        stop("Either the variable'shape_file' or the variables 'extent' AND 'crs' must be defined!")
       } else {
         if(class(ext) != "Extent") ext <- extent(ext)
         if(class(crs) != "CRS")    crs <- crs(crs)
@@ -158,7 +161,7 @@ soil_project <- R6::R6Class(
       self$cluster_soil <- function(n_class){
         if(!is.null(self$.data$soil_cluster$final_n_class)){
           stop("Clustering allready performed and final number of classes set!\n"%&%
-               "Start from scratch with $from_scratch() if you want to redo clustering.")
+               "Start from scratch with $from_scratch() if you want to redo the clustering.")
         }
 
         self$.data$data_processed$soil_class <- NULL
@@ -203,32 +206,3 @@ soil_project <- R6::R6Class(
 )
 
 
-
-#  Implicit Function Descriptions: ----------------------------------------
-
-
-#' Start Soil Project from Scratch
-#'
-#' Provides a simple reset for the soil project, by restarting it from scratch.
-#'
-#' @name from_scratch
-NULL
-
-#' Plot clustered soil map
-#'
-#' Plot a clustered soilmap (where the number of clusters is defined by the
-#' \code{\link{select_n_class}} function).
-#'
-#' @name plot_cluster
-NULL
-
-#' Select Number of Clusters
-#'
-#' Select the number of clusters (within kmeans) for further processing.
-#' The function is meant to be used in conjunction with
-#' \code{\link{cluster_soil}} and \code{\link{evaluate_cluster}}.
-#'
-#' @param n Number of clusters.
-#'
-#' @name select_n_class
-NULL

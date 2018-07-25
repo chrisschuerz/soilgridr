@@ -14,6 +14,6 @@ A ggplot object that shows the the SSE (within a the given classes)
   over the number of classes
 }
 \description{
-Evaluate the results of the different kmeans clusters by calculating the
- sum of squared differences for each one.
+Evaluate the results of the different \link[=cluster_soil]{kmeans clusters} by calculating the
+  sum of squared differences for each one (between the clustered and the raw data) .
 }

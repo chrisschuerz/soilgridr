@@ -27,7 +27,7 @@ The environment should now look like this:
 ![](readme/environ-01.png) 
 </center>
 
-And, a new folder should appear in your project path, like this: 
+Additionally a new folder should appear in your project path. Which should look a little like this: 
 <center>
 ![](readme/folder-01.png) 
 </center>

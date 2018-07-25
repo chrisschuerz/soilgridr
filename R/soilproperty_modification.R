@@ -1,17 +1,16 @@
-#' Calculate new soil properties.
+#' Calculate new soil properties
 #'
 #' Calculate new soil properties from the \href{https://soilgrids.org/}{soilgrids}
-#' layers within the \strong{soil project}
+#' layers within the \strong{soil project}.
 #'
 #' @param soil_list List of tibbles holding soil parameters for the respective
 #'   soil layers.
 #' @param sl Vector defining the soil layers for which the properties are calculated.
-#' @param ... Further arguments provide functions to calculate new soil porperties in \code{dplyr::mutate} style.
+#' @param ... Further arguments provide functions to calculate new soil porperties (in \code{dplyr::mutate} style).
 #'
 #' @importFrom dplyr quo mutate
 #' @importFrom magrittr %<>% %>%
 #' @importFrom purrr map map2 map_at
-
 calculate_soilproperty <- function(soil_list, sl = NULL, fun_list) {
 
   if(is.numeric(sl)) sl <- "sl"%&%sl

@@ -23,7 +23,6 @@
 #'   get_layermeta(raw = TRUE)
 #'
 #' @keywords internal
-
 get_layermeta <- function(project_path, wcs) {
 
   # first layer of the soilgrids data set for which to aqcuire info
