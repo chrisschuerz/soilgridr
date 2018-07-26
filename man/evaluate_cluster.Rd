@@ -15,5 +15,5 @@ A ggplot object that shows the the SSE (within a the given classes)
 }
 \description{
 Evaluate the results of the different \link[=cluster_soil]{kmeans clusters} by calculating the
-  sum of squared differences for each one (between the clustered and the raw data) .
+  sum of squared differences for each one (between the clustered and the raw data).
 }

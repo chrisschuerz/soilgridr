@@ -18,7 +18,7 @@ cluster_soil <- function(soil_list, n_class){
   suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
 
   clst_tbl <- soil_list %>%
-    purr::map2(., suffix, function(tbl, nm) {
+    purrr::map2(., suffix, function(tbl, nm) {
       names(tbl) <- names(tbl)%&%nm
       return(tbl)}) %>%
     dplyr::bind_cols(.) %>%
