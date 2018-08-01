@@ -140,6 +140,10 @@ soil_project <- R6::R6Class(
                               sl = sl, sel_expr = sel_expr)
       }
 
+      self$plot_variable <- function(variable = NULL, sl = NULL) {
+        plot_variable(soil_data = self$.data, variable = variable, sl = sl)
+      }
+
       self$partition_depth <- function(lower_bound) {
         if(!is.null(self$.data$soil_cluster) &
            is.null(self$.data$soil_cluster$final_n_class)){
