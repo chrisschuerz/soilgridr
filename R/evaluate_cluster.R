@@ -1,7 +1,7 @@
 #' Evaluate Clustering Results
 #'
-#' Evaluate the results of the different kmeans clusters by calculating the
-#'  sum of squared differences for each one.
+#' Evaluate the results of the different \link[=cluster_soil]{kmeans clusters} by calculating the
+#'   sum of squared differences for each one (between the clustered and the raw data).
 #'
 #' @param cluster_result Results of the soilgrids clustering stored in the \strong{soil project}.
 #'
@@ -11,7 +11,6 @@
 #'
 #' @return A ggplot object that shows the the SSE (within a the given classes)
 #'   over the number of classes
-
 evaluate_cluster <- function(cluster_result) {
   cluster_result %>%
     map_dfr(., function(x){

@@ -2,7 +2,7 @@
 % Please edit documentation in R/soilproperty_modification.R
 \name{calculate_soilproperty}
 \alias{calculate_soilproperty}
-\title{Calculate new soil properties.}
+\title{Calculate new soil properties}
 \usage{
 calculate_soilproperty(soil_list, sl = NULL, fun_list)
 }
@@ -12,5 +12,9 @@ soil layers.}
 
 \item{sl}{Vector defining the soil layers for which the properties are calculated.}
 
-\item{...}{Further arguments provide functions to calculate new soil porperties in \code{dplyr::mutate} style.}
+\item{...}{Further arguments provide functions to calculate new soil porperties (in \code{dplyr::mutate} style).}
+}
+\description{
+Calculate new soil properties from the \href{https://soilgrids.org/}{soilgrids}
+layers within the \strong{soil project}.
 }

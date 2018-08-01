@@ -11,7 +11,6 @@
 #' @importFrom dplyr bind_cols progress_estimated
 #' @importFrom magrittr %>%
 #' @importFrom purrr map2
-
 cluster_soil <- function(soil_list, n_class){
   # Soil group clustering using kmeans ------------------------------------
   # Create scaled table to apply kmeans on
@@ -19,11 +18,11 @@ cluster_soil <- function(soil_list, n_class){
   suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
 
   clst_tbl <- soil_list %>%
-    map2(., suffix, function(tbl, nm) {
+    purrr::map2(., suffix, function(tbl, nm) {
       names(tbl) <- names(tbl)%&%nm
       return(tbl)}) %>%
-    bind_cols(.) %>%
-    scale(., scale = TRUE, center = TRUE) %>%
+    dplyr::bind_cols(.) %>%
+    base::scale(., scale = TRUE, center = TRUE) %>%
     as.data.frame(.)
 
   # Empty list that further stores the clustering results

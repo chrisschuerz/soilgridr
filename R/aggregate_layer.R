@@ -1,18 +1,16 @@
 #' Aggregate soilgrids Layers over Depth.
 #'
-#' Aggregate the \href{https://soilgrids.org/}{soilgrids}} layers within the
+#' Aggregate the \href{https://soilgrids.org/}{soilgrids} layers within the
 #'  \strong{soil project} over their respective depth. By convention most
 #'  layers are divided into 7 depth-classes.This function allows to aggregated
 #'  them over chosen depths.
 #'
-#' @param soil_list List of tibbles holding soil parameters for the respective
-#'   soil layers.
 #' @param lower_bound Vector defining the lower bounds of the aggregated soil
 #'   layers (depths in cm).
 
 #' @importFrom magrittr %>% set_names
 #' @importFrom purrr map map2 map_at reduce
-
+#' @keywords internal
 aggregate_layer <- function(soil_list, lower_bound) {
 
   # Checking if all depth for intended aggregation are available:

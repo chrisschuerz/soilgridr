@@ -1,7 +1,7 @@
 #' Load soilgrids
 #'
 #' Loads a set of layers (defined by \code{layer_names} character-vector) from
-#'  \href{https://soilgrids.org/}{soilgrids}} into the \strong{soil project}
+#'  \href{https://soilgrids.org/}{soilgrids} into the \strong{soil project}
 #'  (this includes files in the defined path and the R environment, see:
 #'  \code{\link{new_soil_project}}).
 #'

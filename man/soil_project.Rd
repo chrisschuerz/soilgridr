@@ -9,8 +9,11 @@
 soil_project
 }
 \description{
-The \strong{soil project} itself. Constitutes the basic \code{solACE}
-  building block (see: \href{https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html}{Introduction to R6}). \cr
- Generate a soil project with the \code{\link{new_soil_project}} function.
+The \strong{soil project} class constitutes the basic building block of
+  \code{solACE}. One can Generate a soil project with the
+  \code{\link{new_soil_project}} function. \cr
+  In case you are interested in the technical details: The soil
+  project class is realised by using object-oriented approach from the R6
+  package. Read more at: \href{https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html}{Introduction to R6}.
 }
 \keyword{datasets}
