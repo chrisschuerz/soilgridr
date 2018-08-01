@@ -112,11 +112,11 @@ soil_project <- R6::R6Class(
         self$.data$soil_cluster <- NULL
         self$.data$soilgrids$meta$layer$depths <- NULL
         self$evaluate_cluster <- NULL
-        self$select_cluster_k <-  NULL
+        self$select_cluster <-  NULL
         self$plot_cluster <- NULL
       }
 
-      self$calculate_soilproperty <- function(..., sl = NULL) {
+      self$mutate_variable <- function(..., sl = NULL) {
         fun_list <- as.list(match.call(expand.dots = FALSE))$...
         new_var <- names(fun_list)
         fun_list %<>% unname()
@@ -128,7 +128,7 @@ soil_project <- R6::R6Class(
                                  sl = sl, fun_list = fun_list)
       }
 
-      self$select_soilproperty <- function(..., sl = NULL) {
+      self$select_variable <- function(..., sl = NULL) {
         vars <- as.list(match.call(expand.dots = FALSE))$...
         sel_expr <- quo(c(!!!vars))
 
@@ -137,7 +137,7 @@ soil_project <- R6::R6Class(
                               sl = sl, sel_expr = sel_expr)
       }
 
-      self$aggregate_depth <- function(lower_bound) {
+      self$partition_depth <- function(lower_bound) {
         if(!is.null(self$.data$soil_cluster) &
            is.null(self$.data$soil_cluster$final_n_class)){
           stop("Set final number of soil classes before aggregating!")
@@ -155,7 +155,7 @@ soil_project <- R6::R6Class(
         self$.data$soilgrids$meta$layer$depths <- lower_bound
       }
 
-      self$cluster_soil <- function(n_class){
+      self$cluster_area <- function(n_class){
         if(!is.null(self$.data$soil_cluster$final_n_class)){
           stop("Clustering allready performed and final number of classes set!\n"%&%
                "Start from scratch with $from_scratch() if you want to redo clustering.")
@@ -171,7 +171,7 @@ soil_project <- R6::R6Class(
           evaluate_cluster(cluster_result = self$.data$soil_cluster)
         }
 
-        self$select_cluster_k <-  function(cluster_k){
+        self$select_cluster <-  function(cluster_k){
           if(!("n"%_%cluster_k %in% names(self$.data$soil_cluster))){
             stop("Selected number of classes not available!")
           }

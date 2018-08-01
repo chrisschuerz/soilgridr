@@ -19,8 +19,8 @@
 #'   object), as well as the project folder in the project path.
 #' @export
 
-new_soil_project <- function(project_name, project_path,
-                             shape_file = NULL, extent = NULL, crs = NULL) {
+new_project <- function(project_name, project_path,
+                        shape_file = NULL, extent = NULL, crs = NULL) {
   soil_obj <- soil_project$new(project_name = project_name,
                                project_path = project_path,
                                shape_file = shape_file,
@@ -43,7 +43,7 @@ new_soil_project <- function(project_name, project_path,
 #'   object).
 #' @export
 
-load_soil_project <- function(soil_project) {
+load_project <- function(soil_project) {
 
   dir_name <-  dirname(soil_project)
   base_name <- basename(soil_project)
