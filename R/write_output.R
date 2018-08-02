@@ -32,16 +32,16 @@ write_out <- function(soil_data, format, overwrite) {
     stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
   }
   unlink(soil_data$meta$project_path%//%"output")
-  dir.create(soil_data$meta$project_path%//%"output")
+  dir.create(soil_data$meta$project_path%//%"output", showWarnings = FALSE)
 
   file_suffix <- tibble(suffix = c("ascii", "tif"),
                         driver = c("AAIGrid", "GTiff"))
 
   # Create layer table that should be exported as raster layers
   suffix <- "_"%&%names(soil_data$data_processed)
-  suffix[!grepl("_sl", layer_suffix)] <- ""
+  suffix[!grepl("_sl", suffix)] <- ""
 
-  if("soil_class" %in% names(soil_data)){
+  if("soil_class" %in% names(soil_data$data_processed)){
     suffix <- suffix[1:(length(suffix) - 1)]
     soil_class <- soil_data$data_processed[[1]]$soil_class
 
@@ -50,7 +50,7 @@ write_out <- function(soil_data, format, overwrite) {
       names(soil_data$data_processed) != "soil_class"] %>%
       map2_dfc(., suffix, function(tbl, sfx){
         tbl %<>%
-          select(.,- soil_class) %>%
+          dplyr::select(.,- soil_class) %>%
           set_colnames(., colnames(.)%&%sfx)}) %>%
       add_column(., soil_class = soil_class, .before = 1)
 

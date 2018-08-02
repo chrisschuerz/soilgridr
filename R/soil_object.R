@@ -146,7 +146,7 @@ soil_project <- R6::R6Class(
 
       self$partition_depth <- function(lower_bound) {
         if(!is.null(self$.data$soil_cluster) &
-           is.null(self$.data$soil_cluster$final_n_class)){
+           is.null(self$.data$soil_cluster$cluster_k)){
           stop("Set final number of soil classes before aggregating!")
         }
 
