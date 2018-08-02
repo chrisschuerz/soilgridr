@@ -5,7 +5,8 @@
 #'
 #' @param cluster_result Results of the soilgrids clustering stored in the \strong{soil project}.
 #'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point theme_bw xlab ylab
+#' @importFrom ggplot2 ggplot aes geom_line geom_point scale_x_continuous
+#' theme_bw xlab ylab
 #' @importFrom tibble tibble add_column
 #' @importFrom purrr map_dfr
 #'
@@ -22,13 +23,13 @@ evaluate_cluster <- function(cluster_result) {
                  gsub("n_", "", .) %>%
                  as.numeric(.), .before = 1)
 
-  int <- max(round(nrow(sse_plot)/10),1)
-  x_breaks <- seq(min(sse_plot$n_class), max(sse_plot$n_class), int)
+  int <- max(round(nrow(sse_dat)/10),1)
+  x_breaks <- seq(int, max(sse_dat$n_class), int)
 
   sse_plot <- ggplot(data = sse_dat, aes(x = n_class, y = norm_within_ssq)) +
     geom_line() +
     geom_point() +
-    scale_x_continuous(breaks = x_breaks, minor_breaks = 1:max(sse_plot$n_class)) +
+    scale_x_continuous(breaks = x_breaks, minor_breaks = 1:max(sse_dat$n_class)) +
     theme_bw() +
     xlab("Number of soil classes") +
     ylab("within SSE / total SSE")
