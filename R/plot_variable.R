@@ -48,7 +48,7 @@ plot_variable <- function(soil_data, variable, sl) {
     .$name_comb
 
   name_comb <- name_comb[name_comb %in% names(plot_data)]
-  plot_data %<>% dplyr::select(., one_of(name_comb))
+  plot_data %<>% select(., one_of(name_comb))
 
 
   # Create raster dummy for x/y coordinates.
@@ -65,7 +65,7 @@ plot_variable <- function(soil_data, variable, sl) {
     rasterToPoints(.) %>%
     as_tibble(.) %>%
     filter(!is.na(layer)) %>%
-    dplyr::select(x,y)
+    select(x,y)
 
   plot_data <- bind_cols(plot_data, rst_tbl) %>%
     gather(., key = "variable", value = "value", -x, -y)

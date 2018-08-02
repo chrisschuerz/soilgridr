@@ -27,12 +27,11 @@ NULL
 #' @return Writes the modified soilgrids layers in the defined format.
 #' @keywords internal
 
-write_out <- function(soil_data, format, overwrite) {
-  if(dir.exists(soil_data$meta$project_path%//%"output") & !overwrite){
-    stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
+write_out <- function(soil_data, variable, sl, format, overwrite) {
+
+  if(!dir.exists(soil_data$meta$project_path%//%"output")) {
+    dir.create(soil_data$meta$project_path%//%"output", showWarnings = FALSE)
   }
-  unlink(soil_data$meta$project_path%//%"output")
-  dir.create(soil_data$meta$project_path%//%"output", showWarnings = FALSE)
 
   file_suffix <- tibble(suffix = c("ascii", "tif"),
                         driver = c("AAIGrid", "GTiff"))
@@ -42,6 +41,14 @@ write_out <- function(soil_data, format, overwrite) {
   suffix[!grepl("_sl", suffix)] <- ""
 
   if("soil_class" %in% names(soil_data$data_processed)){
+    if(file.exists(soil_data$meta$project_path%//%"output/soil_class"%.%format) & !overwrite){
+      stop("Soil_class layer was allready written for this project."%&%
+             "To overwrite the ouputs set overwrite = TRUE.")
+    }
+
+    if(!is.null(variable)) warning("Input 'variable' will be ignored and clustered soilmap is written.\n")
+    if(!is.null(sl)) warning("Input 'sl' will be ignored and clustered soilmap is written.\n")
+
     suffix <- suffix[1:(length(suffix) - 1)]
     soil_class <- soil_data$data_processed[[1]]$soil_class
 
@@ -50,7 +57,7 @@ write_out <- function(soil_data, format, overwrite) {
       names(soil_data$data_processed) != "soil_class"] %>%
       map2_dfc(., suffix, function(tbl, sfx){
         tbl %<>%
-          dplyr::select(.,- soil_class) %>%
+          select(.,- soil_class) %>%
           set_colnames(., colnames(.)%&%sfx)}) %>%
       add_column(., soil_class = soil_class, .before = 1)
 
@@ -64,8 +71,30 @@ write_out <- function(soil_data, format, overwrite) {
         names(tbl) <- names(tbl)%&%nm
         return(tbl)}) %>%
       bind_cols(.)
-  }
 
+    if(is.null(variable)) {
+      variable <- map(soil_data$data_processed, names) %>%
+        unlist() %>%
+        unique()
+    }
+
+    if(is.null(sl)) sl <- suffix
+    if(is.numeric(sl)) sl <- "_sl"%&%sl
+    if(substr(sl[1], 1, 2) == "sl") "_"%&%sl
+
+    name_comb <- expand.grid(var = variable, sl = sl) %>%
+      mutate(name_comb = var%&%sl) %>%
+      .$name_comb
+
+    name_comb <- name_comb[name_comb %in% names(raster_tbl)]
+
+    if(any(file.exists(soil_data$meta$project_path%//%"output"%//%name_comb%.%format)) & !overwrite){
+      stop("At least one of the defined variables was allready written for this project."%&%
+           "To overwrite the ouputs set overwrite = TRUE.")
+    }
+
+    raster_tbl %<>% select(., one_of(name_comb))
+  }
 
   data_type <- map_chr(raster_tbl, typeof)
 

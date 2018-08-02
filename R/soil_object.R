@@ -199,13 +199,14 @@ soil_project <- R6::R6Class(
         }
       }
 
-      self$write_output <- function(format, overwrite = FALSE){
+      self$write_output <- function(variable = NULL, sl = NULL, format = "tif", overwrite = FALSE){
         if(!is.null(self$.data$soil_cluster) &
-           is.null(self$.data$soil_cluster$final_n_class)){
+           is.null(self$.data$soil_cluster$cluster_k)){
           stop("Set final number of soil classes before writing outputs!")
         }
 
-        write_out(soil_data = self$.data, format = format, overwrite = overwrite)
+        write_out(soil_data = self$.data, variable = variable, sl = sl,
+                  format = format, overwrite = overwrite)
       }
 
       self$save()
