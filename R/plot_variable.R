@@ -7,7 +7,7 @@
 #' @param sl Vector providing soil layers to be plotted
 #'
 #' @importFrom dplyr bind_cols filter mutate one_of select
-#' @importFrom ggplot2 aes coord_equal geom_raster ggplot
+#' @importFrom ggplot2 aes coord_equal facet_wrap geom_raster ggplot
 #'   scale_fill_gradientn theme theme_bw element_text
 #' @importFrom magrittr %>% %<>%
 #' @importFrom pasta %&%
@@ -40,9 +40,8 @@ plot_variable <- function(soil_data, variable, sl) {
   }
 
   if(is.null(sl)) sl <- layer_suffix
-  if(!is.na(as.numeric(sl))) sl <- "sl"%&%sl
-  if(is.numeric(sl)) sl <- "sl"%&%sl
-  sl <-  "_"%&%sl %>% c("", .)
+  if(is.numeric(sl)) sl <- "_sl"%&%sl
+  if(substr(sl[1], 1, 2) == "sl") "_"%&%sl
 
   name_comb <- expand.grid(var = variable, sl = sl) %>%
     mutate(name_comb = var%&%sl) %>%
@@ -66,7 +65,7 @@ plot_variable <- function(soil_data, variable, sl) {
     rasterToPoints(.) %>%
     as_tibble(.) %>%
     filter(!is.na(layer)) %>%
-    select(x,y)
+    dplyr::select(x,y)
 
   plot_data <- bind_cols(plot_data, rst_tbl) %>%
     gather(., key = "variable", value = "value", -x, -y)

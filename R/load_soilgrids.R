@@ -58,7 +58,7 @@ load_soilgrids <- function(project_path,
   for(layer_i in layer_names) {
     ## Extract label for the respective layer in final table
     name_i <- layer_i %>%
-      gsub("M|.tif|250m|ll","",.) %>% # remove bad-listed characters
+      gsub("_M|.tif|_250m|_ll","",.) %>% # remove bad-listed characters
       gsub("_+$","",.) %>%            # remove _ at end of string
       gsub("_+","_",.)                # remove follow-up -
 
