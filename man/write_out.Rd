@@ -4,7 +4,7 @@
 \alias{write_out}
 \title{Write Soil Project Output}
 \usage{
-write_out(soil_data, format, overwrite = FALSE)
+write_out(soil_data, format, overwrite)
 }
 \arguments{
 \item{soil_data}{Soil data.}

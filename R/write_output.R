@@ -27,7 +27,7 @@ NULL
 #' @return Writes the modified soilgrids layers in the defined format.
 #' @keywords internal
 
-write_out <- function(soil_data, format, overwrite = FALSE) {
+write_out <- function(soil_data, format, overwrite) {
   if(dir.exists(soil_data$meta$project_path%//%"output") & !overwrite){
     stop("Output allready written for this project. For overwriting set overwrite = TRUE.")
   }
@@ -37,12 +37,9 @@ write_out <- function(soil_data, format, overwrite = FALSE) {
   file_suffix <- tibble(suffix = c("ascii", "tif"),
                         driver = c("AAIGrid", "GTiff"))
 
-
   # Create layer table that should be exported as raster layers
   suffix <- "_"%&%names(soil_data$data_processed)
-  suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
-
-
+  suffix[!grepl("_sl", layer_suffix)] <- ""
 
   if("soil_class" %in% names(soil_data)){
     suffix <- suffix[1:(length(suffix) - 1)]

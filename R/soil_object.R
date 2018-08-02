@@ -163,7 +163,7 @@ soil_project <- R6::R6Class(
       }
 
       self$cluster_area <- function(n_class){
-        if(!is.null(self$.data$soil_cluster$final_n_class)){
+        if(!is.null(self$.data$soil_cluster$cluster_k)){
           stop("Clustering allready performed and final number of classes set!\n"%&%
                "Start from scratch with $from_scratch() if you want to redo the clustering.")
         }
@@ -183,6 +183,12 @@ soil_project <- R6::R6Class(
             stop("Selected number of classes not available!")
           }
 
+          if(!is.null(self$.data$soil_cluster$cluster_k)){
+            stop("Final number of soil classes allready set!\n"%&%
+                   "Start from scratch with $from_scratch() if"%&%
+                   " you want to define a different number of soil classes!")
+          }
+
           self$.data$soil_cluster$cluster_k <- cluster_k
           self$.data$data_processed <-
             set_cluster_data(soil_data = self$.data, n_class = cluster_k)
@@ -193,13 +199,13 @@ soil_project <- R6::R6Class(
         }
       }
 
-      self$write_output <- function(format){
+      self$write_output <- function(format, overwrite = FALSE){
         if(!is.null(self$.data$soil_cluster) &
            is.null(self$.data$soil_cluster$final_n_class)){
           stop("Set final number of soil classes before writing outputs!")
         }
 
-        write_out(soil_data = self$.data, format = format)
+        write_out(soil_data = self$.data, format = format, overwrite = overwrite)
       }
 
       self$save()
