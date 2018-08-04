@@ -1,16 +1,16 @@
-Package: solACE
+Package: soilgridr
 Type: Package
-Title: Soil information aggregation, clustering and estimation from soilgrids
-    data
+Title: Working with SoilGrids data in R
 Version: 0.2.0
-Authors@R: person("Christoph", "Schuerz",
-    email = "c.schuerz@gmail.com",
-    role = c("aut", "cre"))
-Maintainer: Christoph Schuerz <c.schuerz@gmail.com>
-Description: solACE provides a workflow to download soilgrids layer for a
-    defined shapefile domain, calculates additional soil parameters, aggregates
-    the input layers over the depth and clusters the soil layers in space to
-    define soil groups.
+Authors@R: as.person(c(
+    "Christoph Schuerz <c.schuerz@posteo.org> [aut, cre]", 
+    "Daniel Klotz <klotzdaniel87@gmail.com> [aut]"
+  ))
+Maintainer: Christoph Schuerz <c.schuerz@posteo.org>
+Description: An intuitive suite of workflows to download SoilGrids data, 
+    partition soil data over depth, cluster in space, modify, calculate and 
+    visualize soil variables and write outputs in different formats for further 
+    use.
 Imports:
     ggplot2,
     magrittr,
