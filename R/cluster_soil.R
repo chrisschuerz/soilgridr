@@ -47,9 +47,10 @@ cluster_soil <- function(soil_data, clusters_k){
 #'   sum of squared differences for each one (between the clustered and the raw data).
 #'
 #' @param cluster_result Results of the soilgrids clustering stored in the \strong{soil project}.
-#'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point scale_x_continuous
-#' theme_bw xlab ylab
+#' @importFrom dplyr filter mutate
+#' @importFrom ggplot2 aes element_blank element_text geom_line geom_point
+#'     ggplot facet_grid rel scale_x_continuous
+#' theme theme_bw xlab
 #' @importFrom tibble tibble add_column
 #' @importFrom tidyr gather
 #' @importFrom purrr map_dfr
