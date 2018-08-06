@@ -4,13 +4,13 @@
 \alias{cluster_soil}
 \title{Cluster Layers}
 \usage{
-cluster_soil(soil_list, n_class)
+cluster_soil(soil_data, clusters_k)
 }
 \arguments{
-\item{soil_list}{List of tibbles holding soil parameters for the respective
+\item{soil_data}{List of tibbles holding soil parameters for the respective
 soil layers.}
 
-\item{n_class}{Vector of number of soil classes that should be generated
+\item{clusters_k}{Vector of number of soil classes that should be generated
 with k-means clustering.}
 }
 \description{

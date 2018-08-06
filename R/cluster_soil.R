@@ -51,40 +51,111 @@ cluster_soil <- function(soil_data, clusters_k){
 #' @importFrom ggplot2 ggplot aes geom_line geom_point scale_x_continuous
 #' theme_bw xlab ylab
 #' @importFrom tibble tibble add_column
+#' @importFrom tidyr gather
 #' @importFrom purrr map_dfr
 #'
 #' @return A ggplot object that shows the the SSE (within a the given classes)
 #'   over the number of classes
-evaluate_cluster <- function(cluster_result) {
-  n_class  <- names(cluster_result)[grepl("n_", names(cluster_result))]
-  n_select <- cluster_result$cluster_k
+evaluate_cluster <- function(soil_data) {
+  n_class  <- names(soil_data$soil_cluster)[grepl("n_", names(soil_data$soil_cluster))]
+  k_select <- soil_data$soil_cluster$cluster_k
+  cluster_data <- soil_data$soil_cluster$cluster_summary %>%
+    gather(., key = "variable", value = "value", -cluster_k) %>%
+    mutate(variable = ifelse(variable == "norm_within_ssq",
+                             "within SSE / total SSE", "Distance to chord line"),
+           variable = factor(variable, levels = c("within SSE / total SSE",
+                                                  "Distance to chord line")))
 
-  sse_dat <- cluster_result[n_class] %>%
-    map_dfr(., function(x){
-      tibble(norm_within_ssq  = x$tot.withinss/x$totss)}) %>%
-    add_column(n_class = n_class %>%
-                 gsub("n_", "", .) %>%
-                 as.numeric(.), .before = 1)
+  int <- max(round(nrow(cluster_data)/10),1)
+  x_breaks <- seq(int, max(cluster_data$cluster_k), int)
 
-  int <- max(round(nrow(sse_dat)/10),1)
-  x_breaks <- seq(int, max(sse_dat$n_class), int)
-
-  sse_plot <- ggplot(data = sse_dat, aes(x = n_class, y = norm_within_ssq)) +
+  sse_plot <- ggplot(data = cluster_data, aes(x = cluster_k, y = value)) +
     geom_line() +
     geom_point() +
-    scale_x_continuous(breaks = x_breaks, minor_breaks = 1:max(sse_dat$n_class)) +
+    scale_x_continuous(breaks = x_breaks, minor_breaks = 1:max(cluster_data$cluster_k)) +
+    facet_grid(variable~., switch = "both") +
     theme_bw() +
-    xlab("Number of soil classes") +
-    ylab("within SSE / total SSE")
+    theme(axis.title.y = element_blank(),
+          strip.placement = "outside",
+          strip.background=element_blank(),
+          strip.text.y = element_text(size = rel(1.1))) +
+    xlab("Number of soil classes")
 
-  if(!is.null(n_select)) {
-    select_dat <- sse_dat %>% filter(n_class == n_select)
+  if(!is.null(k_select)) {
+    select_dat <- cluster_data %>% filter(cluster_k == k_select)
     sse_plot <- sse_plot +
-      geom_point(data = select_dat, aes(x = n_class, y = norm_within_ssq), col = "red", size = 3)
+      geom_point(data = select_dat, aes(x = cluster_k, y = value), col = "red", size = 3)
   }
   return(sse_plot)
 }
 
+#-------------------------------------------------------------------------------
+#' Calculate maximum difference for each cluster value to the chord line
+#'
+#' @param soil_data Saved soil information in the soil_object.
+
+#' @importFrom tibble add_column tibble
+#' @importFrom dplyr arrange filter
+#' @importFrom purrr map_dfr
+#' @importFrom magrittr %>%
+#'
+#' @keywords internal
+
+calculate_max_dist <- function(soil_data) {
+  n_class  <- names(soil_data$soil_cluster)[grepl("n_", names(soil_data$soil_cluster))]
+
+  sse_dat <- soil_data$soil_cluster[n_class] %>%
+    map_dfr(., function(x){
+      tibble(norm_within_ssq  = x$tot.withinss/x$totss)}) %>%
+    add_column(cluster_k = n_class %>%
+                 gsub("n_", "", .) %>%
+                 as.numeric(.), .before = 1)
+
+  max_dist <- function(coord_i, chord) {
+    alpha_0 <- atan(abs(diff(chord[,2]))/abs(diff(chord[,1])))
+    c <- sqrt((coord_i[1] - chord[1,1])^2 + (coord_i[2] - chord[1,2])^2)
+    alpha <- acos(abs(coord_i[1] - chord[1,1])/c) - alpha_0
+    unname(sin(alpha)*c)
+  }
+
+  chord <- filter(sse_dat, cluster_k == min(cluster_k) | cluster_k == max(cluster_k)) %>%
+    arrange(cluster_k) %>%
+    as.matrix()
+
+  sse_dat$max_diff <- apply(sse_dat, 1, max_dist, chord)
+
+  return(sse_dat)
+}
+
+#-------------------------------------------------------------------------------
+#' Set Final Cluster Number
+#'
+#' Define the final number of clusters within the \strong{soil project} and
+#' set the respective clustered soil data.
+#'
+#' @param soil_data Saved soil information in the soil_object.
+#' @param cluster_k Numeric value of final number of classes.
+
+#' @importFrom tibble add_column tibble
+#' @importFrom dplyr group_by summarise_all
+#' @importFrom purrr map
+#' @importFrom magrittr %>%
+#'
+#' @keywords internal
+
+set_cluster_data <- function(soil_data, cluster_k) {
+
+  soil_clust <- soil_data$soil_cluster[["n"%_%cluster_k]]$cluster
+
+  data_proc <- soil_data$data_processed %>%
+    map(., function(tbl, add_col){ add_column(tbl, soil_class = add_col) %>%
+        group_by(soil_class) %>%
+        summarise_all(mean)}, soil_clust)
+
+  data_proc$soil_class <- tibble(soil_class = soil_clust)
+
+  return(data_proc)
+}
 
 #-------------------------------------------------------------------------------
 #' Plot clustered soil map
@@ -165,34 +236,4 @@ plot_soilmap <- function(soil_data, cluster_k){
     theme(axis.text.y = element_text(angle = 90, hjust = 0.5))
 
   return(clust_plot)
-}
-
-#-------------------------------------------------------------------------------
-#' Set Final Cluster Number
-#'
-#' Define the final number of clusters within the \strong{soil project} and
-#' set the respective clustered soil data.
-#'
-#' @param soil_data Saved soil information in the soil_object.
-#' @param cluster_k Numeric value of final number of classes.
-
-#' @importFrom tibble add_column tibble
-#' @importFrom dplyr group_by summarise_all
-#' @importFrom purrr map
-#' @importFrom magrittr %>%
-#'
-#' @keywords internal
-
-set_cluster_data <- function(soil_data, cluster_k) {
-
-  soil_clust <- soil_data$soil_cluster[["n"%_%cluster_k]]$cluster
-
-  data_proc <- soil_data$data_processed %>%
-    map(., function(tbl, add_col){ add_column(tbl, soil_class = add_col) %>%
-        group_by(soil_class) %>%
-        summarise_all(mean)}, soil_clust)
-
-  data_proc$soil_class <- tibble(soil_class = soil_clust)
-
-  return(data_proc)
 }

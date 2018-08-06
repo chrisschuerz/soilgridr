@@ -173,16 +173,18 @@ soil_project <- R6::R6Class(
         self$.data$soil_cluster <-
           cluster_soil(soil_data = self$.data$data_processed,
                        clusters_k = clusters_k)
+        self$.data$soil_cluster$cluster_summary <- calculate_max_dist(soil_data)
 
         if(auto_select) {
           self$.data$soil_cluster$cluster_k <-
-            auto_select_cluster(soil_data = self$.data)
+            self$.data$soil_cluster$cluster_summary$cluster_k[
+              which.max(self$.data$soil_cluster$cluster_summary$max_diff)]
           self$.data$data_processed <-
             set_cluster_data(soil_data = self$.data, cluster_k = cluster_k)
         }
 
         self$evaluate_cluster <- function(){
-          evaluate_cluster(cluster_result = self$.data$soil_cluster)
+          evaluate_cluster(soil_data = self$.data)
         }
 
         self$select_cluster <-  function(cluster_k){

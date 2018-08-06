@@ -4,7 +4,7 @@
 \alias{aggregate_layer}
 \title{Aggregate soilgrids Layers over Depth.}
 \usage{
-aggregate_layer(soil_list, lower_bound)
+aggregate_layer(soil_data, lower_bound)
 }
 \arguments{
 \item{lower_bound}{Vector defining the lower bounds of the aggregated soil

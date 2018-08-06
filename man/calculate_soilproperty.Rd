@@ -4,10 +4,10 @@
 \alias{calculate_soilproperty}
 \title{Calculate new soil properties}
 \usage{
-calculate_soilproperty(soil_list, sl = NULL, fun_list)
+calculate_soilproperty(soil_data, sl = NULL, fun_list)
 }
 \arguments{
-\item{soil_list}{List of tibbles holding soil parameters for the respective
+\item{soil_data}{List of tibbles holding soil parameters for the respective
 soil layers.}
 
 \item{sl}{Vector defining the soil layers for which the properties are calculated.}

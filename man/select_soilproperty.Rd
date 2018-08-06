@@ -4,10 +4,10 @@
 \alias{select_soilproperty}
 \title{Select soil properties.}
 \usage{
-select_soilproperty(soil_list, sl = NULL, sel_expr)
+select_soilproperty(soil_data, sl = NULL, sel_expr)
 }
 \arguments{
-\item{soil_list}{List of tibbles holding soil parameters for the respective
+\item{soil_data}{List of tibbles holding soil parameters for the respective
 soil layers.}
 
 \item{sl}{Vector defining the soil layers for which the properties are calculated.}
