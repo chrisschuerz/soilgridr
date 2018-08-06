@@ -68,6 +68,15 @@ soil_project <- R6::R6Class(
 
     },
 
+    print = function() {
+      if(is.null(self$.data$data_processed)) {
+        cat("New porject initiated. Load soilgrids layers with .$load_soilgrids()")
+      } else {
+        self$.data$data_processed
+      }
+      invisible(self)
+    },
+
     save = function(){
       obj_save <- get(x = self$.data$meta$project_name,
                       envir = sys.frame(-1))
