@@ -4,7 +4,7 @@
 \alias{plot_variable}
 \title{Plot soil variables from processed data}
 \usage{
-plot_variable(soil_data, variable, sl)
+plot_variable(soil_data, variable, sl, normalize)
 }
 \arguments{
 \item{soil_data}{The cluster results output from \code{cluster_soilgrids()}.}

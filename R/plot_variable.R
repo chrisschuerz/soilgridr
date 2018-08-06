@@ -22,7 +22,7 @@
 #' @keywords internal
 
 
-plot_variable <- function(soil_data, variable, sl) {
+plot_variable <- function(soil_data, variable, sl, normalize) {
 
   layer_suffix <- "_"%&%names(soil_data$data_processed)
   layer_suffix <- layer_suffix[layer_suffix != "_soil_class"]
@@ -77,6 +77,29 @@ plot_variable <- function(soil_data, variable, sl) {
     filter(!is.na(layer)) %>%
     select(x,y)
 
+  if(normalize) {
+    normalize <- function(x) {(x - min(x)) / (max(x) - min(x))}
+    select_min <- function(x) {
+      w_min <- which(x == min(x))
+      w_min[ceiling(length(w_min)/2)]}
+    select_max <- function(x) {
+      w_max <- which(x == max(x))
+      w_max[ceiling(length(w_max)/2)]}
+    range_data <- plot_data %>%
+      gather(key = "variable") %>%
+      group_by(variable) %>%
+      summarize(min = min(value), max = max(value),
+                which_min = select_min(value), which_max = select_max(value)) %>%
+      mutate(x_min = rst_tbl$x[which_min],
+             y_min = rst_tbl$y[which_min],
+             x_max = rst_tbl$x[which_max],
+             y_max = rst_tbl$y[which_max]) %>%
+      select(-which_min, -which_max)
+
+
+    plot_data %<>%  mutate_all(funs(normalize))
+    }
+
   plot_data <- bind_cols(plot_data, rst_tbl) %>%
     gather(., key = "variable", value = "value", -x, -y)
 
@@ -88,6 +111,16 @@ plot_variable <- function(soil_data, variable, sl) {
     theme_bw() +
     theme(axis.text.y = element_text(angle = 90, hjust = 0.5)) +
     facet_wrap(~variable)
+
+  if(normalize) {
+    layer_plot <- layer_plot +
+      geom_point(data = range_data, aes(x = x_min, y = y_min), pch = 3) +
+      geom_text(data = range_data, aes(x = x_min, y = y_min, label = min),
+                hjust = 0, vjust = 0, nudge_x = 0.02) +
+      geom_point(data = range_data, aes(x = x_max, y = y_max), pch = 3) +
+      geom_text(data = range_data, aes(x = x_max, y = y_max, label = max),
+                hjust = 0, vjust = 0, nudge_x = 0.02)
+  }
 
   return(layer_plot)
 }
