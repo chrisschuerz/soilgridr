@@ -72,7 +72,7 @@ soil_project <- R6::R6Class(
       if(is.null(self$.data$data_processed)) {
         cat("New porject initiated. Load soilgrids layers with .$load_soilgrids()")
       } else {
-        self$.data$data_processed
+        print(self$.data$data_processed)
       }
       invisible(self)
     },
@@ -84,8 +84,7 @@ soil_project <- R6::R6Class(
               file = self$.data$meta$project_path%//%"sol.proj")
     },
 
-    load_soilgrids = function(soilgrids_server = self$.data$soilgrids$meta$server_path,
-                              layer_names = c("BDRICM_M_250m",
+    load_soilgrids = function(layer_names = c("BDRICM_M_250m",
                                               "BLDFIE_M_sl"%&%1:7%_%"250m",
                                               "CLYPPT_M_sl"%&%1:7%_%"250m",
                                               "CRFVOL_M_sl"%&%1:7%_%"250m",
@@ -93,7 +92,8 @@ soil_project <- R6::R6Class(
                                               "SNDPPT_M_sl"%&%1:7%_%"250m",
                                               "CECSOL_M_sl"%&%1:7%_%"250m",
                                               "ORCDRC_M_sl"%&%1:7%_%"250m",
-                                              "PHIHOX_M_sl"%&%1:7%_%"250m")){
+                                              "PHIHOX_M_sl"%&%1:7%_%"250m"),
+                              soilgrids_server = self$.data$soilgrids$meta$server_path){
       cat("Downloading soilgrids layer:\n\n")
       layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
                                   wcs = soilgrids_server)
@@ -123,9 +123,9 @@ soil_project <- R6::R6Class(
         self$.data$data_processed <- self$.data$soilgrids$data
         self$.data$soil_cluster <- NULL
         self$.data$soilgrids$meta$layer$depths <- NULL
-        self$evaluate_cluster <- NULL
-        self$select_cluster <-  NULL
-        self$plot_cluster <- NULL
+        self$evaluate_cluster <- function() cat("No clustering to evaluate! Redo clustering over area before.")
+        self$select_cluster <-  function() cat("No cluster to select! Redo clustering over area before.")
+        self$plot_cluster <- function() cat("No cluster to plot! Redo clustering over area before.")
       }
 
       self$mutate_variable <- function(..., sl = NULL) {
@@ -182,14 +182,15 @@ soil_project <- R6::R6Class(
         self$.data$soil_cluster <-
           cluster_soil(soil_data = self$.data$data_processed,
                        clusters_k = clusters_k)
-        self$.data$soil_cluster$cluster_summary <- calculate_max_dist(soil_data)
+        self$.data$soil_cluster$cluster_summary <- calculate_max_dist(soil_data = self$.data)
 
         if(auto_select) {
           self$.data$soil_cluster$cluster_k <-
             self$.data$soil_cluster$cluster_summary$cluster_k[
               which.max(self$.data$soil_cluster$cluster_summary$max_diff)]
           self$.data$data_processed <-
-            set_cluster_data(soil_data = self$.data, cluster_k = cluster_k)
+            set_cluster_data(soil_data = self$.data,
+                             cluster_k = self$.data$soil_cluster$cluster_k)
         }
 
         self$evaluate_cluster <- function(){

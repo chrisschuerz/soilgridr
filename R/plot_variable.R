@@ -6,7 +6,7 @@
 #' @param variable Charcacter vector providing variable names.
 #' @param sl Vector providing soil layers to be plotted
 #'
-#' @importFrom dplyr bind_cols filter mutate one_of select
+#' @importFrom dplyr bind_cols filter left_join mutate one_of select starts_with
 #' @importFrom ggplot2 aes coord_equal facet_wrap geom_raster ggplot
 #'   scale_fill_gradientn theme theme_bw element_text
 #' @importFrom magrittr %>% %<>%
@@ -25,18 +25,28 @@
 plot_variable <- function(soil_data, variable, sl) {
 
   layer_suffix <- "_"%&%names(soil_data$data_processed)
+  layer_suffix <- layer_suffix[layer_suffix != "_soil_class"]
   layer_suffix[!grepl("_sl", layer_suffix)] <- ""
 
-  plot_data <- soil_data$data_processed %>%
+
+  plot_data <- soil_data$data_processed[names(soil_data$data_processed)!="soil_class"] %>%
     map2_dfc(., layer_suffix, function(df, suf){
       names(df) <- names(df)%&%suf
       return(df)
-    })
+    }) %>%
+    select(-starts_with("soil_class"))
+
+  if("soil_class" %in% names(soil_data$data_processed)) {
+    plot_data %<>% mutate(soil_class = 1:nrow(plot_data))
+    plot_data <- left_join(soil_data$data_processed$soil_class, plot_data, by = "soil_class") %>%
+      select(-soil_class)
+  }
 
   if(is.null(variable)) {
     variable <- map(soil_data$data_processed, names) %>%
       unlist() %>%
       unique()
+    variable <- variable[variable != "soil_class"]
   }
 
   if(is.null(sl)) sl <- layer_suffix
@@ -56,13 +66,13 @@ plot_variable <- function(soil_data, variable, sl) {
     matrix(ncol = soil_data$soilgrids$meta$layer$dim_rst[1],
            nrow = soil_data$soilgrids$meta$layer$dim_rst[2]) %>%
     t() %>%
-    raster(crs = soil_data$soilgrids$meta$layer$crs)
+    raster::raster(crs = soil_data$soilgrids$meta$layer$crs)
 
   # Assign the shape files' extent and provide a nodata value
-  extent(rst_dummy) <- soil_data$soilgrids$meta$layer$extent
+  raster::extent(rst_dummy) <- soil_data$soilgrids$meta$layer$extent
 
   rst_tbl <- rst_dummy %>%
-    rasterToPoints(.) %>%
+    raster::rasterToPoints(.) %>%
     as_tibble(.) %>%
     filter(!is.na(layer)) %>%
     select(x,y)

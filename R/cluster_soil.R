@@ -58,7 +58,6 @@ cluster_soil <- function(soil_data, clusters_k){
 #' @return A ggplot object that shows the the SSE (within a the given classes)
 #'   over the number of classes
 evaluate_cluster <- function(soil_data) {
-  n_class  <- names(soil_data$soil_cluster)[grepl("n_", names(soil_data$soil_cluster))]
   k_select <- soil_data$soil_cluster$cluster_k
   cluster_data <- soil_data$soil_cluster$cluster_summary %>%
     gather(., key = "variable", value = "value", -cluster_k) %>%
@@ -103,12 +102,12 @@ evaluate_cluster <- function(soil_data) {
 #' @keywords internal
 
 calculate_max_dist <- function(soil_data) {
-  n_class  <- names(soil_data$soil_cluster)[grepl("n_", names(soil_data$soil_cluster))]
+  cluster_names  <- names(soil_data$soil_cluster)[grepl("n_", names(soil_data$soil_cluster))]
 
-  sse_dat <- soil_data$soil_cluster[n_class] %>%
+  sse_dat <- soil_data$soil_cluster[cluster_names] %>%
     map_dfr(., function(x){
       tibble(norm_within_ssq  = x$tot.withinss/x$totss)}) %>%
-    add_column(cluster_k = n_class %>%
+    add_column(cluster_k = cluster_names %>%
                  gsub("n_", "", .) %>%
                  as.numeric(.), .before = 1)
 
