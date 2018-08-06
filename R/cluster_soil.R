@@ -66,12 +66,21 @@ evaluate_cluster <- function(soil_data) {
            variable = factor(variable, levels = c("within SSE / total SSE",
                                                   "Distance to chord line")))
 
+  chord_data <- soil_data$soil_cluster$cluster_summary %>%
+    filter(., cluster_k == min(cluster_k) | cluster_k == max(cluster_k)) %>%
+    arrange(cluster_k) %>%
+    select(-max_diff) %>%
+    mutate(variable = factor("within SSE / total SSE"),
+           value = norm_within_ssq)
+
+
   int <- max(round(nrow(cluster_data)/10),1)
   x_breaks <- seq(int, max(cluster_data$cluster_k), int)
 
   sse_plot <- ggplot(data = cluster_data, aes(x = cluster_k, y = value)) +
     geom_line() +
     geom_point() +
+    geom_line(data = chord_data, aes(x = cluster_k, y = value), linetype = "dotted") +
     scale_x_continuous(breaks = x_breaks, minor_breaks = 1:max(cluster_data$cluster_k)) +
     facet_grid(variable~., switch = "both") +
     theme_bw() +

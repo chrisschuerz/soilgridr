@@ -6,9 +6,10 @@
 #' @param variable Charcacter vector providing variable names.
 #' @param sl Vector providing soil layers to be plotted
 #'
-#' @importFrom dplyr bind_cols filter left_join mutate one_of select starts_with
-#' @importFrom ggplot2 aes coord_equal facet_wrap geom_raster ggplot
-#'   scale_fill_gradientn theme theme_bw element_text
+#' @importFrom dplyr bind_cols filter funs group_by left_join mutate mutate_all
+#'    one_of select starts_with summarize
+#' @importFrom ggplot2 aes coord_equal element_text facet_wrap geom_raster geom_text
+#' ggplot scale_fill_gradientn theme theme_bw
 #' @importFrom magrittr %>% %<>%
 #' @importFrom pasta %&%
 #' @importFrom purrr map2_dfc
@@ -78,7 +79,7 @@ plot_variable <- function(soil_data, variable, sl, normalize) {
     select(x,y)
 
   if(normalize) {
-    normalize <- function(x) {(x - min(x)) / (max(x) - min(x))}
+    normalize_var <- function(x) {(x - min(x)) / (max(x) - min(x))}
     select_min <- function(x) {
       w_min <- which(x == min(x))
       w_min[ceiling(length(w_min)/2)]}
@@ -90,14 +91,16 @@ plot_variable <- function(soil_data, variable, sl, normalize) {
       group_by(variable) %>%
       summarize(min = min(value), max = max(value),
                 which_min = select_min(value), which_max = select_max(value)) %>%
-      mutate(x_min = rst_tbl$x[which_min],
+      mutate(min = round(min, digits = max(1,ceiling(log10(10/min)))),
+             max = round(max, digits = max(1,ceiling(log10(10/max)))),
+             x_min = rst_tbl$x[which_min],
              y_min = rst_tbl$y[which_min],
              x_max = rst_tbl$x[which_max],
              y_max = rst_tbl$y[which_max]) %>%
       select(-which_min, -which_max)
 
 
-    plot_data %<>%  mutate_all(funs(normalize))
+    plot_data %<>%  mutate_all(funs(normalize_var))
     }
 
   plot_data <- bind_cols(plot_data, rst_tbl) %>%

@@ -149,8 +149,9 @@ soil_project <- R6::R6Class(
                               sl = sl, sel_expr = sel_expr)
       }
 
-      self$plot_variable <- function(variable = NULL, sl = NULL) {
-        plot_variable(soil_data = self$.data, variable = variable, sl = sl)
+      self$plot_variable <- function(variable = NULL, sl = NULL, normalize = FALSE) {
+        plot_variable(soil_data = self$.data, variable = variable, sl = sl,
+                      normalize = normalize)
       }
 
       self$partition_depth <- function(lower_bound) {
