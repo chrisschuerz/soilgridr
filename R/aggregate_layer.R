@@ -11,29 +11,29 @@
 #' @importFrom magrittr %>% set_names
 #' @importFrom purrr map map2 map_at reduce
 #' @keywords internal
-aggregate_layer <- function(soil_list, lower_bound) {
+aggregate_layer <- function(soil_data, lower_bound) {
 
   # Checking if all depth for intended aggregation are available:
   depth_soilgrids <- c(0, 2.5, 10, 22.5, 45, 80, 150)
   depth_required  <- ("sl"%&%1:7)[depth_soilgrids <= max(lower_bound)]
-  depth_avail <- depth_required %in% names(soil_list)
+  depth_avail <- depth_required %in% names(soil_data)
   if(!all(depth_avail)) stop("Required soil depths for intended aggregation missing!")
 
-  soil_list_aggr <- soil_list[depth_required]
+  soil_data_aggr <- soil_data[depth_required]
 
-  unique_lyr <- soil_list_aggr %>%
+  unique_lyr <- soil_data_aggr %>%
     map(., colnames) %>%
     unlist(.) %>%
     unique(.)
 
-  layer_missing <- soil_list_aggr %>%
+  layer_missing <- soil_data_aggr %>%
     map(., function(x){!all(unique_lyr %in% colnames(x))}) %>%
     unlist(.) %>%
     any(.)
 
   if(layer_missing) stop("For depth aggregation respective layers must be available for all soil depths!")
 
-  soil_list_aggr %<>% map(., function(x){x[unique_lyr]})
+  soil_data_aggr %<>% map(., function(x){x[unique_lyr]})
 
   # Aggregate soil layers over depth: --------------------------------------------
   upper_bound <- c(0,lower_bound[1:length(lower_bound) - 1])
@@ -66,12 +66,12 @@ aggregate_layer <- function(soil_list, lower_bound) {
     map(., function(weight, layer_list){
       map2(weight, layer_list, ~.x*.y) %>%
       reduce(`+`)},
-    soil_list_aggr) %>%
+    soil_data_aggr) %>%
     map(., as_tibble) %>%
     set_names("sl"%&%1:length(upper_bound))
 
   #Concatenate aggregated soil layer and layers where no aggregation was applied
-  soil_return <- c(soil_aggr, soil_list[!(names(soil_list) %in% ("sl"%&%1:100))])
+  soil_return <- c(soil_aggr, soil_data[!(names(soil_data) %in% ("sl"%&%1:100))])
 
   return(soil_return)
 }

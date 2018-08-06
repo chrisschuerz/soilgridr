@@ -106,9 +106,9 @@ soil_project <- R6::R6Class(
 
 
       self$.data$soilgrids$raster     <- soil_data$soil_raster
-      self$.data$soilgrids$data       <- soil_data$soil_list
+      self$.data$soilgrids$data       <- soil_data$soil_data
       self$.data$soilgrids$meta$layer <- soil_data$layer_meta
-      self$.data$data_processed       <- soil_data$soil_list
+      self$.data$data_processed       <- soil_data$soil_data
 
       self$from_scratch <- function(){
         self$.data$data_processed <- self$.data$soilgrids$data
@@ -127,7 +127,7 @@ soil_project <- R6::R6Class(
         fun_list <- fun_list[new_var]
 
         self$.data$data_processed <-
-          calculate_soilproperty(soil_list = self$.data$data_processed,
+          calculate_soilproperty(soil_data = self$.data$data_processed,
                                  sl = sl, fun_list = fun_list)
       }
 
@@ -136,7 +136,7 @@ soil_project <- R6::R6Class(
         sel_expr <- quo(c(!!!vars))
 
         self$.data$data_processed <-
-          select_soilproperty(soil_list = self$.data$data_processed,
+          select_soilproperty(soil_data = self$.data$data_processed,
                               sl = sl, sel_expr = sel_expr)
       }
 
@@ -156,13 +156,13 @@ soil_project <- R6::R6Class(
         }
 
         self$.data$data_processed <-
-          aggregate_layer(soil_list = self$.data$data_processed,
+          aggregate_layer(soil_data = self$.data$data_processed,
                           lower_bound)
 
         self$.data$soilgrids$meta$layer$depths <- lower_bound
       }
 
-      self$cluster_area <- function(n_class){
+      self$cluster_area <- function(clusters_k, auto_select = FALSE){
         if(!is.null(self$.data$soil_cluster$cluster_k)){
           stop("Clustering allready performed and final number of classes set!\n"%&%
                "Start from scratch with $from_scratch() if you want to redo the clustering.")
@@ -171,8 +171,14 @@ soil_project <- R6::R6Class(
         self$.data$data_processed$soil_class <- NULL
 
         self$.data$soil_cluster <-
-          cluster_soil(soil_list = self$.data$data_processed,
-                       n_class = n_class)
+          cluster_soil(soil_data = self$.data$data_processed,
+                       clusters_k = clusters_k)
+        if(auto_select) {
+          self$.data$soil_cluster$cluster_k <-
+            auto_select_cluster(soil_data = self$.data)
+          self$.data$data_processed <-
+            set_cluster_data(soil_data = self$.data, cluster_k = cluster_k)
+        }
 
         self$evaluate_cluster <- function(){
           evaluate_cluster(cluster_result = self$.data$soil_cluster)
@@ -191,11 +197,11 @@ soil_project <- R6::R6Class(
 
           self$.data$soil_cluster$cluster_k <- cluster_k
           self$.data$data_processed <-
-            set_cluster_data(soil_data = self$.data, n_class = cluster_k)
+            set_cluster_data(soil_data = self$.data, cluster_k = cluster_k)
         }
 
         self$plot_cluster <- function(cluster_k = self$.data$soil_cluster$cluster_k) {
-          plot_soilmap(soil_data = self$.data, n_class = cluster_k)
+          plot_soilmap(soil_data = self$.data, cluster_k = cluster_k)
         }
       }
 

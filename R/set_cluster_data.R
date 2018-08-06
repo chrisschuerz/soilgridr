@@ -4,7 +4,7 @@
 #' set the respective clustered soil data.
 #'
 #' @param soil_data Saved soil information in the soil_object.
-#' @param n_class Numeric value of final number of classes.
+#' @param cluster_k Numeric value of final number of classes.
 
 #' @importFrom tibble add_column tibble
 #' @importFrom dplyr group_by summarise_all
@@ -13,9 +13,9 @@
 #'
 #' @keywords internal
 
-set_cluster_data <- function(soil_data, n_class) {
+set_cluster_data <- function(soil_data, cluster_k) {
 
-  soil_clust <- soil_data$soil_cluster[["n"%_%n_class]]$cluster
+  soil_clust <- soil_data$soil_cluster[["n"%_%cluster_k]]$cluster
 
   data_proc <- soil_data$data_processed %>%
     map(., function(tbl, add_col){ add_column(tbl, soil_class = add_col) %>%

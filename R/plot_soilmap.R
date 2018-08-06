@@ -3,7 +3,7 @@
 #' Internal/Actual general-function to plot the clustered soil maps.
 #'
 #' @param soil_data The cluster results output from \code{cluster_soilgrids()}.
-#' @param n_class Numeric. Number of soil classes to plot in the soil map.
+#' @param cluster_k Numeric. Number of soil classes to plot in the soil map.
 #'
 #' @importFrom dplyr mutate full_join
 #' @importFrom ggplot2 aes coord_equal geom_raster ggplot guide_legend
@@ -18,20 +18,20 @@
 #'
 #' @keywords internal
 
-plot_soilmap <- function(soil_data, n_class){
+plot_soilmap <- function(soil_data, cluster_k){
 
   #Checking of number of soil classes
-  if(is.null(n_class)){
+  if(is.null(cluster_k)){
     stop("No number of soil classes defined!\n"%&%
            "Either set final number of classes with select_cluster()"%&&%
            "or define the number of classes in the function!")
   }
-  if(!("n"%_%n_class %in% names(soil_data$soil_cluster))){
+  if(!("n"%_%cluster_k %in% names(soil_data$soil_cluster))){
     stop("Selected number of classes not available!")
   }
 
   # Clustering results for the selected number of soil classes in a tibble
-  clust_sel <- soil_data$soil_cluster[["n"%_%n_class]]$cluster %>%
+  clust_sel <- soil_data$soil_cluster[["n"%_%cluster_k]]$cluster %>%
     enframe()
 
   # Assign the cluster group indices to vector with length of the final raster map.

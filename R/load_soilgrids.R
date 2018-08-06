@@ -143,7 +143,7 @@ load_soilgrids <- function(project_path,
 
 
   # Output with soil layer data, cluster results and spatial meta data
-  out_list <- list(soil_list   = sol_tbl_list,
+  out_list <- list(soil_data   = sol_tbl_list,
                    soil_raster = sol_layer_list,
                    layer_meta  = layer_meta)
 

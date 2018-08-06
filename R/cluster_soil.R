@@ -3,21 +3,21 @@
 #' Cluster the layers within the \strong{soil project} by using kmeans
 #'   clustering.
 #'
-#' @param soil_list List of tibbles holding soil parameters for the respective
+#' @param soil_data List of tibbles holding soil parameters for the respective
 #'   soil layers.
-#' @param n_class Vector of number of soil classes that should be generated
+#' @param clusters_k Vector of number of soil classes that should be generated
 #'   with k-means clustering.
 
 #' @importFrom dplyr bind_cols progress_estimated
 #' @importFrom magrittr %>%
 #' @importFrom purrr map2
-cluster_soil <- function(soil_list, n_class){
+cluster_soil <- function(soil_data, clusters_k){
   # Soil group clustering using kmeans ------------------------------------
   # Create scaled table to apply kmeans on
-  suffix <- "_"%&%names(soil_list)
+  suffix <- "_"%&%names(soil_data)
   suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
 
-  clst_tbl <- soil_list %>%
+  clst_tbl <- soil_data %>%
     purrr::map2(., suffix, function(tbl, nm) {
       names(tbl) <- names(tbl)%&%nm
       return(tbl)}) %>%
@@ -29,9 +29,9 @@ cluster_soil <- function(soil_list, n_class){
   soil_km <- list()
 
   cat("\nCluster soil data:\n")
-  pb <- progress_estimated(length(n_class))
+  pb <- progress_estimated(length(clusters_k))
   # Loop over all defined number of classes and apply kmeans to the soilgrids data.
-  for(i_clust in n_class) {
+  for(i_clust in clusters_k) {
     soil_km[["n"%_%i_clust]] <- kmeans(x = clst_tbl,centers = i_clust, iter.max = 100)
     pb$tick()$print()
   }
