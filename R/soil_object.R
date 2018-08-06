@@ -173,6 +173,7 @@ soil_project <- R6::R6Class(
         self$.data$soil_cluster <-
           cluster_soil(soil_data = self$.data$data_processed,
                        clusters_k = clusters_k)
+
         if(auto_select) {
           self$.data$soil_cluster$cluster_k <-
             auto_select_cluster(soil_data = self$.data)
