@@ -24,29 +24,6 @@ load_soilgrids <- function(project_path,
   # Define path to soilgrids layer
   layer_dir <- project_path%//%"soil_layer"
 
-  ## Helper function to set the nodata values in the loaded raster files
-  ## should be defined as seperate function outside :(
-  set_nodata <- function(rst) {
-    if (dataType(rst) == "INT1U") {
-      rst@file@nodatavalue <- 255
-    } else if(dataType(rst) == "INT2S") {
-      rst@file@nodatavalue <- -32768
-    }
-    return(rst)
-  }
-
-  ## Function to mask raster only when shape file is available
-  mask_if <- function(rst, shp, shp_from_ext){
-    if(!shp_from_ext) rst <- mask(rst, shp)
-    return(rst)
-  }
-
-  ## Function to project raster only when crs(shp) and crs(rst) differ.
-  project_if <- function(rst, shp) {
-    if(crs(shp)@projargs != crs(rst)@projargs) projectRaster(rst, crs = crs(shp))
-    return(rst)
-  }
-
   # Initiate list with soil data
   sol_value_list <- list()
   sol_layer_list <- list()

@@ -67,13 +67,13 @@ plot_variable <- function(soil_data, variable, sl, normalize) {
     matrix(ncol = soil_data$soilgrids$meta$layer$dim_rst[1],
            nrow = soil_data$soilgrids$meta$layer$dim_rst[2]) %>%
     t() %>%
-    raster::raster(crs = soil_data$soilgrids$meta$layer$crs)
+    raster(crs = soil_data$soilgrids$meta$layer$crs)
 
   # Assign the shape files' extent and provide a nodata value
-  raster::extent(rst_dummy) <- soil_data$soilgrids$meta$layer$extent
+  extent(rst_dummy) <- soil_data$soilgrids$meta$layer$extent
 
   rst_tbl <- rst_dummy %>%
-    raster::rasterToPoints(.) %>%
+    rasterToPoints(.) %>%
     as_tibble(.) %>%
     filter(!is.na(layer)) %>%
     select(x,y)

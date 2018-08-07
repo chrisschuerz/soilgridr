@@ -224,9 +224,15 @@ soil_project <- R6::R6Class(
            is.null(self$.data$soil_cluster$cluster_k)){
           stop("Set final number of soil classes before writing outputs!")
         }
-
-        write_out(soil_data = self$.data, variable = variable, sl = sl,
-                  format = format, overwrite = overwrite)
+        if(format %in% c("tif", "ascii")) {
+          write_out(soil_data = self$.data, variable = variable, sl = sl,
+                    format = format, overwrite = overwrite)
+        } else if (format %in% c("tibble", "raster")) {
+          print(return_out(soil_data = self$.data, variable = variable, sl = sl,
+                           format = format))
+        } else {
+          stop("Wrong format. Select one of: 'tif', 'ascii', 'tibble', 'raster'." )
+        }
       }
 
       self$save()

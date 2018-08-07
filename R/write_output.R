@@ -98,27 +98,6 @@ write_out <- function(soil_data, variable, sl, format, overwrite) {
 
   data_type <- map_chr(raster_tbl, typeof)
 
-  rasterize <- function(soil_vct, meta) {
-    # Assign the cluster group indices to vector with length of the final raster map.
-    out_rst <- rep(NA, meta$len_rst)
-    out_rst[which(!is.na(meta$has_value))] <- soil_vct
-
-    # Reshape the vector and create raster map.
-    out_rst %<>%
-      matrix(ncol = meta$dim_rst[1],
-             nrow = meta$dim_rst[2]) %>%
-      t() %>%
-      raster(crs = meta$crs)
-
-    # Assign the shape files' extent and provide a nodata value
-    extent(out_rst) <- meta$extent
-    out_rst@file@nodatavalue <- -32768
-
-    out_rst <- as(out_rst, 'SpatialGridDataFrame')
-
-    return(out_rst)
-  }
-
   write_out <- function(rst, layer_name, type, format, driver){
     type <- type[layer_name]
     flag <- ifelse(type == "integer", -32768, NA)
