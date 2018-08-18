@@ -2,11 +2,11 @@
 #'
 #' Aggregate the \href{https://soilgrids.org/}{soilgrids} layers within the
 #'  \strong{soil project} over their respective depth. By convention most
-#'  layers are divided into 7 depth-classes.This function allows to aggregated
-#'  them over chosen depths.
+#'  layers are divided into seven depth-classes (and \code{aggregate_layer}
+#'  function allows to aggregate them over chosen depths.
 #'
 #' @param lower_bound Vector defining the lower bounds of the aggregated soil
-#'   layers (depths in cm).
+#'   layers (depths, given in cm).
 
 #' @importFrom magrittr %>% set_names
 #' @importFrom purrr map map2 map_at reduce
