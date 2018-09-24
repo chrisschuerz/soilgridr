@@ -1,0 +1,57 @@
+---
+title: "Documentation"
+output: html_document
+---
+
+
+## Load required R packages
+```{r}
+library(solACE)
+suppressPackageStartupMessages(library(rgdal))
+```
+
+## Get package demo data
+The package *solACE* contains a demo shape file for the Little River Experimental Watershed in south‐central Georgia, United States. For the demostration example load the demo shap file into the workspace.
+
+```{r}
+shape_path <- system.file("extdata", "demo.shp", package = "solACE")
+
+shape_demo <- readOGR(shape_path)
+shape_ext <- c(5100, 39800, 1088900, 1119600)
+shape_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=clrk66 +units=m +no_defs"
+plot(shape_demo)
+```
+
+## Starting a new soil project
+To start a new soil project simply execute the function \code{new_soil_project()}. For the setup the user has to provide the name of the new project, the path on the hard drive where the project will be located and the shape file for which the soil data will be computed. Once the path and the project name are defined these **must not be changed**. A change in the project name or the location of the project folder will affect the functionality of *solACE*.
+
+```{r}
+load("E:/R_project/solACE_test/soil_demo/soil_project.RData")
+# pro_path <- "define:/path/for/your/project"
+pro_path <- here("demo_test")
+
+
+new_soil_project(project_name = "soil_demo", 
+                 project_path = pro_path,
+                 shape_file = shape_demo)
+```
+
+The new soil project is now located on the hard drive in the defined project path and is also an object in the global environment of your R session with the defined project name. The soil project is an R6 object providing now some functionality provided by the obeject internally. After the setup the following funcrtionality is given:
+
+ - \code{demo_soil$save()} saves the current status of the soil project in the working environment to the project folder.
+ - \code{demo_soil$load_soilgrids()} loads the soilgrids layer for the extent of the shape file into the project folder and afterwards loads the soilgrids layer into the R object. Loading the soilgrid layers unlocks further functionality that is described below.
+ 
+
+```{r}
+soil_demo$load_soilgrids()
+
+soil_demo$cluster_soil(n_class = 1:20)
+```
+
+
+```{r}
+unlink(x = soil_demo$.data$meta$project_path, recursive = TRUE, force = TRUE)
+soil_tmp <- soil_demo$.data
+soil_demo$.data <- soil_tmp
+```
+

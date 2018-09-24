@@ -1,3 +1,6 @@
+# Test directory is too large
+/demo_test
+
 # History files
 .Rhistory
 .Rapp.history

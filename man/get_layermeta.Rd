@@ -4,22 +4,19 @@
 \alias{get_layermeta}
 \title{Soilgrids Metainformation}
 \usage{
-get_layermeta(wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
-  raw = FALSE)
+get_layermeta(project_path, wcs)
 }
 \arguments{
-\item{wcs}{URL of the ISRIC soilgrids geoserver}
+\item{project_path}{Path where the soil_project is located.}
 
-\item{raw}{logic, if \code{TRUE}  raw text output is returned if \code{FALSE} (default) the
-function returns the extracted values of the Tiff tiles pixel size and the
-extent.}
+\item{wcs}{URL of the ISRIC soilgrids geoserver.}
 }
 \value{
 Returns either a list with pixel size and extent of Tiffs as numerics
   or the raw text output.
 }
 \description{
-Get the required soilgrids meta information.
+Get the required soilgrids meta-information.
 }
 \examples{
 # Generate the required input for `obtain_soilgrids()`:
@@ -29,4 +26,6 @@ Get the required soilgrids meta information.
 # Check all meta information:
 # (also for crosschecking that function works properly)
   get_layermeta(raw = TRUE)
+
 }
+\keyword{internal}

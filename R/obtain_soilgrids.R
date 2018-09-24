@@ -1,4 +1,6 @@
-#' Obtain soilgrids layer from the ISRIC geoserver
+#' Obtain Soilgrids
+#'
+#' Obtain soilgrids layer from the ISRIC geoserver.
 #'
 #' @param project_path Path to the SWAT project / Path where soilgrids layers
 #'   are saved
@@ -9,36 +11,27 @@
 #' @param layer_meta List with the entries extent (Vector of length 4 with the
 #'   soilgrids extent) and the soilgrids pixel_size. Check if these values are
 #'   correct with \code{get_layermeta()]}
-#' @importFrom rgdal readOGR
-#' @importFrom sp CRS spTransform
-#' @importFrom raster extent
+#' @param layer_names Character vector of names of the soilgrids layers to be
+#'   downloadad.
+#'
+#' @importFrom sp spTransform SpatialPolygons
+#' @importFrom raster extent crs extent<- crs<-
 #' @importFrom XML newXMLNode saveXML
-#' @importFrom pasta %//% %.% %_% %&%
+#' @importFrom pasta %//% %.% %_% %&% %&&%
+#' @importFrom magrittr %>%
 #'
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
-#' @export
+#'
+#' @keywords internal
 
-obtain_soilgrids <- function(project_path, shp_file = NULL,
-                             wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
-                             layer_meta = list(extent = c(-180, 180, -56.0008104, 83.9991672),
-                                               pixel_size = 1/480)) {
+obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_names) {
 
-  # if no shp file provided subs1 shape frome SWAT watershed delineation used.
-  if(is.null(shp_file)) {
-    shp_file <- readOGR(dsn = project_path%//%"Watershed/shapes"%//%
-                                     "subs1.shp",
-                               layer = "subs1")
-  } else if(is.character(shp_file)){
-    lyr <- strsplit(shp_file, "\\/|\\\\|\\.")[[1]]
-    lyr <- lyr[length(lyr) - 1]
-    shp_file <- readOGR(dsn = shp_file,
-                               layer = lyr)
-  }
   # soilgrids data uses the WGS84 reference system. Projection of shape file
   # required for the extent and further clipping.
-  sg_crs <- CRS("+proj=longlat +datum=WGS84 +no_defs")
-  shp_file <- spTransform(x = shp_file, CRSobj = sg_crs)
-  shp_ext <- extent(shp_file)
+  sg_crs <- crs("+proj=longlat +datum=WGS84 +no_defs")
+
+  shp_ext <- spTransform(x = shp_file$shape, CRSobj = sg_crs) %>%
+    extent(.)
 
   # Calculate the indices of the soilgrids raster for wcs access.
   find_rasterindex <- function(shp_ext, layer_meta) {
@@ -63,16 +56,6 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
   #URL of the ISRIC Soilgrids WCS server
   wcs <- "http://data.isric.org/geoserver/sg250m/wcs?"
 
-  #The following soil layers are required
-  layer_names <- c("BDRICM_M_250m",
-                   "BLDFIE_M_sl"%&%1:7%_%"250m",
-                   "CLYPPT_M_sl"%&%1:7%_%"250m",
-                   "CRFVOL_M_sl"%&%1:7%_%"250m",
-                   "SLTPPT_M_sl"%&%1:7%_%"250m",
-                   "SNDPPT_M_sl"%&%1:7%_%"250m",
-                   "CECSOL_M_sl"%&%1:7%_%"250m",
-                   "ORCDRC_M_sl"%&%1:7%_%"250m",
-                   "PHIHOX_M_sl"%&%1:7%_%"250m")
 
   # Obtain the soilgrids layers from the ISRIC geoserver
   ## Most steps here modification from
@@ -80,8 +63,8 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
 
   ## Path to the installed gdal distro
   path_gdal_translate <- ifelse(.Platform$OS.type == "windows",
-                           shortPathName("C:/Program files/GDAL")%//%"gdal_translate.exe",
-                           "gdal_translate")
+                                shortPathName("C:/Program files/GDAL")%//%"gdal_translate.exe",
+                                "gdal_translate")
   ## Pixel size x,y
   pxl_dim <- paste(layer_meta$pixel_size, layer_meta$pixel_size, collapse = " ")
   ## Creation option
@@ -90,26 +73,29 @@ obtain_soilgrids <- function(project_path, shp_file = NULL,
   src_win <- paste(sg_ind, collapse=" ")
 
   ## Create soilgrids folder in Project directory
-  dir.create(project_path%//%"soilgrids")
+  # dir.create(project_path%//%"soil_layer")
 
   ## Looping over all layer names to obtain them from the ISRIC WCS
   for (layer_i in layer_names) {
+    cat("Layer"%&&%which(layer_names == layer_i)%&&%"of"%&&%
+          length(layer_names)%&&%"Layers:"%&&%layer_i%&%"\n")
+
     loc   <- newXMLNode("WCS_GDAL")
     loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
     loc.l <- newXMLNode("CoverageName", layer_i, parent = loc)
-    xml_out <- project_path%//%"soilgrids"%//%layer_i%.%"xml"
+    xml_out <- project_path%//%"soil_layer"%//%layer_i%.%"xml"
     saveXML(loc, file = xml_out)
-    tif_out <- project_path%//%"soilgrids"%//%layer_i%.%"tif"
+    tif_out <- project_path%//%"soil_layer"%//%layer_i%.%"tif"
 
     ### Pasting and sourcing gdal_translate command
     gdal_cmd <- paste(path_gdal_translate, xml_out, tif_out, "-tr", pxl_dim,
                       "-co", c_opt, "-srcwin", src_win)
     system(gdal_cmd)
 
+    # Further steps only require .tif files, therefore all loaded .xml files are removed.
+    xml_files <- list.files(path = project_path%//%"soil_layer", pattern = ".xml$",
+                            full.names = TRUE)
+    file.remove(xml_files)
   }
-
-  # Further steps only require .tif files, therefore all loaded .xml files are removed.
-  xml_files <- list.files(path = project_path%//%"soilgrids", pattern = ".xml$",
-                          full.names = TRUE)
-  file.remove(xml_files)
+  return(layer_names)
 }

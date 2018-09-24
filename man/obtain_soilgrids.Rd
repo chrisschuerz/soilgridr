@@ -2,12 +2,9 @@
 % Please edit documentation in R/obtain_soilgrids.R
 \name{obtain_soilgrids}
 \alias{obtain_soilgrids}
-\title{Obtain soilgrids layer from the ISRIC geoserver}
+\title{Obtain Soilgrids}
 \usage{
-obtain_soilgrids(project_path, shp_file = NULL,
-  wcs = "http://data.isric.org/geoserver/sg250m/wcs?",
-  layer_meta = list(extent = c(-180, 180, -56.0008104, 83.9991672), pixel_size
-  = 1/480))
+obtain_soilgrids(project_path, shp_file, wcs, layer_meta, layer_names)
 }
 \arguments{
 \item{project_path}{Path to the SWAT project / Path where soilgrids layers
@@ -22,10 +19,14 @@ will be used.}
 \item{layer_meta}{List with the entries extent (Vector of length 4 with the
 soilgrids extent) and the soilgrids pixel_size. Check if these values are
 correct with \code{get_layermeta()]}}
+
+\item{layer_names}{Character vector of names of the soilgrids layers to be
+downloadad.}
 }
 \value{
 Writes the required soilgrids layer to project_path/soilgrids.
 }
 \description{
-Obtain soilgrids layer from the ISRIC geoserver
+Obtain soilgrids layer from the ISRIC geoserver.
 }
+\keyword{internal}

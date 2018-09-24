@@ -1,57 +1,245 @@
-#' #' soil_object
-#' #'
-#' #' The `controls` is the hopefully new form of the `factor_set`. Instead of
-#' #' using attributed we use an `R6` class. This should make it simpler for us
-#' #' and the user. I am however not yet sure what the main attributes are and
-#' #' what sub-class specific controls are? We can use inheritance to distinguish
-#' #' sampling sets for specific sampling methods. Also, the construction and other
-#' #' functions will later not be exported. I just want to have them exposed during
-#' #' the development.
-#' #' @name soil_object
-#' #'
-#' NULL
+#' Soil Project Class
 #'
-#' #' Sampling Set
-#' #'
-#' #' The most basic sampling set (used for sample_random). Internally we can
-#' #' assign it with
-#' #' `g <- SWATpasteR::controls$new(method = "test", sample_data = 4)`. This
-#' #' creates a objected named `g` of class `controls` (see `class(g)`), with
-#' #' the provided data. We can then extract the information as part of the object,
-#' #' e.g. `g$method` will return the string "cool" and `g$sample_data` a tibble
-#' #' with the column `data` and one entry, namely `4`.
-#' #'
-#' #' @rdname controls
-#' #'
-#' #' @import R6
-#' #' @import pasta
-#' #' @importFrom tibble tibble as_tibble
-#' #'
-#' #' @export
-#' soil_object <- R6Class(
-#'   "soil_object",
-#'   public = list(
-#'     soil_data   = tibble(idx = NA_integer_,
-#'                          label   = NA_character_,
-#'                            control = NA_character_,
-#'                            type    = NA_character_,
-#'                            domain  = list(NA),
-#'                            domain_norm = list(NA_real_)),
-#'     n_samples     = NA_integer_,
-#'     method        = NA_character_,
-#'     sample_data   = tibble(NA), # samplign data
+#' The \strong{soil project} class constitutes the basic building block of
+#'   \code{solACE}. One can Generate a soil project with the
+#'   \code{\link{new_project}} function. \cr
+#'   In case you are interested in the technical details: The soil
+#'   project class is realised by using object-oriented approach from the R6
+#'   package. Read more at: \href{https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html}{Introduction to R6}.
 #'
-#'     initialize = function(.boundaries,
-#'                           n_samples,
-#'                           method,
-#'                           sample_data) {
-#'       self$.boundaries <- .boundaries
-#'       self$n_samples <- n_samples
-#'       self$method <- method
-#'       self$sample_data <- sample_data
-#'     },
-#'     print = function(...) {
-#'       print(tibble::as_tibble(self$sample_data))
-#'       invisible(self)}
-#'   )
-#' )
+#'
+#' @rdname soil_project
+#'
+#' @import R6
+#' @import pasta
+#' @importFrom dplyr quo
+#' @importFrom tibble tibble as_tibble
+#' @importFrom raster crs extent shapefile
+#' @importFrom sp SpatialPolygons
+#'
+#' @export
+soil_project <- R6::R6Class(
+  "soil_project",
+  cloneable = FALSE,
+  lock_objects = FALSE,
+  public = list(
+    .data = list(),
+
+    initialize = function(project_name, project_path, shape_file, ext, crs) {
+      if(dir.exists(project_path%//%project_name%//%"soil_layer")){
+        stop("Soil project allready exists in"%&&%project_path)
+      } else {
+        dir.create(project_path%//%project_name%//%"soil_layer", recursive = TRUE)
+      }
+
+      if(!is.null(shape_file) & is.null(ext) & is.null(crs)){
+        if(is.character(shape_file)){
+          shape_file <- shapefile(shape_file)
+        } else if(class(shape_file)[1] != "SpatialPolygonsDataFrame"){
+          stop("The variable 'shape_file' must be either a shape file or a character string providing the path to a shape file!")
+          }
+        dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
+        shapefile(shape_file, project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
+        shp_from_ext <- FALSE
+      } else if(any(is.null(ext), is.null(crs))){
+        stop("Either the variable'shape_file' or the variables 'extent' AND 'crs' must be defined!")
+      } else {
+        if(class(ext) != "Extent") ext <- extent(ext)
+        if(class(crs) != "CRS")    crs <- crs(crs)
+        dir.create(project_path%//%project_name%//%"shape_file", recursive = TRUE)
+        shp_ext <- as(ext, 'SpatialPolygons')
+        crs(shp_ext) <- crs
+        shapefile(shp_ext, project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
+        shape_file <- shapefile(project_path%//%project_name%//%"shape_file"%//%"shp_file.shp")
+        shp_from_ext <- TRUE
+      }
+
+
+      self$.data$meta$project_name <- project_name
+      self$.data$meta$project_path <- project_path%//%project_name
+
+      self$.data$shape_file$shape <- shape_file
+      self$.data$shape_file$extent <- extent(shape_file)
+      self$.data$shape_file$crs <- crs(shape_file)
+      self$.data$shape_file$shape_from_extent <- shp_from_ext
+
+      self$.data$soilgrids$meta$server_path <-
+        "http://data.isric.org/geoserver/sg250m/wcs?"
+
+    },
+
+    print = function() {
+      if(is.null(self$.data$data_processed)) {
+        cat("New porject initiated. Load soilgrids layers with .$load_soilgrids()")
+      } else {
+        print(self$.data$data_processed)
+      }
+      invisible(self)
+    },
+
+    save = function(){
+      obj_save <- get(x = self$.data$meta$project_name,
+                      envir = sys.frame(-1))
+      saveRDS(object = obj_save,
+              file = self$.data$meta$project_path%//%"sol.proj")
+    },
+
+    load_soilgrids = function(layer_names = c("BDRICM_M_250m",
+                                              "BLDFIE_M_sl"%&%1:7%_%"250m",
+                                              "CLYPPT_M_sl"%&%1:7%_%"250m",
+                                              "CRFVOL_M_sl"%&%1:7%_%"250m",
+                                              "SLTPPT_M_sl"%&%1:7%_%"250m",
+                                              "SNDPPT_M_sl"%&%1:7%_%"250m",
+                                              "CECSOL_M_sl"%&%1:7%_%"250m",
+                                              "ORCDRC_M_sl"%&%1:7%_%"250m",
+                                              "PHIHOX_M_sl"%&%1:7%_%"250m"),
+                              soilgrids_server = self$.data$soilgrids$meta$server_path){
+      cat("Downloading soilgrids layer:\n\n")
+      layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
+                                  wcs = soilgrids_server)
+
+      self$.data$soilgrids$meta$pixel_size <- layer_meta$pixel_size
+      self$.data$soilgrids$meta$extent <- layer_meta$extent
+
+      self$.data$soilgrids$meta$layer_names <-
+        obtain_soilgrids(project_path = self$.data$meta$project_path,
+                         shp_file = self$.data$shape_file,
+                         wcs = soilgrids_server,
+                         layer_meta = layer_meta,
+                         layer_names = layer_names)
+
+      cat("\nLoading soilgrids layer into R:\n\n")
+      soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
+                                  shape_file   = self$.data$shape_file,
+                                  layer_names  = self$.data$soilgrids$meta$layer_names)
+
+
+      self$.data$soilgrids$raster     <- soil_data$soil_raster
+      self$.data$soilgrids$data       <- soil_data$soil_data
+      self$.data$soilgrids$meta$layer <- soil_data$layer_meta
+      self$.data$data_processed       <- soil_data$soil_data
+
+      self$from_scratch <- function(){
+        self$.data$data_processed <- self$.data$soilgrids$data
+        self$.data$soil_cluster <- NULL
+        self$.data$soilgrids$meta$layer$depths <- NULL
+        self$evaluate_cluster <- function() cat("No clustering to evaluate! Redo clustering over area before.")
+        self$select_cluster <-  function() cat("No cluster to select! Redo clustering over area before.")
+        self$plot_cluster <- function() cat("No cluster to plot! Redo clustering over area before.")
+      }
+
+      self$mutate_variable <- function(..., sl = NULL) {
+        fun_list <- as.list(match.call(expand.dots = FALSE))$...
+        new_var <- names(fun_list)
+        fun_list %<>% unname()
+        for(i in 1:length(fun_list)) {fun_list[[new_var[i]]] <- quo(!!fun_list[[i]])}
+        fun_list <- fun_list[new_var]
+
+        self$.data$data_processed <-
+          calculate_soilproperty(soil_data = self$.data$data_processed,
+                                 sl = sl, fun_list = fun_list)
+      }
+
+      self$select_variable <- function(..., sl = NULL) {
+        vars <- as.list(match.call(expand.dots = FALSE))$...
+        sel_expr <- quo(c(!!!vars))
+
+        self$.data$data_processed <-
+          select_soilproperty(soil_data = self$.data$data_processed,
+                              sl = sl, sel_expr = sel_expr)
+      }
+
+      self$plot_variable <- function(variable = NULL, sl = NULL, normalize = FALSE) {
+        plot_variable(soil_data = self$.data, variable = variable, sl = sl,
+                      normalize = normalize)
+      }
+
+      self$partition_depth <- function(lower_bound) {
+        if(!is.null(self$.data$soil_cluster) &
+           is.null(self$.data$soil_cluster$cluster_k)){
+          stop("Set final number of soil classes before aggregating!")
+        }
+
+        if(!is.null(self$.data$soilgrids$meta$layer$depths)){
+          stop("Aggregation of soil layers allready performed!\n"%&%
+                 "Start from scratch with $from_scratch() if you want to redo an aggregation over depth.")
+        }
+
+        self$.data$data_processed <-
+          aggregate_layer(soil_data = self$.data$data_processed,
+                          lower_bound)
+
+        self$.data$soilgrids$meta$layer$depths <- lower_bound
+      }
+
+      self$cluster_area <- function(clusters_k, auto_select = FALSE){
+        if(!is.null(self$.data$soil_cluster$cluster_k)){
+          stop("Clustering allready performed and final number of classes set!\n"%&%
+               "Start from scratch with $from_scratch() if you want to redo the clustering.")
+        }
+
+        self$.data$data_processed$soil_class <- NULL
+
+        self$.data$soil_cluster <-
+          cluster_soil(soil_data = self$.data$data_processed,
+                       clusters_k = clusters_k)
+        self$.data$soil_cluster$cluster_summary <- calculate_max_dist(soil_data = self$.data)
+
+        if(auto_select) {
+          self$.data$soil_cluster$cluster_k <-
+            self$.data$soil_cluster$cluster_summary$cluster_k[
+              which.max(self$.data$soil_cluster$cluster_summary$max_diff)]
+          self$.data$data_processed <-
+            set_cluster_data(soil_data = self$.data,
+                             cluster_k = self$.data$soil_cluster$cluster_k)
+        }
+
+        self$evaluate_cluster <- function(){
+          evaluate_cluster(soil_data = self$.data)
+        }
+
+        self$select_cluster <-  function(cluster_k){
+          if(!("n"%_%cluster_k %in% names(self$.data$soil_cluster))){
+            stop("Selected number of classes not available!")
+          }
+
+          if(!is.null(self$.data$soil_cluster$cluster_k)){
+            stop("Final number of soil classes allready set!\n"%&%
+                   "Start from scratch with $from_scratch() if"%&%
+                   " you want to define a different number of soil classes!")
+          }
+
+          self$.data$soil_cluster$cluster_k <- cluster_k
+          self$.data$data_processed <-
+            set_cluster_data(soil_data = self$.data, cluster_k = cluster_k)
+        }
+
+        self$plot_cluster <- function(cluster_k = self$.data$soil_cluster$cluster_k) {
+          plot_soilmap(soil_data = self$.data, cluster_k = cluster_k)
+        }
+      }
+
+      self$write_output <- function(variable = NULL, sl = NULL, format = "tif", overwrite = FALSE){
+        if(!is.null(self$.data$soil_cluster) &
+           is.null(self$.data$soil_cluster$cluster_k)){
+          stop("Set final number of soil classes before writing outputs!")
+        }
+        if(format %in% c("tif", "ascii")) {
+          write_out(soil_data = self$.data, variable = variable, sl = sl,
+                    format = format, overwrite = overwrite)
+        } else if (format %in% c("tibble", "raster")) {
+          print(return_out(soil_data = self$.data, variable = variable, sl = sl,
+                           format = format))
+        } else {
+          stop("Wrong format. Select one of: 'tif', 'ascii', 'tibble', 'raster'." )
+        }
+      }
+
+      self$save()
+
+    }
+
+  )
+)
+
+
