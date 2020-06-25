@@ -88,33 +88,27 @@ soil_project <- R6::R6Class(
               file = self$.data$meta$project_path%//%"sol.proj")
     },
 
-    load_soilgrids = function(layer_names = c("BDRICM_M_250m",
-                                              "BLDFIE_M_sl"%&%1:7%_%"250m",
-                                              "CLYPPT_M_sl"%&%1:7%_%"250m",
-                                              "CRFVOL_M_sl"%&%1:7%_%"250m",
-                                              "SLTPPT_M_sl"%&%1:7%_%"250m",
-                                              "SNDPPT_M_sl"%&%1:7%_%"250m",
-                                              "CECSOL_M_sl"%&%1:7%_%"250m",
-                                              "ORCDRC_M_sl"%&%1:7%_%"250m",
-                                              "PHIHOX_M_sl"%&%1:7%_%"250m")){
-      cat("Downloading soilgrids layer:\n\n")
+    load_soilgrids = function(valriables = c("sand", "silt", "clay", "bdod",
+                                             "cfvo", "cec", "phh2o", "soc"),
+                              depths = 1:6, quantiles = "mean"){
+      cat("Load SoilGrids layers using Web Coverage Services: \n")
       # layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
       #                             wcs = self$.data$soilgrids$meta$wcs_server)
       #
       # self$.data$soilgrids$meta$pixel_size <- layer_meta$pixel_size
       # self$.data$soilgrids$meta$extent <- layer_meta$extent
 
-      self$.data$soilgrids$meta$layer_names <-
+      self$.data$soilgrids$meta$layer_table <-
         obtain_soilgrids(project_path = self$.data$meta$project_path,
                          shp_file = self$.data$shape_file,
-                         layer_names = layer_names,
+                         layer_table = layer_table,
                          wcs = self$.data$meta$wcs_server)
                          # layer_meta = layer_meta,
 
-      # cat("\nLoading soilgrids layer into R:\n\n")
-      # soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
-      #                             shape_file   = self$.data$shape_file,
-      #                             layer_names  = self$.data$soilgrids$meta$layer_names)
+      cat("\nLoading soilgrids layer into R:\n\n")
+      soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
+                                  shape_file   = self$.data$shape_file,
+                                  layer_table  = self$.data$soilgrids$meta$layer_table)
       #
       #
       # self$.data$soilgrids$raster     <- soil_data$soil_raster

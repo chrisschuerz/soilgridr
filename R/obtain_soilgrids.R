@@ -24,7 +24,14 @@
 #'
 #' @keywords internal
 
-obtain_soilgrids <- function(project_path, shp_file, variable, depth, quantile, wcs) {
+obtain_soilgrids <- function(project_path, shp_file, variables, depths, quantiles, wcs) {
+
+  variable_available <- c("bdod", "cec", "cfvo", "clay", "nitrogen", "phh2o", "sand", "silt", "soc", "ocd", "ocs")
+
+  if(any(!(variables %in% variable_available))) {
+    stop("Only the following 'variables' can be accessed:\n",
+         paste(variable_available, collapse = ", "))
+  }
 
   depth_lbl <- c("0-5cm", "5-15cm", "15-30cm", "30-60cm", "60-100cm", "100-200cm")
   depth <- c(1,3)
@@ -32,15 +39,18 @@ obtain_soilgrids <- function(project_path, shp_file, variable, depth, quantile, 
     stopifnot(depth %in% 1:6)
     depth <- depth_lbl[depth]
   }
-  variable <- c("sand", "silt", "clay")
-  quantile <- c("mean", "Q0.05")
 
   if(any(!(quantile %in% c("Q0.05", "Q0.5", "mean", "Q0.95")))) {
-    stop("For 'quantile' only the inputs 'Q0.05', 'Q0.5', 'mean', and 'Q0.95'",
+    stop("For 'quantiles' only the inputs 'Q0.05', 'Q0.5', 'mean', and 'Q0.95'",
          " are allowed!")
   }
 
-  layer_names <- expand.grid(variable, depth, quantile)
+  layer_tbl <- expand.grid(quantiles, depths, variables) %>%
+    as_tibble(.) %>%
+    map_df(., as.character) %>%
+    set_names(c("quantile", "depth", "variable")) %>%
+    select(variable, depth, quantile)
+  layer_names <- apply(layer_tbl, 1, paste, collapse = "_")
 
   # soilgrids data uses the Interrupted_Goode_Homolosine projection.
   # Projection of shape file required for the extent and further clipping.
@@ -53,11 +63,10 @@ obtain_soilgrids <- function(project_path, shp_file, variable, depth, quantile, 
   ## Looping over all layer names to obtain them from the ISRIC WCS
   t0 <- now()
 
-  cat("Load SoilGrids layers using Web Coverage Services: \n")
-  for (i_layer in 1:nrow(layer_names)) {
+  for (i_layer in 1:length(layer_names)) {
 
-    layer_i <- paste(unlist(layer_names[i_layer,]), collapse = "_")
-    wcs_pth <- paste(wcs$path%//%layer_names[i_layer,1]%.%"map", wcs$service,wcs$version, sep = "&")
+    layer_i <- layer_names[i_layer]
+    wcs_pth <- paste(wcs$path%//%layer_tbl[i_layer,1]%.%"map", wcs$service,wcs$version, sep = "&")
 
     loc   <- newXMLNode("WCS_GDAL")
     loc.s <- newXMLNode("ServiceURL", wcs_pth, parent = loc)
@@ -78,7 +87,8 @@ obtain_soilgrids <- function(project_path, shp_file, variable, depth, quantile, 
     xml_files <- list.files(path = project_path%//%"soil_layer", pattern = ".xml$",
                             full.names = TRUE)
     file.remove(xml_files)
-    display_progress(i_layer, nrow(layer_names), t0, "Layer")
+    display_progress(i_layer, length(layer_names), t0, "Layer")
   }
-  return(layer_names)
+  finish_progress(length(layer_names), t0, "Finished downloading", "layer")
+  return(layer_tbl)
 }

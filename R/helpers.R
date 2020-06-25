@@ -26,12 +26,14 @@ mask_if <- function(rst, shp, shp_from_ext){
 
 ## Function to project raster only when crs(shp) and crs(rst) differ.
 project_if <- function(rst, shp) {
-  if(crs(shp)@projargs != crs(rst)@projargs) projectRaster(rst, crs = crs(shp))
+  if(crs(shp)@projargs != crs(rst)@projargs) {
+    rst <- projectRaster(rst, crs = crs(shp))
+  }
   return(rst)
 }
 
 
-## Convert voctors with soil data values to raster layer
+## Convert vectors with soil data values to raster layer
 rasterize <- function(soil_vct, meta) {
   # Assign the cluster group indices to vector with length of the final raster map.
   out_rst <- rep(NA, meta$len_rst)
@@ -89,6 +91,12 @@ rasterize <- function(soil_vct, meta) {
 #' @keywords internal
 '%&&%' <- function(a, b) paste(a, b, sep = " ")
 
+#' Concatenate with double colon
+#'
+#' \%&&\% pastes two strings by " ".
+#' @keywords internal
+'%:%' <- function(a, b) paste(a, b, sep = " ")
+
 
 #' Display the progress if iterative processes
 #'
@@ -114,4 +122,31 @@ display_progress <- function(n, nmax, t0, word){
       "  Time elapsed:", as.character(time_elaps),
       "  Time remaining:", as.character(time_remain),
       "   ")
+}
+
+#' Print message for completed process
+#'
+#' @param nmax Number of iterations
+#' @param t0 initial time step
+#'
+#' @importFrom dplyr %>%
+#' @importFrom lubridate as.period interval now
+#' @keywords internal
+#'
+finish_progress <- function(nmax, t0, word1, word2) {
+  cat("\r", paste0(rep(" ", 75), collapse = ""))
+  interval(t0,now()) %>%
+    round(.) %>%
+    as.period(.) %>%
+    as.character(.) %>%
+    cat("\r",word1, nmax, word2%&%plural(nmax), "in", ., "\n")
+}
+
+#' Add plural 's' to the written message if multiple operations done
+#'
+#' @param n Interger number of operations
+#' @keywords internal
+#'
+plural <- function(n) {
+  ifelse(n == 1, "", "s")
 }

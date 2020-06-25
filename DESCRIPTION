@@ -12,9 +12,9 @@ Description: An intuitive suite of workflows to download SoilGrids data,
     visualize soil variables and write outputs in different formats for further 
     use.
 Imports:
+    dplyr,
     ggplot2,
-    magrittr,
-    pasta,
+    lubridate,
     purrr,
     RColorBrewer,
     tibble,
