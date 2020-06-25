@@ -1,6 +1,6 @@
 # Test directory is too large
 /demo_test
-
+/tests
 # History files
 .Rhistory
 .Rapp.history
@@ -35,3 +35,5 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 .Rproj.user
+
+tests/sub_shp/

@@ -11,11 +11,10 @@
 #' @rdname soil_project
 #'
 #' @import R6
-#' @import pasta
 #' @importFrom dplyr quo
-#' @importFrom tibble tibble as_tibble
 #' @importFrom raster crs extent shapefile
 #' @importFrom sp SpatialPolygons
+#' @importFrom tibble tibble as_tibble
 #'
 #' @export
 soil_project <- R6::R6Class(
@@ -63,8 +62,13 @@ soil_project <- R6::R6Class(
       self$.data$shape_file$crs <- crs(shape_file)
       self$.data$shape_file$shape_from_extent <- shp_from_ext
 
-      self$.data$soilgrids$meta$server_path <-
-        "http://data.isric.org/geoserver/sg250m/wcs?"
+      self$.data$meta$wcs_server <- list(
+        path = "https://maps.isric.org/mapserv?map=/map",
+        service = "SERVICE=WCS",
+        version = "VERSION=2.0.1",
+        crs = '+proj=igh +lat_0=0 +lon_0=0 +datum=WGS84 +units=m +no_defs',
+        pixel = c(250, 250)
+      )
 
     },
 
@@ -92,32 +96,31 @@ soil_project <- R6::R6Class(
                                               "SNDPPT_M_sl"%&%1:7%_%"250m",
                                               "CECSOL_M_sl"%&%1:7%_%"250m",
                                               "ORCDRC_M_sl"%&%1:7%_%"250m",
-                                              "PHIHOX_M_sl"%&%1:7%_%"250m"),
-                              soilgrids_server = self$.data$soilgrids$meta$server_path){
+                                              "PHIHOX_M_sl"%&%1:7%_%"250m")){
       cat("Downloading soilgrids layer:\n\n")
-      layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
-                                  wcs = soilgrids_server)
-
-      self$.data$soilgrids$meta$pixel_size <- layer_meta$pixel_size
-      self$.data$soilgrids$meta$extent <- layer_meta$extent
+      # layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
+      #                             wcs = self$.data$soilgrids$meta$wcs_server)
+      #
+      # self$.data$soilgrids$meta$pixel_size <- layer_meta$pixel_size
+      # self$.data$soilgrids$meta$extent <- layer_meta$extent
 
       self$.data$soilgrids$meta$layer_names <-
         obtain_soilgrids(project_path = self$.data$meta$project_path,
                          shp_file = self$.data$shape_file,
-                         wcs = soilgrids_server,
-                         layer_meta = layer_meta,
-                         layer_names = layer_names)
+                         layer_names = layer_names,
+                         wcs = self$.data$meta$wcs_server)
+                         # layer_meta = layer_meta,
 
-      cat("\nLoading soilgrids layer into R:\n\n")
-      soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
-                                  shape_file   = self$.data$shape_file,
-                                  layer_names  = self$.data$soilgrids$meta$layer_names)
-
-
-      self$.data$soilgrids$raster     <- soil_data$soil_raster
-      self$.data$soilgrids$data       <- soil_data$soil_data
-      self$.data$soilgrids$meta$layer <- soil_data$layer_meta
-      self$.data$data_processed       <- soil_data$soil_data
+      # cat("\nLoading soilgrids layer into R:\n\n")
+      # soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
+      #                             shape_file   = self$.data$shape_file,
+      #                             layer_names  = self$.data$soilgrids$meta$layer_names)
+      #
+      #
+      # self$.data$soilgrids$raster     <- soil_data$soil_raster
+      # self$.data$soilgrids$data       <- soil_data$soil_data
+      # self$.data$soilgrids$meta$layer <- soil_data$layer_meta
+      # self$.data$data_processed       <- soil_data$soil_data
 
       self$from_scratch <- function(){
         self$.data$data_processed <- self$.data$soilgrids$data

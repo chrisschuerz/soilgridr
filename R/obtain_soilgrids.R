@@ -14,88 +14,71 @@
 #' @param layer_names Character vector of names of the soilgrids layers to be
 #'   downloadad.
 #'
-#' @importFrom sp spTransform SpatialPolygons
+#' @importFrom dplyr %>%
+#' @importFrom gdalUtils gdal_translate
 #' @importFrom raster extent crs extent<- crs<-
+#' @importFrom sp spTransform SpatialPolygons
 #' @importFrom XML newXMLNode saveXML
-#' @importFrom pasta %//% %.% %_% %&% %&&%
-#' @importFrom magrittr %>%
 #'
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
 #'
 #' @keywords internal
 
-obtain_soilgrids <- function(project_path, shp_file, wcs, layer_meta, layer_names) {
+obtain_soilgrids <- function(project_path, shp_file, variable, depth, quantile, wcs) {
 
-  # soilgrids data uses the WGS84 reference system. Projection of shape file
-  # required for the extent and further clipping.
-  sg_crs <- crs("+proj=longlat +datum=WGS84 +no_defs")
+  depth_lbl <- c("0-5cm", "5-15cm", "15-30cm", "30-60cm", "60-100cm", "100-200cm")
+  depth <- c(1,3)
+  if(is.numeric(depth)) {
+    stopifnot(depth %in% 1:6)
+    depth <- depth_lbl[depth]
+  }
+  variable <- c("sand", "silt", "clay")
+  quantile <- c("mean", "Q0.05")
 
-  shp_ext <- spTransform(x = shp_file$shape, CRSobj = sg_crs) %>%
-    extent(.)
-
-  # Calculate the indices of the soilgrids raster for wcs access.
-  find_rasterindex <- function(shp_ext, layer_meta) {
-    #Translation from shape extent to pixel indices.
-    sg_ext <- layer_meta$extent
-    sg_pxl <- layer_meta$pixel_size
-    sg_dim <- c(round((sg_ext[2] - sg_ext[1])/sg_pxl),
-                round((sg_ext[4] - sg_ext[3])/sg_pxl))
-    ind <- floor(sg_dim[1]*(shp_ext[1] - sg_ext[1])/(sg_ext[2] - sg_ext[1]))
-    ind <- c(ind,
-             floor(sg_dim[2]*(sg_ext[4] - shp_ext[4])/(sg_ext[4] - sg_ext[3])))
-    ind <- c(ind,
-             ceiling(sg_dim[1]*(shp_ext[2] - shp_ext[1])/(sg_ext[2] - sg_ext[1])))
-    ind <- c(ind,
-             ceiling(sg_dim[2]*(shp_ext[4] - shp_ext[3])/(sg_ext[4] - sg_ext[3])))
-
-    return(ind)
+  if(any(!(quantile %in% c("Q0.05", "Q0.5", "mean", "Q0.95")))) {
+    stop("For 'quantile' only the inputs 'Q0.05', 'Q0.5', 'mean', and 'Q0.95'",
+         " are allowed!")
   }
 
-  sg_ind <- find_rasterindex(shp_ext, layer_meta)
+  layer_names <- expand.grid(variable, depth, quantile)
 
-  #URL of the ISRIC Soilgrids WCS server
-  wcs <- "http://data.isric.org/geoserver/sg250m/wcs?"
+  # soilgrids data uses the Interrupted_Goode_Homolosine projection.
+  # Projection of shape file required for the extent and further clipping.
+  sg_crs <- crs(wcs$crs)
 
-
-  # Obtain the soilgrids layers from the ISRIC geoserver
-  ## Most steps here modification from
-  ## http://gsif.isric.org/doku.php/wiki:tutorial_soilgrids
-
-  ## Path to the installed gdal distro
-  path_gdal_translate <- ifelse(.Platform$OS.type == "windows",
-                                shortPathName("C:/Program files/GDAL")%//%"gdal_translate.exe",
-                                "gdal_translate")
-  ## Pixel size x,y
-  pxl_dim <- paste(layer_meta$pixel_size, layer_meta$pixel_size, collapse = " ")
-  ## Creation option
-  c_opt <- "\"COMPRESS=DEFLATE\""
-  ## Subwindow dimensions of the shape file extent
-  src_win <- paste(sg_ind, collapse=" ")
-
-  ## Create soilgrids folder in Project directory
-  # dir.create(project_path%//%"soil_layer")
+  shp_ext <- spTransform(x = shp_file$shape, CRSobj = sg_crs) %>%
+    extent(.) %>%
+    .[c(1,4,2,3)]
 
   ## Looping over all layer names to obtain them from the ISRIC WCS
-  for (layer_i in layer_names) {
-    cat("Layer"%&&%which(layer_names == layer_i)%&&%"of"%&&%
-          length(layer_names)%&&%"Layers:"%&&%layer_i%&%"\n")
+  t0 <- now()
+
+  cat("Load SoilGrids layers using Web Coverage Services: \n")
+  for (i_layer in 1:nrow(layer_names)) {
+
+    layer_i <- paste(unlist(layer_names[i_layer,]), collapse = "_")
+    wcs_pth <- paste(wcs$path%//%layer_names[i_layer,1]%.%"map", wcs$service,wcs$version, sep = "&")
 
     loc   <- newXMLNode("WCS_GDAL")
-    loc.s <- newXMLNode("ServiceURL", wcs, parent = loc)
+    loc.s <- newXMLNode("ServiceURL", wcs_pth, parent = loc)
     loc.l <- newXMLNode("CoverageName", layer_i, parent = loc)
     xml_out <- project_path%//%"soil_layer"%//%layer_i%.%"xml"
     saveXML(loc, file = xml_out)
     tif_out <- project_path%//%"soil_layer"%//%layer_i%.%"tif"
 
-    ### Pasting and sourcing gdal_translate command
-    gdal_cmd <- paste(path_gdal_translate, xml_out, tif_out, "-tr", pxl_dim,
-                      "-co", c_opt, "-srcwin", src_win)
-    system(gdal_cmd)
+    gdal_translate(src_dataset = xml_out,
+                   dst_dataset = tif_out,
+                   of = "GTiff",
+                   tr = wcs$pixel,
+                   projwin = shp_ext,
+                   projwin_srs = wcs$crs,
+                   co = c("TILED=YES","COMPRESS=DEFLATE","PREDICTOR=2","BIGTIFF=YES"))
 
     # Further steps only require .tif files, therefore all loaded .xml files are removed.
     xml_files <- list.files(path = project_path%//%"soil_layer", pattern = ".xml$",
                             full.names = TRUE)
     file.remove(xml_files)
+    display_progress(i_layer, nrow(layer_names), t0, "Layer")
   }
   return(layer_names)
 }
