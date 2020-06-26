@@ -4,7 +4,7 @@
 \alias{obtain_soilgrids}
 \title{Obtain Soilgrids}
 \usage{
-obtain_soilgrids(project_path, shp_file, wcs, layer_meta, layer_names)
+obtain_soilgrids(project_path, shp_file, variables, depths, quantiles, wcs)
 }
 \arguments{
 \item{project_path}{Path to the SWAT project / Path where soilgrids layers

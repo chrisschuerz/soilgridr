@@ -1,7 +1,7 @@
 Package: soilgridr
 Type: Package
 Title: Working with SoilGrids data in R
-Version: 0.2.0
+Version: 0.3.0.9000
 Authors@R: as.person(c(
     "Christoph Schuerz <c.schuerz@posteo.org> [aut, cre]", 
     "Daniel Klotz <klotzdaniel87@gmail.com> [aut]"
@@ -22,4 +22,4 @@ Imports:
 License: GPL-3.0
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 7.0.2

@@ -2,7 +2,6 @@
 % Please edit documentation in R/return_output.R, R/write_output.R
 \name{write_output}
 \alias{write_output}
-\alias{write_output}
 \title{Return a Soil Project Output in R}
 \arguments{
 \item{soil_data}{The cluster results output from \code{cluster_soilgrids()}.}
@@ -10,8 +9,6 @@
 \item{variable}{Charcacter vector providing variable names.}
 
 \item{sl}{Vector providing soil layers to be plotted}
-
-\item{format}{Output format to be returned (either tibble or raster).}
 
 \item{format}{Output format provided to the \link[rgdal]{writeGDAL} function (tif, ascii, etc.).}
 }

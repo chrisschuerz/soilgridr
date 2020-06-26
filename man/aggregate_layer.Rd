@@ -4,16 +4,16 @@
 \alias{aggregate_layer}
 \title{Aggregate soilgrids Layers over Depth.}
 \usage{
-aggregate_layer(soil_data, lower_bound)
+aggregate_layer(soil_data, bottom_depths, depth_table)
 }
 \arguments{
-\item{lower_bound}{Vector defining the lower bounds of the aggregated soil
-layers (depths in cm).}
+\item{bottom_depths}{Vector defining the lower bounds of the aggregated soil
+layers (depths, given in cm).}
 }
 \description{
 Aggregate the \href{https://soilgrids.org/}{soilgrids} layers within the
  \strong{soil project} over their respective depth. By convention most
- layers are divided into 7 depth-classes.This function allows to aggregated
- them over chosen depths.
+ layers are divided into seven depth-classes (and \code{aggregate_layer}
+ function allows to aggregate them over chosen depths.
 }
 \keyword{internal}
