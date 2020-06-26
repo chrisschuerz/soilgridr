@@ -9,11 +9,11 @@
 #' @param shape_file Shape file of the study area.
 #' @param layer_names Character vector for defining the soilgrids layers to load, e.g "BDRICM_M_250m".
 
-#' @importFrom dplyr bind_cols ends_with filter select %>%
+#' @importFrom dplyr bind_cols ends_with filter mutate select %>%
 #' @importFrom lubridate now
-#' @importFrom purrr map map_at set_names
+#' @importFrom purrr map map_int set_names
 #' @importFrom raster raster projectRaster crop mask dataType getValues
-#' @importFrom tibble as_tibble
+#' @importFrom tibble as_tibble tibble
 #'
 #' @keywords internal
 
@@ -68,12 +68,18 @@ load_soilgrids <- function(project_path,
   layer_nr <- map_int(layer_table$depth, ~which(depth_lbl == .x))
   unique_layer_nr <- unique(layer_nr)
 
+  layer_meta$depths_initial <- tibble(top    = c(0, 5, 15, 30, 60, 100),
+                                      bottom = c(5, 15, 30, 60,100, 200)) %>%
+    .[unique_layer_nr,] %>%
+    mutate(sl    = 1:nrow(.),
+           label = "sl"%&%sl%&%": "%&%top%-%bottom%&%"cm") %>%
+    select(label, sl, top, bottom)
+
+  layer_meta$depths_aggregate <- layer_meta$depths_initial
+
   soil_data <- map(unique_layer_nr,
-                   ~bind_cols(soil_value_list[which(layer_number == .x)])) %>%
+                   ~bind_cols(soil_value_list[which(layer_nr == .x)])) %>%
     set_names(paste0("sl",1:length(unique_layer_nr), ": ", depth_lbl[unique_layer_nr]))
-
-
-
 
   # Output with soil layer data, cluster results and spatial meta data
   out_list <- list(soil_data   = soil_data,

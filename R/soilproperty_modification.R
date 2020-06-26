@@ -8,16 +8,16 @@
 #' @param sl Vector defining the soil layers for which the properties are calculated.
 #' @param ... Further arguments provide functions to calculate new soil porperties (in \code{dplyr::mutate} style).
 #'
-#' @importFrom dplyr quo mutate
-#' @importFrom magrittr %<>% %>%
-#' @importFrom purrr map map2 map_at
+#' @importFrom dplyr quo mutate %>%
+#' @importFrom purrr map_at
 calculate_soilproperty <- function(soil_data, sl = NULL, fun_list) {
 
-  if(is.numeric(sl)) sl <- "sl"%&%sl
-  if(is.null(sl)) sl <- names(soil_data) %>% .[grepl("sl",.)]
-
-  layer_avail <- sl %in% names(soil_data)
-  if(!all(layer_avail)) stop("Soil layer given with 'sl' are missing!")
+  if(is.null(sl)) sl <- 1:length(soil_data)
+  stopifnot(is.numeric(sl))
+  if(any(!(sl %in% 1:length(soil_data)))) {
+    stop("Values for 'sl' must be between 1 and ", length(soil_data),
+         " (the number of available soil layers)!")
+  }
 
   map_at(soil_data, .at = sl, ~ mutate(.x, !!!fun_list))
 }
@@ -31,17 +31,17 @@ calculate_soilproperty <- function(soil_data, sl = NULL, fun_list) {
 #' @param sl Vector defining the soil layers for which the properties are calculated.
 #' @param ... Further arguments provide soil porperties to select in \code{dplyr::select} style.
 #'
-#' @importFrom dplyr quo select
-#' @importFrom magrittr %>%
+#' @importFrom dplyr quo select %>%
 #' @importFrom purrr map_at
 
 select_soilproperty <- function(soil_data, sl = NULL, sel_expr) {
 
-  if(is.numeric(sl)) sl <- "sl"%&%sl
-  if(is.null(sl)) sl <- names(soil_data) %>% .[grepl("sl",.)]
-
-  layer_avail <- sl %in% names(soil_data)
-  if(!all(layer_avail)) stop("Soil layer given with 'sl' are missing!")
+  if(is.null(sl)) sl <- 1:length(soil_data)
+  stopifnot(is.numeric(sl))
+  if(any(!(sl %in% 1:length(soil_data)))) {
+    stop("Values for 'sl' must be between 1 and ", length(soil_data),
+         " (the number of available soil layers)!")
+  }
 
   map_at(soil_data, .at = sl, ~ select(.x, !!sel_expr))
 

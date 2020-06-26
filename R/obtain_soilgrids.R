@@ -14,10 +14,12 @@
 #' @param layer_names Character vector of names of the soilgrids layers to be
 #'   downloadad.
 #'
-#' @importFrom dplyr %>%
+#' @importFrom dplyr select %>%
 #' @importFrom gdalUtils gdal_translate
+#' @importFrom purrr map_df set_names
 #' @importFrom raster extent crs extent<- crs<-
 #' @importFrom sp spTransform SpatialPolygons
+#' @importFrom tibble as_tibble
 #' @importFrom XML newXMLNode saveXML
 #'
 #' @return Writes the required soilgrids layer to project_path/soilgrids.
@@ -34,13 +36,12 @@ obtain_soilgrids <- function(project_path, shp_file, variables, depths, quantile
   }
 
   depth_lbl <- c("0-5cm", "5-15cm", "15-30cm", "30-60cm", "60-100cm", "100-200cm")
-  depth <- c(1,3)
-  if(is.numeric(depth)) {
-    stopifnot(depth %in% 1:6)
-    depth <- depth_lbl[depth]
+  if(is.numeric(depths)) {
+    stopifnot(depths %in% 1:6)
+    depths <- depth_lbl[depths]
   }
 
-  if(any(!(quantile %in% c("Q0.05", "Q0.5", "mean", "Q0.95")))) {
+  if(any(!(quantiles %in% c("Q0.05", "Q0.5", "mean", "Q0.95")))) {
     stop("For 'quantiles' only the inputs 'Q0.05', 'Q0.5', 'mean', and 'Q0.95'",
          " are allowed!")
   }

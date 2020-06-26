@@ -88,10 +88,10 @@ soil_project <- R6::R6Class(
               file = self$.data$meta$project_path%//%"sol.proj")
     },
 
-    load_soilgrids = function(valriables = c("sand", "silt", "clay", "bdod",
-                                             "cfvo", "cec", "phh2o", "soc"),
+    load_soilgrids = function(variables = c("sand", "silt", "clay", "bdod",
+                                            "cfvo", "cec", "phh2o", "soc"),
                               depths = 1:6, quantiles = "mean"){
-      cat("Load SoilGrids layers using Web Coverage Services: \n")
+      cat("Loading SoilGrids layers using Web Coverage Services (WCS): \n")
       # layer_meta <- get_layermeta(project_path = self$.data$meta$project_path,
       #                             wcs = self$.data$soilgrids$meta$wcs_server)
       #
@@ -101,11 +101,13 @@ soil_project <- R6::R6Class(
       self$.data$soilgrids$meta$layer_table <-
         obtain_soilgrids(project_path = self$.data$meta$project_path,
                          shp_file = self$.data$shape_file,
-                         layer_table = layer_table,
+                         variables = variables,
+                         depths = depths,
+                         quantiles = quantiles,
                          wcs = self$.data$meta$wcs_server)
                          # layer_meta = layer_meta,
 
-      cat("\nLoading soilgrids layer into R:\n\n")
+      cat("\nReading SoilGrids layers into R:\n")
       soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
                                   shape_file   = self$.data$shape_file,
                                   layer_table  = self$.data$soilgrids$meta$layer_table)
@@ -119,7 +121,7 @@ soil_project <- R6::R6Class(
       self$from_scratch <- function(){
         self$.data$data_processed <- self$.data$soilgrids$data
         self$.data$soil_cluster <- NULL
-        self$.data$soilgrids$meta$layer$depths_partition <- NULL
+        self$.data$soilgrids$meta$layer$depths_aggregate <- self$.data$soilgrids$meta$layer$depths_initial
         self$evaluate_cluster <- function() cat("No clustering to evaluate! Redo clustering over area before.")
         self$select_cluster <-  function() cat("No cluster to select! Redo clustering over area before.")
         self$plot_cluster <- function() cat("No cluster to plot! Redo clustering over area before.")
@@ -151,28 +153,33 @@ soil_project <- R6::R6Class(
                       normalize = normalize)
       }
 
-      self$partition_depth <- function(lower_bound) {
+      self$aggregate_depths <- function(lower_bound,
+                                        depth_table = self$.data$soilgrids$meta$layer$depths_aggregate) {
         if(!is.null(self$.data$soil_cluster) &
            is.null(self$.data$soil_cluster$cluster_k)){
           stop("Set final number of soil classes before aggregating!")
         }
 
-        if(!is.null(self$.data$soilgrids$meta$layer$depths)){
-          stop("Aggregation of soil layers allready performed!\n"%&%
-                 "Start from scratch with $from_scratch() if you want to redo an aggregation over depth.")
+        if(!setequal(self$.data$soilgrids$meta$layer$depths_aggregate,
+                     self$.data$soilgrids$meta$layer$depths_initial)){
+          stop("Aggregation of soil layers was allready performed!\n",
+               "Start from scratch with .$from_scratch() if you want to redo ",
+               "an aggregation over depth.")
         }
-
-        self$.data$data_processed <-
+        soil_data_aggregate <-
           aggregate_layer(soil_data = self$.data$data_processed,
-                          lower_bound)
+                          lower_bound,
+                          depth_table)
 
-        self$.data$soilgrids$meta$layer$depths <- lower_bound
+        self$.data$data_processed <- soil_data_aggregate$soil_data
+        self$.data$soilgrids$meta$layer$depths_aggregate <- soil_data_aggregate$depth_table
       }
 
       self$cluster_area <- function(clusters_k, auto_select = FALSE){
         if(!is.null(self$.data$soil_cluster$cluster_k)){
-          stop("Clustering allready performed and final number of classes set!\n"%&%
-               "Start from scratch with $from_scratch() if you want to redo the clustering.")
+          stop("Clustering allready performed and final number of classes set!\n",
+               "Start from scratch with .$from_scratch() if you want to redo ",
+               "the clustering.")
         }
 
         self$.data$data_processed$soil_class <- NULL
