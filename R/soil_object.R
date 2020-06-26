@@ -111,15 +111,15 @@ soil_project <- R6::R6Class(
                                   layer_table  = self$.data$soilgrids$meta$layer_table)
       #
       #
-      # self$.data$soilgrids$raster     <- soil_data$soil_raster
-      # self$.data$soilgrids$data       <- soil_data$soil_data
-      # self$.data$soilgrids$meta$layer <- soil_data$layer_meta
-      # self$.data$data_processed       <- soil_data$soil_data
+      self$.data$soilgrids$raster     <- soil_data$soil_raster
+      self$.data$soilgrids$data       <- soil_data$soil_data
+      self$.data$soilgrids$meta$layer <- soil_data$layer_meta
+      self$.data$data_processed       <- soil_data$soil_data
 
       self$from_scratch <- function(){
         self$.data$data_processed <- self$.data$soilgrids$data
         self$.data$soil_cluster <- NULL
-        self$.data$soilgrids$meta$layer$depths <- NULL
+        self$.data$soilgrids$meta$layer$depths_partition <- NULL
         self$evaluate_cluster <- function() cat("No clustering to evaluate! Redo clustering over area before.")
         self$select_cluster <-  function() cat("No cluster to select! Redo clustering over area before.")
         self$plot_cluster <- function() cat("No cluster to plot! Redo clustering over area before.")
