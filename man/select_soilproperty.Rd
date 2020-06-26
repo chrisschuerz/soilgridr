@@ -4,7 +4,7 @@
 \alias{select_soilproperty}
 \title{Select soil properties.}
 \usage{
-select_soilproperty(soil_data, sl = NULL, sel_expr)
+select_soilproperty(soil_data, sl = NULL, sel_expr, depth_table)
 }
 \arguments{
 \item{soil_data}{List of tibbles holding soil parameters for the respective

@@ -4,7 +4,7 @@
 \alias{calculate_max_dist}
 \title{Calculate maximum difference for each cluster value to the chord line}
 \usage{
-calculate_max_dist(soil_data)
+calculate_max_dist(soil_cluster)
 }
 \arguments{
 \item{soil_data}{Saved soil information in the soil_object.}

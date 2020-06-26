@@ -28,6 +28,11 @@ aggregate_layer <- function(soil_data, bottom_depths, depth_table) {
          "soil depth \nintervals that are within the aggregation range.")
   }
 
+  if("soil_class" %in% names(soil_data)) {
+    soil_class__ <- soil_data$soil_class
+    soil_data$soil_class <- NULL
+  }
+
   soil_data <- soil_data[depth_table$sl]
 
   unique_lyr <- soil_data %>%
@@ -43,7 +48,6 @@ aggregate_layer <- function(soil_data, bottom_depths, depth_table) {
   if(layer_missing) stop("For depth aggregation respective layers must be available for all soil depths!")
 
   soil_data <- map(soil_data, function(x){x[unique_lyr]})
-
 
   # Aggregate soil layers over depth: --------------------------------------------
   top_depths <- c(0,bottom_depths[1:length(bottom_depths) - 1])
@@ -78,6 +82,9 @@ aggregate_layer <- function(soil_data, bottom_depths, depth_table) {
     map(., as_tibble) %>%
     set_names(depth_table_aggr$label)
 
+  if(exists("soil_class__")) {
+    soil_data_aggr$soil_class <- soil_class__
+  }
 
   #Concatenate aggregated soil layer and layers where no aggregation was applied
   out_list <- list(soil_data = soil_data_aggr,

@@ -136,7 +136,8 @@ soil_project <- R6::R6Class(
 
         self$.data$data_processed <-
           calculate_soilproperty(soil_data = self$.data$data_processed,
-                                 sl = sl, fun_list = fun_list)
+                                 sl = sl, fun_list = fun_list,
+                                 depth_table = self$.data$soilgrids$meta$layer$depths_aggregate)
       }
 
       self$select_variable <- function(..., sl = NULL) {
@@ -145,7 +146,8 @@ soil_project <- R6::R6Class(
 
         self$.data$data_processed <-
           select_soilproperty(soil_data = self$.data$data_processed,
-                              sl = sl, sel_expr = sel_expr)
+                              sl = sl, sel_expr = sel_expr,
+                              depth_table = self$.data$soilgrids$meta$layer$depths_aggregate)
       }
 
       self$plot_variable <- function(variable = NULL, sl = NULL, normalize = FALSE) {
@@ -187,7 +189,8 @@ soil_project <- R6::R6Class(
         self$.data$soil_cluster <-
           cluster_soil(soil_data = self$.data$data_processed,
                        clusters_k = clusters_k)
-        self$.data$soil_cluster$cluster_summary <- calculate_max_dist(soil_data = self$.data)
+        self$.data$soil_cluster$cluster_summary <-
+          calculate_max_dist(soil_cluster = self$.data$soil_cluster)
 
         if(auto_select) {
           self$.data$soil_cluster$cluster_k <-
@@ -199,7 +202,7 @@ soil_project <- R6::R6Class(
         }
 
         self$evaluate_cluster <- function(){
-          evaluate_cluster(soil_data = self$.data)
+          evaluate_cluster(soil_cluster = self$.data$soil_cluster)
         }
 
         self$select_cluster <-  function(cluster_k){

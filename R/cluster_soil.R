@@ -8,34 +8,30 @@
 #' @param clusters_k Vector of number of soil classes that should be generated
 #'   with k-means clustering.
 
-#' @importFrom dplyr bind_cols progress_estimated
-#' @importFrom magrittr %>%
-#' @importFrom purrr map2
+#' @importFrom dplyr bind_cols %>%
+#' @importFrom lubridate now
+#' @importFrom purrr map2 set_names
 cluster_soil <- function(soil_data, clusters_k){
-  # Soil group clustering using kmeans
-  # Create scaled table to apply kmeans on
-  suffix <- "_"%&%names(soil_data)
-  suffix[!(suffix %in% ("_sl"%&%1:100))] <- ""
 
-  clst_tbl <- soil_data %>%
-    purrr::map2(., suffix, function(tbl, nm) {
-      names(tbl) <- names(tbl)%&%nm
-      return(tbl)}) %>%
-    dplyr::bind_cols(.) %>%
+    # Soil group clustering using kmeans
+  # Create scaled table to apply kmeans on
+  clst_tbl <- map2(soil_data, 1:length(soil_data),
+                   ~ set_names(.x, names(.x)%_%"sl"%&%.y)) %>%
+    bind_cols() %>%
     base::scale(., scale = TRUE, center = TRUE) %>%
     as.data.frame(.)
 
   # Empty list that further stores the clustering results
   soil_km <- list()
-
-  cat("\nCluster soil data:\n")
-  pb <- progress_estimated(length(clusters_k))
+  t0 <- now()
+  cat("Clustering soil data with kmeans:\n")
   # Loop over all defined number of classes and apply kmeans to the soilgrids data.
-  for(i_clust in clusters_k) {
-    soil_km[["n"%_%i_clust]] <- kmeans(x = clst_tbl,centers = i_clust, iter.max = 100)
-    pb$tick()$print()
+  for(i_clust in 1:length(clusters_k)) {
+    clust_i <- clusters_k[i_clust]
+    soil_km[["n"%_%clust_i]] <- kmeans(x = clst_tbl,centers = clust_i, iter.max = 100)
+    display_progress(i_clust, length(clusters_k), t0, "Cluster")
   }
-  pb$stop()
+  finish_progress(length(clusters_k), t0, "Finished calculating", "cluster")
 
   return(soil_km)
 }
@@ -47,26 +43,25 @@ cluster_soil <- function(soil_data, clusters_k){
 #'   sum of squared differences for each one (between the clustered and the raw data).
 #'
 #' @param cluster_result Results of the soilgrids clustering stored in the \strong{soil project}.
-#' @importFrom dplyr filter mutate
+#' @importFrom dplyr arrange filter mutate select %>%
 #' @importFrom ggplot2 aes element_blank element_text geom_line geom_point
-#'     ggplot facet_grid rel scale_x_continuous
-#' theme theme_bw xlab
+#'     ggplot facet_grid rel scale_x_continuous theme theme_bw xlab
 #' @importFrom tibble tibble add_column
 #' @importFrom tidyr gather
-#' @importFrom purrr map_dfr
 #'
 #' @return A ggplot object that shows the the SSE (within a the given classes)
 #'   over the number of classes
-evaluate_cluster <- function(soil_data) {
-  k_select <- soil_data$soil_cluster$cluster_k
-  cluster_data <- soil_data$soil_cluster$cluster_summary %>%
+evaluate_cluster <- function(soil_cluster) {
+  k_select <- soil_cluster$cluster_k
+  cluster_data <- soil_cluster$cluster_summary %>%
     gather(., key = "variable", value = "value", -cluster_k) %>%
     mutate(variable = ifelse(variable == "norm_within_ssq",
                              "within SSE / total SSE", "Distance to chord line"),
            variable = factor(variable, levels = c("within SSE / total SSE",
-                                                  "Distance to chord line")))
+                                                  "Distance to chord line"))) %>%
+    mutate(value = ifelse(is.nan(value), 0, value))
 
-  chord_data <- soil_data$soil_cluster$cluster_summary %>%
+  chord_data <- soil_cluster$cluster_summary %>%
     filter(., cluster_k == min(cluster_k) | cluster_k == max(cluster_k)) %>%
     arrange(cluster_k) %>%
     select(-max_diff) %>%
@@ -103,17 +98,16 @@ evaluate_cluster <- function(soil_data) {
 #'
 #' @param soil_data Saved soil information in the soil_object.
 
-#' @importFrom tibble add_column tibble
-#' @importFrom dplyr arrange filter
+#' @importFrom dplyr arrange filter %>%
 #' @importFrom purrr map_dfr
-#' @importFrom magrittr %>%
+#' @importFrom tibble add_column tibble
 #'
 #' @keywords internal
 
-calculate_max_dist <- function(soil_data) {
-  cluster_names  <- names(soil_data$soil_cluster)[grepl("n_", names(soil_data$soil_cluster))]
+calculate_max_dist <- function(soil_cluster) {
+  cluster_names  <- names(soil_cluster)[grepl("n_", names(soil_cluster))]
 
-  sse_dat <- soil_data$soil_cluster[cluster_names] %>%
+  sse_dat <- soil_cluster[cluster_names] %>%
     map_dfr(., function(x){
       tibble(norm_within_ssq  = x$tot.withinss/x$totss)}) %>%
     add_column(cluster_k = cluster_names %>%
@@ -145,10 +139,9 @@ calculate_max_dist <- function(soil_data) {
 #' @param soil_data Saved soil information in the soil_object.
 #' @param cluster_k Numeric value of final number of classes.
 
-#' @importFrom tibble add_column tibble
-#' @importFrom dplyr group_by summarise_all
+#' @importFrom dplyr group_by summarise_all %>%
 #' @importFrom purrr map
-#' @importFrom magrittr %>%
+#' @importFrom tibble add_column tibble
 #'
 #' @keywords internal
 
@@ -174,11 +167,10 @@ set_cluster_data <- function(soil_data, cluster_k) {
 #' @param soil_data The cluster results output from \code{cluster_soilgrids()}.
 #' @param cluster_k Numeric. Number of soil classes to plot in the soil map.
 #'
-#' @importFrom dplyr mutate full_join
+#' @importFrom dplyr full_join mutate %>%
 #' @importFrom ggplot2 aes coord_equal geom_raster ggplot guide_legend
-#'   scale_fill_manual theme theme_bw element_text
-#' @importFrom magrittr %>% %<>% set_colnames
-#' @importFrom pasta %//% %_%
+#'    scale_fill_manual theme theme_bw element_text
+#' @importFrom purrr set_names
 #' @importFrom raster extent raster rasterToPoints
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom tibble as_tibble enframe
@@ -191,9 +183,9 @@ plot_soilmap <- function(soil_data, cluster_k){
 
   #Checking of number of soil classes
   if(is.null(cluster_k)){
-    stop("No number of soil classes defined!\n"%&%
-           "Either set final number of classes with select_cluster()"%&&%
-           "or define the number of classes in the function!")
+    stop("Number of soil classes not defined!\n",
+         "Either set final number of classes with .$select_cluster()",
+         "or define the number of classes for plotting with 'cluster_k!")
   }
   if(!("n"%_%cluster_k %in% names(soil_data$soil_cluster))){
     stop("Selected number of classes not available!")
@@ -208,9 +200,9 @@ plot_soilmap <- function(soil_data, cluster_k){
   clust_rst[which(!is.na(soil_data$soilgrids$meta$layer$has_value))] <- clust_sel$value
 
   # Reshape the vector and create raster map.
-  clust_rst %<>%
-    matrix(ncol = soil_data$soilgrids$meta$layer$dim_rst[1],
-           nrow = soil_data$soilgrids$meta$layer$dim_rst[2]) %>%
+  clust_rst <- matrix(clust_rst,
+                      ncol = soil_data$soilgrids$meta$layer$dim_rst[1],
+                      nrow = soil_data$soilgrids$meta$layer$dim_rst[2]) %>%
     t() %>%
     raster(crs = soil_data$soilgrids$meta$layer$crs)
 
@@ -221,7 +213,7 @@ plot_soilmap <- function(soil_data, cluster_k){
   clust_tbl <- clust_rst %>%
     rasterToPoints(.) %>%
     as_tibble(.) %>%
-    set_colnames(c("x", "y", "soil_class")) %>%
+    set_names(c("x", "y", "soil_class")) %>%
     mutate(soil_class = as.factor(soil_class))
 
   fill_col <- clust_tbl$soil_class %>%

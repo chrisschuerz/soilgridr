@@ -10,11 +10,11 @@
 #'
 #' @importFrom dplyr quo mutate %>%
 #' @importFrom purrr map_at
-calculate_soilproperty <- function(soil_data, sl = NULL, fun_list) {
+calculate_soilproperty <- function(soil_data, sl = NULL, fun_list, depth_table) {
 
-  if(is.null(sl)) sl <- 1:length(soil_data)
+  if(is.null(sl)) sl <- depth_table$sl
   stopifnot(is.numeric(sl))
-  if(any(!(sl %in% 1:length(soil_data)))) {
+  if(any(!(sl %in% depth_table$sl))) {
     stop("Values for 'sl' must be between 1 and ", length(soil_data),
          " (the number of available soil layers)!")
   }
@@ -34,11 +34,11 @@ calculate_soilproperty <- function(soil_data, sl = NULL, fun_list) {
 #' @importFrom dplyr quo select %>%
 #' @importFrom purrr map_at
 
-select_soilproperty <- function(soil_data, sl = NULL, sel_expr) {
+select_soilproperty <- function(soil_data, sl = NULL, sel_expr, depth_table) {
 
-  if(is.null(sl)) sl <- 1:length(soil_data)
+  if(is.null(sl)) sl <- depth_table$sl
   stopifnot(is.numeric(sl))
-  if(any(!(sl %in% 1:length(soil_data)))) {
+  if(any(!(sl %in% depth_table$sl))) {
     stop("Values for 'sl' must be between 1 and ", length(soil_data),
          " (the number of available soil layers)!")
   }
