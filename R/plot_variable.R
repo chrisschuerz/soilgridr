@@ -7,11 +7,9 @@
 #' @param sl Vector providing soil layers to be plotted
 #'
 #' @importFrom dplyr bind_cols filter funs group_by left_join mutate mutate_all
-#'    one_of select starts_with summarize
+#'    one_of select starts_with summarize %>%
 #' @importFrom ggplot2 aes coord_equal element_text facet_wrap geom_raster geom_text
 #' ggplot scale_fill_gradientn theme theme_bw
-#' @importFrom magrittr %>% %<>%
-#' @importFrom pasta %&%
 #' @importFrom purrr map2_dfc
 #' @importFrom raster extent raster rasterToPoints
 #' @importFrom RColorBrewer brewer.pal
@@ -24,23 +22,17 @@
 
 
 plot_variable <- function(soil_data, variable, sl, normalize) {
+  depth_table <- soil_data$soilgrids$meta$layer$depths_aggregate
+  layer_suffix <- "_sl"%&%depth_table$sl
 
-  layer_suffix <- "_"%&%names(soil_data$data_processed)
-  layer_suffix <- layer_suffix[layer_suffix != "_soil_class"]
-  layer_suffix[!grepl("_sl", layer_suffix)] <- ""
-
-
-  plot_data <- soil_data$data_processed[names(soil_data$data_processed)!="soil_class"] %>%
-    map2_dfc(., layer_suffix, function(df, suf){
-      names(df) <- names(df)%&%suf
-      return(df)
-    }) %>%
-    select(-starts_with("soil_class"))
+  plot_data <- soil_data$data_processed[depth_table$sl] %>%
+    map2(., layer_suffix, ~ set_names(.x, names(.x)%&%.y)) %>%
+    bind_cols()
 
   if("soil_class" %in% names(soil_data$data_processed)) {
-    plot_data %<>% mutate(soil_class = 1:nrow(plot_data))
+    plot_data <- mutate(plot_data, soil_class = 1:nrow(plot_data))
     plot_data <- left_join(soil_data$data_processed$soil_class, plot_data, by = "soil_class") %>%
-      select(-soil_class)
+      select(-starts_with("soil_class"))
   }
 
   if(is.null(variable)) {
@@ -59,7 +51,7 @@ plot_variable <- function(soil_data, variable, sl, normalize) {
     .$name_comb
 
   name_comb <- name_comb[name_comb %in% names(plot_data)]
-  plot_data %<>% select(., one_of(name_comb))
+  plot_data <- select(plot_data, one_of(name_comb))
 
 
   # Create raster dummy for x/y coordinates.
@@ -100,7 +92,7 @@ plot_variable <- function(soil_data, variable, sl, normalize) {
       select(-which_min, -which_max)
 
 
-    plot_data %<>%  mutate_all(funs(normalize_var))
+    plot_data <- mutate_all(plot_data, funs(normalize_var))
     }
 
   plot_data <- bind_cols(plot_data, rst_tbl) %>%
