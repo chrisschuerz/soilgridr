@@ -1,7 +1,7 @@
 Package: soilgridr
 Type: Package
 Title: Working with SoilGrids data in R
-Version: 0.3.0.9005
+Version: 0.3.0
 Authors@R: as.person(c(
     "Christoph Schuerz <c.schuerz@posteo.org> [aut, cre]", 
     "Daniel Klotz <klotzdaniel87@gmail.com> [aut]"
