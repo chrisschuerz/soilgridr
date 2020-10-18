@@ -108,9 +108,10 @@ soil_project <- R6::R6Class(
                          # layer_meta = layer_meta,
 
       cat("\nReading SoilGrids layers into R:\n")
-      soil_data <- load_soilgrids(project_path = self$.data$meta$project_path,
-                                  shape_file   = self$.data$shape_file,
-                                  layer_table  = self$.data$soilgrids$meta$layer_table)
+      soil_data <- load_soilgrids(project_path  = self$.data$meta$project_path,
+                                  shape_file    = self$.data$shape_file,
+                                  layer_table   = self$.data$soilgrids$meta$layer_table,
+                                  soilgrids_crs = self$.data$meta$wcs_server$crs)
       #
       #
       self$.data$soilgrids$raster     <- soil_data$soil_raster

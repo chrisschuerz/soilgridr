@@ -19,7 +19,8 @@
 
 load_soilgrids <- function(project_path,
                            shape_file,
-                           layer_table) {
+                           layer_table,
+                           soilgrids_crs) {
   # Reading soilgrids layer and arranging them in list --------------------
   # Define path to soilgrids layer
   tif_path <- project_path%//%"soil_layer"
@@ -37,6 +38,7 @@ load_soilgrids <- function(project_path,
     ## Read layer, clip with shape file and convert values from raster into table
     layer_tmp <- raster(tif_path%//%layer_i%.%"tif") %>% # add data-suffix (assumed .tif)
       set_nodata(.) %>%
+      set_crs(., soilgrids_crs) %>%
       project_if(., shape_file$shape) %>%
       mask_if(., shape_file$shape, shape_file$shape_from_extent)
 

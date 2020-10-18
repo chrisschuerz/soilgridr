@@ -22,6 +22,7 @@ The \strong{soil project} class constitutes the basic building block of
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{soil_project$new(project_name, project_path, shape_file, ext, crs)}\if{html}{\out{</div>}}
@@ -30,6 +31,7 @@ The \strong{soil project} class constitutes the basic building block of
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{soil_project$print()}\if{html}{\out{</div>}}
@@ -38,6 +40,7 @@ The \strong{soil project} class constitutes the basic building block of
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-save"></a>}}
+\if{latex}{\out{\hypertarget{method-save}{}}}
 \subsection{Method \code{save()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{soil_project$save()}\if{html}{\out{</div>}}
@@ -46,6 +49,7 @@ The \strong{soil project} class constitutes the basic building block of
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-load_soilgrids"></a>}}
+\if{latex}{\out{\hypertarget{method-load_soilgrids}{}}}
 \subsection{Method \code{load_soilgrids()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{soil_project$load_soilgrids(

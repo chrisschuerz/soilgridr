@@ -4,7 +4,7 @@
 \alias{load_soilgrids}
 \title{Load soilgrids}
 \usage{
-load_soilgrids(project_path, shape_file, layer_table)
+load_soilgrids(project_path, shape_file, layer_table, soilgrids_crs)
 }
 \arguments{
 \item{project_path}{Path to the soil project.}

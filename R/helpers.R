@@ -8,13 +8,18 @@ c_if <- function(dat, condition, ...) {
 }
 
 ## Set the nodata values in the loaded raster files
-## should be defined as seperate function outside :(
 set_nodata <- function(rst) {
   if (dataType(rst) == "INT1U") {
     rst@file@nodatavalue <- 255
   } else if(dataType(rst) == "INT2S") {
     rst@file@nodatavalue <- -32768
   }
+  return(rst)
+}
+
+## Set the crs in the loaded raster files
+set_crs <- function(rst, crs) {
+  crs(rst) <- crs
   return(rst)
 }
 
